@@ -57,8 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $dbh->commit();
 
-            // 4. 完了ページへのリダイレクト
-            // TODO: 予約確認メールの送信処理をここに追加
+            // 4. 予約確認メールの送信
+            send_booking_confirmation_email($booking_id, $dbh);
+
+            // 5. 完了ページへのリダイレクト
             header("Location: confirm.php?booking_id=" . $booking_id);
             exit();
 
