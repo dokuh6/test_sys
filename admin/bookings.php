@@ -4,6 +4,11 @@ require_once 'admin_check.php';
 $message = '';
 $error = '';
 
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    unset($_SESSION['message']);
+}
+
 // --- キャンセル処理 (GETリクエスト) ---
 if (isset($_GET['action']) && $_GET['action'] === 'cancel' && isset($_GET['id'])) {
     $booking_id_to_cancel = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -94,6 +99,7 @@ require_once 'admin_header.php';
                         </span>
                     </td>
                     <td>
+                        <a href="edit_booking.php?id=<?php echo h($booking['id']); ?>" class="btn-admin" style="background-color:#3498db;">編集</a>
                         <?php if ($booking['status'] === 'confirmed'): ?>
                             <a href="bookings.php?action=cancel&id=<?php echo h($booking['id']); ?>" class="btn-admin btn-cancel" onclick="return confirm('本当にこの予約をキャンセルしますか？');">
                                 キャンセル

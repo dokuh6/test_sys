@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/header.php';
+$csrf_token = generate_csrf_token();
 
 // ログインチェック
 if (!isset($_SESSION['user'])) {
@@ -57,10 +58,35 @@ try {
 }
 .status-confirmed { color: green; font-weight: bold; }
 .status-cancelled { color: red; text-decoration: line-through; }
+.link-style-button {
+    background: none;
+    border: none;
+    color: #004080;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-size: inherit;
+    font-family: inherit;
+}
+.link-style-button:hover {
+    color: #0059b3;
+}
 </style>
 
 <div class="mypage-container">
     <h2><?php echo h(t('mypage_title')); ?></h2>
+
+    <?php
+    if (isset($_SESSION['message'])) {
+        echo '<p style="color:green;">' . h($_SESSION['message']) . '</p>';
+        unset($_SESSION['message']);
+    }
+    if (isset($_SESSION['error_message'])) {
+        echo '<p style="color:red;">' . h($_SESSION['error_message']) . '</p>';
+        unset($_SESSION['error_message']);
+    }
+    ?>
+
     <p><?php echo h(t('mypage_welcome', $_SESSION['user']['name'])); ?></p>
 
     <hr>
@@ -98,8 +124,13 @@ try {
                         </td>
                         <td>
                             <?php if ($booking['status'] === 'confirmed'): ?>
-                                <!-- TODO: キャンセル機能を後で実装 -->
-                                <a href="cancel_booking.php?id=<?php echo h($booking['id']); ?>" onclick="return confirm('本当にこの予約をキャンセルしますか？');"><?php echo h(t('action_cancel')); ?></a>
+                                <form action="cancel_booking.php" method="POST" style="display:inline;">
+                                    <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
+                                    <button type="submit" class="link-style-button" onclick="return confirm('本当にこの予約をキャンセルしますか？');">
+                                        <?php echo h(t('action_cancel')); ?>
+                                    </button>
+                                </form>
                             <?php endif; ?>
                         </td>
                     </tr>
