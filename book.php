@@ -4,6 +4,7 @@ require_once 'includes/functions.php';
 
 // --- POSTリクエスト処理 (フォームが送信された場合) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    validate_csrf_token();
     // 1. 入力値の取得と検証
     $room_id = filter_input(INPUT_POST, 'room_id', FILTER_VALIDATE_INT);
     $check_in = filter_input(INPUT_POST, 'check_in');
@@ -124,6 +125,7 @@ if (empty($errors)) {
 
 
 require_once 'includes/header.php';
+$csrf_token = generate_csrf_token();
 ?>
 <style>
 .booking-summary, .customer-form {
@@ -168,6 +170,7 @@ require_once 'includes/header.php';
     <div class="customer-form">
         <h3>お客様情報の入力</h3>
         <form action="book.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
             <!-- 予約情報をhiddenフィールドで渡す -->
             <input type="hidden" name="room_id" value="<?php echo h($room_id); ?>">
             <input type="hidden" name="check_in" value="<?php echo h($check_in); ?>">

@@ -75,3 +75,30 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         return false;
     }
 }
+
+/**
+ * CSRFトークンを生成し、セッションに保存する
+ * @return string 生成されたトークン
+ */
+function generate_csrf_token() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $token = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = $token;
+    return $token;
+}
+
+/**
+ * 送信されたCSRFトークンを検証する
+ */
+function validate_csrf_token() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (empty($_POST['csrf_token']) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die('不正なリクエストです。');
+    }
+    // トークンを一度使ったら削除
+    unset($_SESSION['csrf_token']);
+}

@@ -13,6 +13,7 @@ if (isset($_SESSION['success_message'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    validate_csrf_token();
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
     $password = filter_input(INPUT_POST, 'password');
 
@@ -56,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 require_once 'includes/header.php';
+$csrf_token = generate_csrf_token();
 ?>
 <style>
 .form-container { max-width: 500px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }
@@ -84,6 +86,7 @@ require_once 'includes/header.php';
     <?php endif; ?>
 
     <form action="login.php" method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <div class="form-group">
             <label for="email">メールアドレス</label>
             <input type="email" id="email" name="email" required>

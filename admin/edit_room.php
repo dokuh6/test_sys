@@ -12,6 +12,7 @@ $error = '';
 
 // --- 更新処理 (POST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    validate_csrf_token();
     $name = filter_input(INPUT_POST, 'name');
     $room_type_id = filter_input(INPUT_POST, 'room_type_id', FILTER_VALIDATE_INT);
     $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
@@ -58,6 +59,7 @@ try {
 }
 
 require_once 'admin_header.php';
+$csrf_token = generate_csrf_token();
 ?>
 <style>
 .edit-form { background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 600px; }
@@ -73,6 +75,7 @@ require_once 'admin_header.php';
 
 <div class="edit-form">
     <form action="edit_room.php?id=<?php echo h($id); ?>" method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <div class="form-row">
             <label for="name">部屋名/番号:</label>
             <input type="text" id="name" name="name" value="<?php echo h($room['name']); ?>" required>

@@ -7,6 +7,7 @@ $errors = [];
 $success_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    validate_csrf_token();
     // フォームからの入力を取得
     $name = filter_input(INPUT_POST, 'name');
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
@@ -71,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 require_once 'includes/header.php';
+$csrf_token = generate_csrf_token();
 ?>
 <style>
 .form-container {
@@ -99,6 +101,7 @@ require_once 'includes/header.php';
     <?php endif; ?>
 
     <form action="register.php" method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <div class="form-group">
             <label for="name">氏名</label>
             <input type="text" id="name" name="name" value="<?php echo isset($name) ? h($name) : ''; ?>" required>

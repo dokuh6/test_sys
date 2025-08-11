@@ -13,6 +13,7 @@ if (isset($_SESSION['message'])) {
 
 // 新規追加処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
+    validate_csrf_token();
     $name = filter_input(INPUT_POST, 'name');
     $description = filter_input(INPUT_POST, 'description');
     $capacity = filter_input(INPUT_POST, 'capacity', FILTER_VALIDATE_INT);
@@ -62,6 +63,7 @@ try {
 }
 
 require_once 'admin_header.php';
+$csrf_token = generate_csrf_token();
 ?>
 
 <style>
@@ -80,6 +82,7 @@ require_once 'admin_header.php';
 <div class="add-form">
     <h3>新しい部屋タイプを追加</h3>
     <form action="room_types.php" method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <input type="hidden" name="action" value="add">
         <div class="form-row">
             <label for="name">タイプ名:</label>
