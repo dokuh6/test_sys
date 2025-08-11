@@ -13,11 +13,14 @@ if (!$room_id) {
 try {
     $sql = "SELECT
                 r.id,
-                r.name AS room_name,
+                r.name,
+                r.name_en,
                 r.price,
                 rt.name AS type_name,
+                rt.name_en AS type_name_en,
                 rt.capacity,
-                rt.description
+                rt.description,
+                rt.description_en
             FROM rooms AS r
             JOIN room_types AS rt ON r.room_type_id = rt.id
             WHERE r.id = :id";
@@ -88,8 +91,11 @@ if (!$room) {
         <span>Room Main Image</span>
     </div>
     <div class="room-detail-info">
-        <h2><?php echo h($room['room_name']); ?> (<?php echo h($room['type_name']); ?>)</h2>
-        <p><?php echo nl2br(h($room['description'])); ?></p>
+        <h2>
+            <?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>
+            (<?php echo h($current_lang === 'en' && !empty($room['type_name_en']) ? $room['type_name_en'] : $room['type_name']); ?>)
+        </h2>
+        <p><?php echo nl2br(h($current_lang === 'en' && !empty($room['description_en']) ? $room['description_en'] : $room['description'])); ?></p>
         <ul>
             <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
         </ul>

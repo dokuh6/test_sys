@@ -14,14 +14,15 @@ if (isset($_SESSION['message'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
     validate_csrf_token();
     $name = filter_input(INPUT_POST, 'name');
+    $name_en = filter_input(INPUT_POST, 'name_en');
     $room_type_id = filter_input(INPUT_POST, 'room_type_id', FILTER_VALIDATE_INT);
     $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
 
     if ($name && $room_type_id && $price) {
         try {
-            $sql = "INSERT INTO rooms (name, room_type_id, price) VALUES (:name, :room_type_id, :price)";
+            $sql = "INSERT INTO rooms (name, name_en, room_type_id, price) VALUES (:name, :name_en, :room_type_id, :price)";
             $stmt = $dbh->prepare($sql);
-            $stmt->execute([':name' => $name, ':room_type_id' => $room_type_id, ':price' => $price]);
+            $stmt->execute([':name' => $name, ':name_en' => $name_en, ':room_type_id' => $room_type_id, ':price' => $price]);
             $message = "新しい部屋「" . h($name) . "」を追加しました。";
         } catch (PDOException $e) {
             $error = "追加に失敗しました: " . h($e->getMessage());
@@ -58,7 +59,7 @@ try {
     $room_types_for_form = $stmt_types->fetchAll(PDO::FETCH_ASSOC);
 
     // 部屋一覧取得
-    $stmt_rooms = $dbh->query("SELECT r.id, r.name, r.price, rt.name as type_name FROM rooms r JOIN room_types rt ON r.room_type_id = rt.id ORDER BY r.id ASC");
+    $stmt_rooms = $dbh->query("SELECT r.id, r.name, r.name_en, r.price, rt.name as type_name FROM rooms r JOIN room_types rt ON r.room_type_id = rt.id ORDER BY r.id ASC");
     $rooms = $stmt_rooms->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = "情報取得に失敗しました: " . h($e->getMessage());
@@ -88,8 +89,12 @@ $csrf_token = generate_csrf_token();
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <input type="hidden" name="action" value="add">
         <div class="form-row">
-            <label for="name">部屋名/番号:</label>
+            <label for="name">部屋名/番号 (日本語):</label>
             <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-row">
+            <label for="name_en">部屋名/番号 (English):</label>
+            <input type="text" id="name_en" name="name_en">
         </div>
         <div class="form-row">
             <label for="room_type_id">部屋タイプ:</label>
@@ -114,7 +119,8 @@ $csrf_token = generate_csrf_token();
     <thead>
         <tr>
             <th>ID</th>
-            <th>部屋名/番号</th>
+            <th>部屋名 (日本語)</th>
+            <th>部屋名 (English)</th>
             <th>部屋タイプ</th>
             <th>料金</th>
             <th>操作</th>
@@ -125,6 +131,7 @@ $csrf_token = generate_csrf_token();
             <tr>
                 <td><?php echo h($room['id']); ?></td>
                 <td><?php echo h($room['name']); ?></td>
+                <td><?php echo h($room['name_en']); ?></td>
                 <td><?php echo h($room['type_name']); ?></td>
                 <td>¥<?php echo h(number_format($room['price'])); ?></td>
                 <td>

@@ -19,7 +19,9 @@ try {
                 b.num_guests,
                 b.total_price,
                 r.name as room_name,
-                rt.name as type_name
+                r.name_en as room_name_en,
+                rt.name as type_name,
+                rt.name_en as type_name_en
             FROM bookings b
             JOIN booking_rooms br ON b.id = br.booking_id
             JOIN rooms r ON br.room_id = r.id
@@ -86,7 +88,7 @@ $nights = $datetime1->diff($datetime2)->days;
         <h3><?php echo h(t('confirm_summary_title')); ?></h3>
         <ul>
             <li><strong><?php echo h(t('form_name')); ?>:</strong> <?php echo h($booking['guest_name']); ?></li>
-            <li><strong><?php echo h(t('booking_info_room')); ?>:</strong> <?php echo h($booking['room_name']); ?> (<?php echo h($booking['type_name']); ?>)</li>
+            <li><strong><?php echo h(t('booking_info_room')); ?>:</strong> <?php echo h($current_lang === 'en' && !empty($booking['room_name_en']) ? $booking['room_name_en'] : $booking['room_name']); ?> (<?php echo h($current_lang === 'en' && !empty($booking['type_name_en']) ? $booking['type_name_en'] : $booking['type_name']); ?>)</li>
             <li><strong><?php echo h(t('booking_info_check_in')); ?>:</strong> <?php echo h($booking['check_in_date']); ?></li>
             <li><strong><?php echo h(t('booking_info_check_out')); ?>:</strong> <?php echo h($booking['check_out_date']); ?></li>
             <li><strong><?php echo h(t('booking_info_nights')); ?>:</strong> <?php echo h(t('booking_info_nights_count', $nights)); ?></li>

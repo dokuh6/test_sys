@@ -18,7 +18,8 @@ try {
                 b.check_out_date,
                 b.total_price,
                 b.status,
-                r.name AS room_name
+                r.name AS room_name,
+                r.name_en AS room_name_en
             FROM bookings AS b
             JOIN booking_rooms AS br ON b.id = br.booking_id
             JOIN rooms AS r ON br.room_id = r.id
@@ -84,7 +85,7 @@ try {
                 <?php foreach ($bookings as $booking): ?>
                     <tr>
                         <td><?php echo h($booking['id']); ?></td>
-                        <td><?php echo h($booking['room_name']); ?></td>
+                        <td><?php echo h($current_lang === 'en' && !empty($booking['room_name_en']) ? $booking['room_name_en'] : $booking['room_name']); ?></td>
                         <td><?php echo h($booking['check_in_date']); ?></td>
                         <td><?php echo h($booking['check_out_date']); ?></td>
                         <td>¥<?php echo h(number_format($booking['total_price'])); ?></td>

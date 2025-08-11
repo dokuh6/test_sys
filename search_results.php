@@ -40,11 +40,14 @@ if (empty($errors)) {
         // 3. 利用可能な部屋を検索
         $sql_available = "SELECT
                             r.id,
-                            r.name AS room_name,
+                            r.name,
+                            r.name_en,
                             r.price,
                             rt.name AS type_name,
+                            rt.name_en AS type_name_en,
                             rt.capacity,
-                            rt.description
+                            rt.description,
+                            rt.description_en
                           FROM rooms AS r
                           JOIN room_types AS rt ON r.room_type_id = rt.id
                           WHERE rt.capacity >= :num_guests";
@@ -108,11 +111,11 @@ if (empty($errors)) {
             <div class="room-card">
                 <div class="room-image"><span>Room Image</span></div>
                 <div class="room-info">
-                    <h3><?php echo h($room['room_name']); ?></h3>
+                    <h3><?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?></h3>
                     <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>
-                    <p><?php echo h($room['description']); ?></p>
+                    <p><?php echo h($current_lang === 'en' && !empty($room['description_en']) ? $room['description_en'] : $room['description']); ?></p>
                     <ul class="room-details">
-                        <li><strong><?php echo h(t('room_type')); ?>:</strong> <?php echo h($room['type_name']); ?></li>
+                        <li><strong><?php echo h(t('room_type')); ?>:</strong> <?php echo h($current_lang === 'en' && !empty($room['type_name_en']) ? $room['type_name_en'] : $room['type_name']); ?></li>
                         <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
                     </ul>
                     <a href="book.php?id=<?php echo h($room['id']); ?>&check_in=<?php echo h($check_in_date); ?>&check_out=<?php echo h($check_out_date); ?>&num_guests=<?php echo h($num_guests);?>" class="btn"><?php echo h(t('btn_book_this_room')); ?></a>

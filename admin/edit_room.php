@@ -14,15 +14,17 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validate_csrf_token();
     $name = filter_input(INPUT_POST, 'name');
+    $name_en = filter_input(INPUT_POST, 'name_en');
     $room_type_id = filter_input(INPUT_POST, 'room_type_id', FILTER_VALIDATE_INT);
     $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
 
     if ($name && $room_type_id && $price) {
         try {
-            $sql = "UPDATE rooms SET name = :name, room_type_id = :room_type_id, price = :price WHERE id = :id";
+            $sql = "UPDATE rooms SET name = :name, name_en = :name_en, room_type_id = :room_type_id, price = :price WHERE id = :id";
             $stmt = $dbh->prepare($sql);
             $stmt->execute([
                 ':name' => $name,
+                ':name_en' => $name_en,
                 ':room_type_id' => $room_type_id,
                 ':price' => $price,
                 ':id' => $id
@@ -77,8 +79,12 @@ $csrf_token = generate_csrf_token();
     <form action="edit_room.php?id=<?php echo h($id); ?>" method="POST">
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <div class="form-row">
-            <label for="name">部屋名/番号:</label>
+            <label for="name">部屋名/番号 (日本語):</label>
             <input type="text" id="name" name="name" value="<?php echo h($room['name']); ?>" required>
+        </div>
+        <div class="form-row">
+            <label for="name_en">部屋名/番号 (English):</label>
+            <input type="text" id="name_en" name="name_en" value="<?php echo h($room['name_en']); ?>">
         </div>
         <div class="form-row">
             <label for="room_type_id">部屋タイプ:</label>

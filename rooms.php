@@ -6,11 +6,14 @@ try {
     // 部屋タイプと結合して部屋の情報を取得するSQL
     $sql = "SELECT
                 r.id,
-                r.name AS room_name,
+                r.name,
+                r.name_en,
                 r.price,
                 rt.name AS type_name,
+                rt.name_en AS type_name_en,
                 rt.capacity,
-                rt.description
+                rt.description,
+                rt.description_en
             FROM rooms AS r
             JOIN room_types AS rt ON r.room_type_id = rt.id
             ORDER BY r.price ASC";
@@ -104,11 +107,11 @@ try {
                     <span>Room Image</span>
                 </div>
                 <div class="room-info">
-                    <h3><?php echo h($room['room_name']); ?></h3>
+                    <h3><?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?></h3>
                     <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>
-                    <p><?php echo h($room['description']); ?></p>
+                    <p><?php echo h($current_lang === 'en' && !empty($room['description_en']) ? $room['description_en'] : $room['description']); ?></p>
                     <ul class="room-details">
-                        <li><strong><?php echo h(t('room_type')); ?>:</strong> <?php echo h($room['type_name']); ?></li>
+                        <li><strong><?php echo h(t('room_type')); ?>:</strong> <?php echo h($current_lang === 'en' && !empty($room['type_name_en']) ? $room['type_name_en'] : $room['type_name']); ?></li>
                         <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
                     </ul>
                     <a href="room_detail.php?id=<?php echo h($room['id']); ?>" class="btn"><?php echo h(t('btn_view_details')); ?></a>

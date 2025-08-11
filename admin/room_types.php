@@ -15,14 +15,22 @@ if (isset($_SESSION['message'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
     validate_csrf_token();
     $name = filter_input(INPUT_POST, 'name');
+    $name_en = filter_input(INPUT_POST, 'name_en');
     $description = filter_input(INPUT_POST, 'description');
+    $description_en = filter_input(INPUT_POST, 'description_en');
     $capacity = filter_input(INPUT_POST, 'capacity', FILTER_VALIDATE_INT);
 
     if ($name && $capacity) {
         try {
-            $sql = "INSERT INTO room_types (name, description, capacity) VALUES (:name, :description, :capacity)";
+            $sql = "INSERT INTO room_types (name, name_en, description, description_en, capacity) VALUES (:name, :name_en, :description, :description_en, :capacity)";
             $stmt = $dbh->prepare($sql);
-            $stmt->execute([':name' => $name, ':description' => $description, ':capacity' => $capacity]);
+            $stmt->execute([
+                ':name' => $name,
+                ':name_en' => $name_en,
+                ':description' => $description,
+                ':description_en' => $description_en,
+                ':capacity' => $capacity
+            ]);
             $message = "新しい部屋タイプ「" . h($name) . "」を追加しました。";
         } catch (PDOException $e) {
             $error = "追加に失敗しました: " . h($e->getMessage());
@@ -85,16 +93,24 @@ $csrf_token = generate_csrf_token();
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <input type="hidden" name="action" value="add">
         <div class="form-row">
-            <label for="name">タイプ名:</label>
+            <label for="name">タイプ名 (日本語):</label>
             <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-row">
+            <label for="name_en">タイプ名 (English):</label>
+            <input type="text" id="name_en" name="name_en">
         </div>
         <div class="form-row">
             <label for="capacity">収容人数:</label>
             <input type="number" id="capacity" name="capacity" min="1" required>
         </div>
         <div class="form-row">
-            <label for="description">説明:</label>
+            <label for="description">説明 (日本語):</label>
             <textarea id="description" name="description" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+            <label for="description_en">説明 (English):</label>
+            <textarea id="description_en" name="description_en" rows="3"></textarea>
         </div>
         <button type="submit" class="btn-admin" style="background-color: #3498db;">追加</button>
     </form>
@@ -106,8 +122,10 @@ $csrf_token = generate_csrf_token();
     <thead>
         <tr>
             <th>ID</th>
-            <th>タイプ名</th>
-            <th>説明</th>
+            <th>タイプ名 (日本語)</th>
+            <th>タイプ名 (English)</th>
+            <th>説明 (日本語)</th>
+            <th>説明 (English)</th>
             <th>収容人数</th>
             <th>操作</th>
         </tr>
@@ -117,7 +135,9 @@ $csrf_token = generate_csrf_token();
             <tr>
                 <td><?php echo h($type['id']); ?></td>
                 <td><?php echo h($type['name']); ?></td>
+                <td><?php echo h($type['name_en']); ?></td>
                 <td><?php echo h($type['description']); ?></td>
+                <td><?php echo h($type['description_en']); ?></td>
                 <td><?php echo h($type['capacity']); ?></td>
                 <td>
                     <a href="edit_room_type.php?id=<?php echo h($type['id']); ?>">編集</a> |
