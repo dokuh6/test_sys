@@ -1,7 +1,5 @@
 <?php
-session_start();
-require_once 'includes/db_connect.php';
-require_once 'includes/functions.php';
+require_once 'includes/header.php';
 
 // ログインチェック
 if (!isset($_SESSION['user'])) {
@@ -37,7 +35,6 @@ try {
 }
 
 
-require_once 'includes/header.php';
 ?>
 <style>
 .mypage-container {
@@ -62,25 +59,25 @@ require_once 'includes/header.php';
 </style>
 
 <div class="mypage-container">
-    <h2>マイページ</h2>
-    <p>ようこそ、<?php echo h($_SESSION['user']['name']); ?>様。こちらでご自身の予約履歴をご確認いただけます。</p>
+    <h2><?php echo h(t('mypage_title')); ?></h2>
+    <p><?php echo h(t('mypage_welcome', $_SESSION['user']['name'])); ?></p>
 
     <hr>
 
-    <h3>ご予約履歴</h3>
+    <h3><?php echo h(t('mypage_history_title')); ?></h3>
     <?php if (empty($bookings)): ?>
-        <p>現在、ご予約はございません。</p>
+        <p><?php echo h(t('mypage_no_bookings')); ?></p>
     <?php else: ?>
         <table class="booking-history-table">
             <thead>
                 <tr>
-                    <th>予約番号</th>
-                    <th>部屋名</th>
-                    <th>チェックイン</th>
-                    <th>チェックアウト</th>
-                    <th>料金</th>
-                    <th>状況</th>
-                    <th>操作</th>
+                    <th><?php echo h(t('history_booking_id')); ?></th>
+                    <th><?php echo h(t('history_room_name')); ?></th>
+                    <th><?php echo h(t('history_check_in')); ?></th>
+                    <th><?php echo h(t('history_check_out')); ?></th>
+                    <th><?php echo h(t('history_price')); ?></th>
+                    <th><?php echo h(t('history_status')); ?></th>
+                    <th><?php echo h(t('history_action')); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -93,15 +90,15 @@ require_once 'includes/header.php';
                         <td>¥<?php echo h(number_format($booking['total_price'])); ?></td>
                         <td>
                             <?php if ($booking['status'] === 'confirmed'): ?>
-                                <span class="status-confirmed">確定</span>
+                                <span class="status-confirmed"><?php echo h(t('status_confirmed')); ?></span>
                             <?php else: ?>
-                                <span class="status-cancelled">キャンセル済</span>
+                                <span class="status-cancelled"><?php echo h(t('status_cancelled')); ?></span>
                             <?php endif; ?>
                         </td>
                         <td>
                             <?php if ($booking['status'] === 'confirmed'): ?>
                                 <!-- TODO: キャンセル機能を後で実装 -->
-                                <a href="cancel_booking.php?id=<?php echo h($booking['id']); ?>" onclick="return confirm('本当にこの予約をキャンセルしますか？');">キャンセル</a>
+                                <a href="cancel_booking.php?id=<?php echo h($booking['id']); ?>" onclick="return confirm('本当にこの予約をキャンセルしますか？');"><?php echo h(t('action_cancel')); ?></a>
                             <?php endif; ?>
                         </td>
                     </tr>

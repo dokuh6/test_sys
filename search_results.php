@@ -1,6 +1,5 @@
 <?php
-require_once 'includes/db_connect.php';
-require_once 'includes/functions.php';
+require_once 'includes/header.php';
 
 // 1. 入力値の取得と検証
 $check_in_date = filter_input(INPUT_GET, 'check_in_date');
@@ -74,9 +73,6 @@ if (empty($errors)) {
     }
 }
 
-require_once 'includes/header.php';
-?>
-
 <!-- rooms.phpからスタイルを拝借 -->
 <style>
 .room-list { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
@@ -90,11 +86,11 @@ require_once 'includes/header.php';
 </style>
 
 <div class="search_results_header" style="margin-bottom: 30px;">
-    <h2>空室検索結果</h2>
-    <p><strong>検索条件:</strong>
-        チェックイン: <?php echo h($check_in_date); ?> |
-        チェックアウト: <?php echo h($check_out_date); ?> |
-        人数: <?php echo h($num_guests); ?>名様
+    <h2><?php echo h(t('search_results_title')); ?></h2>
+    <p><strong><?php echo h(t('search_results_condition')); ?>:</strong>
+        <?php echo h(t('form_check_in')); ?>: <?php echo h($check_in_date); ?> |
+        <?php echo h(t('form_check_out')); ?>: <?php echo h($check_out_date); ?> |
+        <?php echo h(t('form_num_guests')); ?>: <?php echo h(t('room_capacity_people', $num_guests)); ?>
     </p>
 </div>
 
@@ -105,28 +101,28 @@ require_once 'includes/header.php';
             <p><?php echo h($error); ?></p>
         <?php endforeach; ?>
     </div>
-    <p><a href="javascript:history.back()" class="btn">検索条件を修正する</a></p>
+    <p><a href="javascript:history.back()" class="btn"><?php echo h(t('btn_fix_search')); ?></a></p>
 <?php elseif (!empty($available_rooms)): ?>
     <div class="room-list">
         <?php foreach ($available_rooms as $room): ?>
             <div class="room-card">
-                <div class="room-image"><span>部屋の画像</span></div>
+                <div class="room-image"><span>Room Image</span></div>
                 <div class="room-info">
                     <h3><?php echo h($room['room_name']); ?></h3>
-                    <p class="room-price">¥<?php echo h(number_format($room['price'])); ?> / 泊</p>
+                    <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>
                     <p><?php echo h($room['description']); ?></p>
                     <ul class="room-details">
-                        <li><strong>タイプ:</strong> <?php echo h($room['type_name']); ?></li>
-                        <li><strong>定員:</strong> <?php echo h($room['capacity']); ?>名様</li>
+                        <li><strong><?php echo h(t('room_type')); ?>:</strong> <?php echo h($room['type_name']); ?></li>
+                        <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
                     </ul>
-                    <a href="book.php?id=<?php echo h($room['id']); ?>&check_in=<?php echo h($check_in_date); ?>&check_out=<?php echo h($check_out_date); ?>&num_guests=<?php echo h($num_guests);?>" class="btn">この部屋を予約する</a>
+                    <a href="book.php?id=<?php echo h($room['id']); ?>&check_in=<?php echo h($check_in_date); ?>&check_out=<?php echo h($check_out_date); ?>&num_guests=<?php echo h($num_guests);?>" class="btn"><?php echo h(t('btn_book_this_room')); ?></a>
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
 <?php else: ?>
-    <p>申し訳ございませんが、ご指定の条件に合う空室はございませんでした。</p>
-    <p><a href="javascript:history.back()" class="btn">検索条件を変更する</a></p>
+    <p><?php echo h(t('search_results_none')); ?></p>
+    <p><a href="javascript:history.back()" class="btn"><?php echo h(t('btn_fix_search')); ?></a></p>
 <?php endif; ?>
 
 <?php

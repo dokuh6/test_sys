@@ -1,7 +1,5 @@
 <?php
-session_start();
-require_once 'includes/db_connect.php';
-require_once 'includes/functions.php';
+require_once 'includes/header.php';
 
 $errors = [];
 
@@ -18,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = filter_input(INPUT_POST, 'password');
 
     if (!$email || empty($password)) {
-        $errors[] = 'メールアドレスとパスワードを入力してください。';
+        $errors[] = t('login_error_no_input');
     } else {
         try {
             // メールアドレスでユーザーを検索
@@ -46,17 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 exit();
             } else {
-                $errors[] = 'メールアドレスまたはパスワードが正しくありません。';
+                $errors[] = t('login_error_wrong_credentials');
             }
 
         } catch (PDOException $e) {
-            $errors[] = 'データベースエラーが発生しました。';
+            $errors[] = t('error_db');
         }
     }
 }
 
-
-require_once 'includes/header.php';
 $csrf_token = generate_csrf_token();
 ?>
 <style>
@@ -69,11 +65,11 @@ $csrf_token = generate_csrf_token();
 </style>
 
 <div class="form-container">
-    <h2>ログイン</h2>
+    <h2><?php echo h(t('login_title')); ?></h2>
 
     <?php if (!empty($success_message)): ?>
         <div class="success-message">
-            <p><?php echo h($success_message); ?></p>
+            <p><?php echo h(t($success_message)); // Assumes the session message is a translation key ?></p>
         </div>
     <?php endif; ?>
 
@@ -88,14 +84,14 @@ $csrf_token = generate_csrf_token();
     <form action="login.php" method="POST">
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <div class="form-group">
-            <label for="email">メールアドレス</label>
+            <label for="email"><?php echo h(t('form_email')); ?></label>
             <input type="email" id="email" name="email" required>
         </div>
         <div class="form-group">
-            <label for="password">パスワード</label>
+            <label for="password"><?php echo h(t('form_password')); ?></label>
             <input type="password" id="password" name="password" required>
         </div>
-        <button type="submit" class="btn">ログイン</button>
+        <button type="submit" class="btn"><?php echo h(t('btn_login')); ?></button>
     </form>
 </div>
 

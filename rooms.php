@@ -1,6 +1,5 @@
 <?php
-require_once 'includes/db_connect.php';
-require_once 'includes/functions.php';
+// db_connect and functions are loaded via language.php in header
 require_once 'includes/header.php';
 
 try {
@@ -75,50 +74,50 @@ try {
 </style>
 
 <section id="search-section" style="margin-bottom: 30px; padding: 20px; background-color: #f9f9f9; border-radius: 5px; text-align: center;">
-    <h3 style="margin-top:0;">空室を検索</h3>
+    <h3 style="margin-top:0;"><?php echo h(t('index_search_title')); ?></h3>
     <form action="search_results.php" method="GET" style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
         <div>
-            <label for="check_in_date">チェックイン日:</label><br>
+            <label for="check_in_date"><?php echo h(t('form_check_in')); ?>:</label><br>
             <input type="date" id="check_in_date" name="check_in_date" value="<?php echo isset($_GET['check_in_date']) ? h($_GET['check_in_date']) : ''; ?>" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         </div>
         <div>
-            <label for="check_out_date">チェックアウト日:</label><br>
+            <label for="check_out_date"><?php echo h(t('form_check_out')); ?>:</label><br>
             <input type="date" id="check_out_date" name="check_out_date" value="<?php echo isset($_GET['check_out_date']) ? h($_GET['check_out_date']) : ''; ?>" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         </div>
         <div>
-            <label for="num_guests">人数:</label><br>
+            <label for="num_guests"><?php echo h(t('form_num_guests')); ?>:</label><br>
             <input type="number" id="num_guests" name="num_guests" min="1" value="<?php echo isset($_GET['num_guests']) ? h($_GET['num_guests']) : '1'; ?>" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 60px;">
         </div>
         <div style="align-self: flex-end;">
-            <button type="submit" class="btn">再検索</button>
+            <button type="submit" class="btn"><?php echo h(t('btn_search_again')); ?></button>
         </div>
     </form>
 </section>
 
-<h2>お部屋一覧</h2>
+<h2><?php echo h(t('rooms_list_title')); ?></h2>
 
 <?php if (!empty($rooms)): ?>
     <div class="room-list">
         <?php foreach ($rooms as $room): ?>
             <div class="room-card">
                 <div class="room-image">
-                    <span>部屋の画像</span>
+                    <span>Room Image</span>
                 </div>
                 <div class="room-info">
                     <h3><?php echo h($room['room_name']); ?></h3>
-                    <p class="room-price">¥<?php echo h(number_format($room['price'])); ?> / 泊</p>
+                    <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>
                     <p><?php echo h($room['description']); ?></p>
                     <ul class="room-details">
-                        <li><strong>タイプ:</strong> <?php echo h($room['type_name']); ?></li>
-                        <li><strong>定員:</strong> <?php echo h($room['capacity']); ?>名様</li>
+                        <li><strong><?php echo h(t('room_type')); ?>:</strong> <?php echo h($room['type_name']); ?></li>
+                        <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
                     </ul>
-                    <a href="room_detail.php?id=<?php echo h($room['id']); ?>" class="btn">詳細を見る</a>
+                    <a href="room_detail.php?id=<?php echo h($room['id']); ?>" class="btn"><?php echo h(t('btn_view_details')); ?></a>
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
 <?php else: ?>
-    <p>現在ご利用可能なお部屋はございません。</p>
+    <p><?php echo h(t('rooms_none_available')); ?></p>
 <?php endif; ?>
 
 <?php

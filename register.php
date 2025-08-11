@@ -1,7 +1,5 @@
 <?php
-session_start();
-require_once 'includes/db_connect.php';
-require_once 'includes/functions.php';
+require_once 'includes/header.php';
 
 $errors = [];
 $success_message = '';
@@ -16,16 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // バリデーション
     if (empty($name)) {
-        $errors[] = '氏名を入力してください。';
+        $errors[] = t('register_error_name');
     }
     if (!$email) {
-        $errors[] = '有効なメールアドレスを入力してください。';
+        $errors[] = t('register_error_email');
     }
     if (empty($password) || mb_strlen($password) < 8) {
-        $errors[] = 'パスワードは8文字以上で入力してください。';
+        $errors[] = t('register_error_password_length');
     }
     if ($password !== $password_confirm) {
-        $errors[] = 'パスワードが一致しません。';
+        $errors[] = t('register_error_password_mismatch');
     }
 
     // メールアドレスの重複チェック
@@ -36,10 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);
             $stmt->execute();
             if ($stmt->fetchColumn() > 0) {
-                $errors[] = 'このメールアドレスは既に使用されています。';
+                $errors[] = t('register_error_email_in_use');
             }
         } catch (PDOException $e) {
-            $errors[] = 'データベースエラーが発生しました。';
+            $errors[] = t('error_db');
         }
     }
 
@@ -57,21 +55,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($stmt->execute()) {
                 // 登録成功
-                $_SESSION['success_message'] = "会員登録が完了しました。ログインしてください。";
+                $_SESSION['success_message'] = "login_success_message";
                 header('Location: login.php');
                 exit();
             } else {
-                $errors[] = 'ユーザー登録に失敗しました。';
+                $errors[] = t('register_error_failed');
             }
 
         } catch (PDOException $e) {
-            $errors[] = 'データベースエラー: ' . h($e->getMessage());
+            $errors[] = t('error_db');
         }
     }
 }
 
-
-require_once 'includes/header.php';
 $csrf_token = generate_csrf_token();
 ?>
 <style>
@@ -90,7 +86,7 @@ $csrf_token = generate_csrf_token();
 </style>
 
 <div class="form-container">
-    <h2>会員登録</h2>
+    <h2><?php echo h(t('register_title')); ?></h2>
 
     <?php if (!empty($errors)): ?>
         <div class="error-messages">
@@ -103,22 +99,22 @@ $csrf_token = generate_csrf_token();
     <form action="register.php" method="POST">
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <div class="form-group">
-            <label for="name">氏名</label>
+            <label for="name"><?php echo h(t('form_name')); ?></label>
             <input type="text" id="name" name="name" value="<?php echo isset($name) ? h($name) : ''; ?>" required>
         </div>
         <div class="form-group">
-            <label for="email">メールアドレス</label>
+            <label for="email"><?php echo h(t('form_email')); ?></label>
             <input type="email" id="email" name="email" value="<?php echo isset($email) ? h($email) : ''; ?>" required>
         </div>
         <div class="form-group">
-            <label for="password">パスワード (8文字以上)</label>
+            <label for="password"><?php echo h(t('form_password')); ?> (8+ characters)</label>
             <input type="password" id="password" name="password" required>
         </div>
         <div class="form-group">
-            <label for="password_confirm">パスワード（確認用）</label>
+            <label for="password_confirm"><?php echo h(t('form_password_confirm')); ?></label>
             <input type="password" id="password_confirm" name="password_confirm" required>
         </div>
-        <button type="submit" class="btn">登録する</button>
+        <button type="submit" class="btn"><?php echo h(t('btn_register')); ?></button>
     </form>
 </div>
 

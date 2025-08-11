@@ -1,6 +1,5 @@
 <?php
-require_once 'includes/db_connect.php';
-require_once 'includes/functions.php';
+require_once 'includes/header.php';
 
 // 1. URLから部屋IDを取得し、検証する
 $room_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -37,15 +36,11 @@ try {
 if (!$room) {
     // 404 Not Found的なメッセージを表示
     header("HTTP/1.0 404 Not Found");
-    require_once 'includes/header.php';
-    echo "<h2>お探しの部屋は見つかりませんでした</h2>";
-    echo "<p><a href='rooms.php'>部屋一覧に戻る</a></p>";
+    echo "<h2>" . h(t('room_detail_not_found')) . "</h2>";
+    echo "<p><a href='rooms.php' class='btn'>" . h(t('btn_back_to_rooms')) . "</a></p>";
     require_once 'includes/footer.php';
     exit();
 }
-
-
-require_once 'includes/header.php';
 ?>
 <style>
 .room-detail-container {
@@ -90,44 +85,44 @@ require_once 'includes/header.php';
 
 <div class="room-detail-container">
     <div class="room-detail-image">
-        <span>部屋のメイン画像</span>
+        <span>Room Main Image</span>
     </div>
     <div class="room-detail-info">
         <h2><?php echo h($room['room_name']); ?> (<?php echo h($room['type_name']); ?>)</h2>
         <p><?php echo nl2br(h($room['description'])); ?></p>
         <ul>
-            <li><strong>定員:</strong> <?php echo h($room['capacity']); ?>名様まで</li>
+            <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
         </ul>
-        <p class="room-price">¥<?php echo h(number_format($room['price'])); ?> / 泊</p>
+        <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>
 
         <div class="booking-form-section">
-            <h3>ご予約はこちらから</h3>
-            <p>日付を選択して空室状況を確認し、予約手続きへお進みください。</p>
+            <h3><?php echo h(t('room_detail_book_form_title')); ?></h3>
+            <p><?php echo h(t('room_detail_book_form_text')); ?></p>
             <form action="book.php" method="GET">
                 <input type="hidden" name="id" value="<?php echo h($room['id']); ?>">
                 <div>
-                    <label for="check_in_date">チェックイン日:</label>
+                    <label for="check_in_date"><?php echo h(t('form_check_in')); ?>:</label>
                     <input type="date" id="check_in_date" name="check_in" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
                 <br>
                 <div>
-                    <label for="check_out_date">チェックアウト日:</label>
+                    <label for="check_out_date"><?php echo h(t('form_check_out')); ?>:</label>
                     <input type="date" id="check_out_date" name="check_out" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
                 <br>
                 <div>
-                    <label for="num_guests">人数:</label>
+                    <label for="num_guests"><?php echo h(t('form_num_guests')); ?>:</label>
                     <input type="number" id="num_guests" name="num_guests" min="1" max="<?php echo h($room['capacity']); ?>" value="1" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 80px;">
                 </div>
                 <br>
-                <button type="submit" class="btn">予約へ進む</button>
+                <button type="submit" class="btn"><?php echo h(t('btn_proceed_to_booking')); ?></button>
             </form>
         </div>
 
     </div>
 </div>
 <br>
-<a href="rooms.php" class="btn">部屋一覧に戻る</a>
+<a href="rooms.php" class="btn"><?php echo h(t('btn_back_to_rooms')); ?></a>
 
 <?php
 require_once 'includes/footer.php';

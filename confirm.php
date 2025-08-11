@@ -1,6 +1,5 @@
 <?php
-require_once 'includes/db_connect.php';
-require_once 'includes/functions.php';
+require_once 'includes/header.php';
 
 // 1. URLから予約IDを取得
 $booking_id = filter_input(INPUT_GET, 'booking_id', FILTER_VALIDATE_INT);
@@ -39,8 +38,7 @@ try {
 // 予約が見つからない場合
 if (!$booking) {
     header("HTTP/1.0 404 Not Found");
-    require_once 'includes/header.php';
-    echo "<h2>指定された予約は見つかりませんでした</h2>";
+    echo "<h2>" . h(t('confirm_not_found')) . "</h2>";
     require_once 'includes/footer.php';
     exit();
 }
@@ -48,9 +46,6 @@ if (!$booking) {
 $datetime1 = new DateTime($booking['check_in_date']);
 $datetime2 = new DateTime($booking['check_out_date']);
 $nights = $datetime1->diff($datetime2)->days;
-
-
-require_once 'includes/header.php';
 ?>
 <style>
 .confirmation-container {
@@ -82,25 +77,25 @@ require_once 'includes/header.php';
 </style>
 
 <div class="confirmation-container">
-    <h2>ご予約ありがとうございました！</h2>
-    <p>お客様のご予約が正常に完了いたしました。</p>
-    <p>ご予約内容の詳細は下記をご確認ください。</p>
-    <p><strong>予約番号: <?php echo h($booking['id']); ?></strong></p>
+    <h2><?php echo h(t('confirm_title')); ?></h2>
+    <p><?php echo h(t('confirm_text_1')); ?></p>
+    <p><?php echo h(t('confirm_text_2')); ?></p>
+    <p><strong><?php echo h(t('confirm_booking_id')); ?>: <?php echo h($booking['id']); ?></strong></p>
 
     <div class="booking-details">
-        <h3>ご予約内容</h3>
+        <h3><?php echo h(t('confirm_summary_title')); ?></h3>
         <ul>
-            <li><strong>お名前:</strong> <?php echo h($booking['guest_name']); ?></li>
-            <li><strong>お部屋:</strong> <?php echo h($booking['room_name']); ?> (<?php echo h($booking['type_name']); ?>)</li>
-            <li><strong>チェックイン:</strong> <?php echo h($booking['check_in_date']); ?></li>
-            <li><strong>チェックアウト:</strong> <?php echo h($booking['check_out_date']); ?></li>
-            <li><strong>宿泊日数:</strong> <?php echo h($nights); ?>泊</li>
-            <li><strong>ご利用人数:</strong> <?php echo h($booking['num_guests']); ?>名様</li>
-            <li><strong>合計金額:</strong> ¥<?php echo h(number_format($booking['total_price'])); ?></li>
+            <li><strong><?php echo h(t('form_name')); ?>:</strong> <?php echo h($booking['guest_name']); ?></li>
+            <li><strong><?php echo h(t('booking_info_room')); ?>:</strong> <?php echo h($booking['room_name']); ?> (<?php echo h($booking['type_name']); ?>)</li>
+            <li><strong><?php echo h(t('booking_info_check_in')); ?>:</strong> <?php echo h($booking['check_in_date']); ?></li>
+            <li><strong><?php echo h(t('booking_info_check_out')); ?>:</strong> <?php echo h($booking['check_out_date']); ?></li>
+            <li><strong><?php echo h(t('booking_info_nights')); ?>:</strong> <?php echo h(t('booking_info_nights_count', $nights)); ?></li>
+            <li><strong><?php echo h(t('booking_info_guests')); ?>:</strong> <?php echo h(t('room_capacity_people', $booking['num_guests'])); ?></li>
+            <li><strong><?php echo h(t('booking_info_total_price')); ?>:</strong> ¥<?php echo h(number_format($booking['total_price'])); ?></li>
         </ul>
     </div>
     <p style="margin-top: 30px;">
-        <a href="index.php" class="btn">トップページに戻る</a>
+        <a href="index.php" class="btn"><?php echo h(t('btn_back_to_top')); ?></a>
     </p>
 </div>
 

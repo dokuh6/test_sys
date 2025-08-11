@@ -1,6 +1,5 @@
 <?php
-require_once 'includes/db_connect.php';
-require_once 'includes/functions.php';
+require_once 'includes/header.php';
 
 // --- POSTリクエスト処理 (フォームが送信された場合) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -124,7 +123,7 @@ if (empty($errors)) {
 }
 
 
-require_once 'includes/header.php';
+<?php
 $csrf_token = generate_csrf_token();
 ?>
 <style>
@@ -144,31 +143,31 @@ $csrf_token = generate_csrf_token();
 .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
 </style>
 
-<h2>ご予約内容の確認</h2>
+<h2><?php echo h(t('booking_title')); ?></h2>
 
 <?php if (!empty($errors)): ?>
     <div class="errors" style="color: red; border: 1px solid red; padding: 15px; margin-bottom: 20px;">
         <?php foreach ($errors as $error): ?>
             <p><?php echo h($error); ?></p>
         <?php endforeach; ?>
-        <p><a href="rooms.php" class="btn">部屋一覧に戻る</a></p>
+        <p><a href="rooms.php" class="btn"><?php echo h(t('btn_back_to_rooms')); ?></a></p>
     </div>
 <?php else: ?>
     <div class="booking-summary">
-        <h3>予約情報</h3>
+        <h3><?php echo h(t('booking_summary_title')); ?></h3>
         <ul>
-            <li><strong>お部屋:</strong> <?php echo h($room['name']); ?></li>
-            <li><strong>チェックイン:</strong> <?php echo h($check_in); ?></li>
-            <li><strong>チェックアウト:</strong> <?php echo h($check_out); ?></li>
-            <li><strong>宿泊日数:</strong> <?php echo h($nights); ?>泊</li>
-            <li><strong>ご利用人数:</strong> <?php echo h($num_guests); ?>名様</li>
+            <li><strong><?php echo h(t('booking_info_room')); ?>:</strong> <?php echo h($room['name']); ?></li>
+            <li><strong><?php echo h(t('booking_info_check_in')); ?>:</strong> <?php echo h($check_in); ?></li>
+            <li><strong><?php echo h(t('booking_info_check_out')); ?>:</strong> <?php echo h($check_out); ?></li>
+            <li><strong><?php echo h(t('booking_info_nights')); ?>:</strong> <?php echo h(t('booking_info_nights_count', $nights)); ?></li>
+            <li><strong><?php echo h(t('booking_info_guests')); ?>:</strong> <?php echo h(t('room_capacity_people', $num_guests)); ?></li>
         </ul>
         <hr>
-        <p class="total-price">合計金額: ¥<?php echo h(number_format($total_price)); ?></p>
+        <p class="total-price"><?php echo h(t('booking_info_total_price')); ?>: ¥<?php echo h(number_format($total_price)); ?></p>
     </div>
 
     <div class="customer-form">
-        <h3>お客様情報の入力</h3>
+        <h3><?php echo h(t('booking_customer_form_title')); ?></h3>
         <form action="book.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
             <!-- 予約情報をhiddenフィールドで渡す -->
@@ -179,19 +178,19 @@ $csrf_token = generate_csrf_token();
             <input type="hidden" name="total_price" value="<?php echo h($total_price); ?>">
 
             <div class="form-group">
-                <label for="guest_name">お名前</label>
+                <label for="guest_name"><?php echo h(t('form_name')); ?></label>
                 <input type="text" id="guest_name" name="guest_name" required>
             </div>
             <div class="form-group">
-                <label for="guest_email">メールアドレス</label>
+                <label for="guest_email"><?php echo h(t('form_email')); ?></label>
                 <input type="email" id="guest_email" name="guest_email" required>
             </div>
             <div class="form-group">
-                <label for="guest_tel">電話番号</label>
+                <label for="guest_tel"><?php echo h(t('form_tel')); ?></label>
                 <input type="tel" id="guest_tel" name="guest_tel" required>
             </div>
             <hr>
-            <button type="submit" class="btn">予約を確定する</button>
+            <button type="submit" class="btn"><?php echo h(t('btn_confirm_booking')); ?></button>
         </form>
     </div>
 <?php endif; ?>
