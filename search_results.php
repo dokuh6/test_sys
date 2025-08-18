@@ -8,16 +8,16 @@ $num_guests = filter_input(INPUT_GET, 'num_guests', FILTER_VALIDATE_INT);
 
 $errors = [];
 if (empty($check_in_date) || empty($check_out_date) || empty($num_guests)) {
-    $errors[] = "すべての日付と人数を入力してください。";
+    $errors[] = t('error_all_fields_required');
 } else {
     if (strtotime($check_in_date) >= strtotime($check_out_date)) {
-        $errors[] = "チェックアウト日はチェックイン日より後の日付を選択してください。";
+        $errors[] = t('error_checkout_after_checkin');
     }
     if (strtotime($check_in_date) < time()) {
-        $errors[] = "チェックイン日は本日以降の日付を選択してください。";
+        $errors[] = t('error_checkin_not_in_past');
     }
     if ($num_guests <= 0) {
-        $errors[] = "人数は1名以上を選択してください。";
+        $errors[] = t('error_guests_positive');
     }
 }
 
@@ -72,9 +72,10 @@ if (empty($errors)) {
         $available_rooms = $stmt_available->fetchAll(PDO::FETCH_ASSOC);
 
     } catch (PDOException $e) {
-        $errors[] = "データベースエラー: " . h($e->getMessage());
+        $errors[] = t('error_db');
     }
 }
+?>
 
 <!-- rooms.phpからスタイルを拝借 -->
 <style>

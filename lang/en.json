@@ -99,5 +99,9 @@
     "action_cancel": "Cancel",
 
     "error_db": "A database error occurred.",
-    "error_invalid_request": "Invalid request."
+    "error_invalid_request": "Invalid request.",
+    "error_all_fields_required": "Please enter all dates and the number of guests.",
+    "error_checkout_after_checkin": "The check-out date must be after the check-in date.",
+    "error_checkin_not_in_past": "The check-in date cannot be in the past.",
+    "error_guests_positive": "The number of guests must be at least 1."
 }

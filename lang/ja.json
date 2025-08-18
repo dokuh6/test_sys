@@ -99,5 +99,9 @@
     "action_cancel": "キャンセル",
 
     "error_db": "データベースエラーが発生しました。",
-    "error_invalid_request": "不正なリクエストです。"
+    "error_invalid_request": "不正なリクエストです。",
+    "error_all_fields_required": "すべての日付と人数を入力してください。",
+    "error_checkout_after_checkin": "チェックアウト日はチェックイン日より後の日付を選択してください。",
+    "error_checkin_not_in_past": "チェックイン日は本日以降の日付を選択してください。",
+    "error_guests_positive": "人数は1名以上を選択してください。"
 }
