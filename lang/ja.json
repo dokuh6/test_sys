@@ -42,6 +42,7 @@
     "room_capacity": "定員",
     "room_capacity_people": "%s名様",
     "room_type": "タイプ",
+    "no_image_available": "画像がありません",
 
     "search_results_title": "空室検索結果",
     "search_results_condition": "検索条件",

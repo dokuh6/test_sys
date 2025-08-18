@@ -30,6 +30,25 @@ try {
     $stmt->execute();
     $room = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // 部屋が見つかった場合、関連画像を取得
+    if ($room) {
+        $stmt_images = $dbh->prepare("SELECT image_path, is_main FROM room_images WHERE room_id = :id ORDER BY is_main DESC, id ASC");
+        $stmt_images->bindParam(':id', $room_id, PDO::PARAM_INT);
+        $stmt_images->execute();
+        $images = $stmt_images->fetchAll(PDO::FETCH_ASSOC);
+
+        // 画像をメインとサブに分類
+        $main_image = null;
+        $sub_images = [];
+        foreach ($images as $image) {
+            if ($image['is_main']) {
+                $main_image = $image['image_path'];
+            } else {
+                $sub_images[] = $image['image_path'];
+            }
+        }
+    }
+
 } catch (PDOException $e) {
     // エラーが発生した場合は、エラーメッセージを表示して終了
     die("データベースエラー: " . h($e->getMessage()));
@@ -51,17 +70,46 @@ if (!$room) {
     gap: 30px;
     flex-wrap: wrap;
 }
-.room-detail-image {
+.room-images-section {
     flex: 1;
-    min-width: 300px;
+    min-width: 350px;
+}
+.main-image-container {
+    width: 100%;
     height: 400px;
     background-color: #eee;
+    border-radius: 5px;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #aaa;
-    font-size: 1.5rem;
-    border-radius: 5px;
+}
+.main-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.sub-images-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+.sub-image-item {
+    width: 100%;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    position: relative;
+    background-color: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.sub-image-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 .room-detail-info {
     flex: 1;
@@ -87,8 +135,23 @@ if (!$room) {
 </style>
 
 <div class="room-detail-container">
-    <div class="room-detail-image">
-        <span>Room Main Image</span>
+    <div class="room-images-section">
+        <div class="main-image-container">
+            <?php if ($main_image): ?>
+                <img src="<?php echo h($main_image); ?>" alt="<?php echo h($room['name']); ?>">
+            <?php else: ?>
+                <span style="color: #aaa; font-size: 1.5rem;"><?php echo h(t('no_image_available')); ?></span>
+            <?php endif; ?>
+        </div>
+        <?php if (!empty($sub_images)): ?>
+            <div class="sub-images-container">
+                <?php foreach ($sub_images as $sub_image): ?>
+                    <div class="sub-image-item">
+                        <img src="<?php echo h($sub_image); ?>" alt="Sub image for <?php echo h($room['name']); ?>">
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
     <div class="room-detail-info">
         <h2>
