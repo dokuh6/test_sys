@@ -38,9 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // 3. bookingsテーブルへの登録
-            $sql_bookings = "INSERT INTO bookings (guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status) VALUES (:guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
+            $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
+
+            $sql_bookings = "INSERT INTO bookings (user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status) VALUES (:user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
             $stmt_bookings = $dbh->prepare($sql_bookings);
             $stmt_bookings->execute([
+                ':user_id' => $user_id,
                 ':guest_name' => $guest_name,
                 ':guest_email' => $guest_email,
                 ':check_in_date' => $check_in,
