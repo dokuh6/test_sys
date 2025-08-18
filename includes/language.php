@@ -1,6 +1,7 @@
 <?php
-// Always load base functions
+// Always load base functions and db connection
 require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/db_connect.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
