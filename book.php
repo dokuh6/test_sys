@@ -121,7 +121,7 @@ if (empty($errors)) {
     $nights = $interval->days;
     $total_price = $nights * $room['price'];
 }
-
+?>
 
 <?php
 $csrf_token = generate_csrf_token();
