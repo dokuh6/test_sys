@@ -1,0 +1,134 @@
+<?php
+require_once 'includes/header.php';
+
+// 1. 入力値の取得と検証
+$check_in_date = filter_input(INPUT_GET, 'check_in_date');
+$check_out_date = filter_input(INPUT_GET, 'check_out_date');
+$num_guests = filter_input(INPUT_GET, 'num_guests', FILTER_VALIDATE_INT);
+
+$errors = [];
+if (empty($check_in_date) || empty($check_out_date) || empty($num_guests)) {
+    $errors[] = t('error_all_fields_required');
+} else {
+    if (strtotime($check_in_date) >= strtotime($check_out_date)) {
+        $errors[] = t('error_checkout_after_checkin');
+    }
+    if (strtotime($check_in_date) < time()) {
+        $errors[] = t('error_checkin_not_in_past');
+    }
+    if ($num_guests <= 0) {
+        $errors[] = t('error_guests_positive');
+    }
+}
+
+$available_rooms = [];
+if (empty($errors)) {
+    try {
+        // 2. 指定期間に予約されている部屋IDのリストを取得
+        $sql_booked = "SELECT DISTINCT br.room_id
+                       FROM bookings b
+                       JOIN booking_rooms br ON b.id = br.booking_id
+                       WHERE b.status = 'confirmed'
+                       AND (b.check_in_date < :check_out_date AND b.check_out_date > :check_in_date)";
+
+        $stmt_booked = $dbh->prepare($sql_booked);
+        $stmt_booked->bindParam(':check_in_date', $check_in_date, PDO::PARAM_STR);
+        $stmt_booked->bindParam(':check_out_date', $check_out_date, PDO::PARAM_STR);
+        $stmt_booked->execute();
+        $booked_room_ids = $stmt_booked->fetchAll(PDO::FETCH_COLUMN, 0);
+
+        // 3. 利用可能な部屋を検索
+        $sql_available = "SELECT
+                            r.id,
+                            r.name,
+                            r.name_en,
+                            r.price,
+                            rt.name AS type_name,
+                            rt.name_en AS type_name_en,
+                            rt.capacity,
+                            rt.description,
+                            rt.description_en
+                          FROM rooms AS r
+                          JOIN room_types AS rt ON r.room_type_id = rt.id
+                          WHERE rt.capacity >= :num_guests";
+
+        if (!empty($booked_room_ids)) {
+            // 予約済みの部屋を除外する
+            $placeholders = implode(',', array_fill(0, count($booked_room_ids), '?'));
+            $sql_available .= " AND r.id NOT IN ($placeholders)";
+        }
+        $sql_available .= " ORDER BY r.price ASC";
+
+        $stmt_available = $dbh->prepare($sql_available);
+        $stmt_available->bindParam(':num_guests', $num_guests, PDO::PARAM_INT);
+
+        if (!empty($booked_room_ids)) {
+            foreach ($booked_room_ids as $k => $id) {
+                $stmt_available->bindValue(($k + 1), $id, PDO::PARAM_INT);
+            }
+        }
+
+        $stmt_available->execute();
+        $available_rooms = $stmt_available->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+        $errors[] = t('error_db');
+    }
+}
+?>
+
+<!-- rooms.phpからスタイルを拝借 -->
+<style>
+.room-list { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+.room-card { border: 1px solid #ddd; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 300px; overflow: hidden; background: #fff; }
+.room-image { width: 100%; height: 200px; background-color: #eee; display: flex; align-items: center; justify-content: center; color: #aaa; }
+.room-info { padding: 15px; }
+.room-info h3 { margin-top: 0; font-size: 1.4rem; color: #004080; }
+.room-price { font-size: 1.2rem; font-weight: bold; color: #d9534f; margin-bottom: 10px; }
+.room-details ul { list-style: none; padding: 0; margin: 10px 0; }
+.room-details li { margin-bottom: 5px; }
+</style>
+
+<div class="search_results_header" style="margin-bottom: 30px;">
+    <h2><?php echo h(t('search_results_title')); ?></h2>
+    <p><strong><?php echo h(t('search_results_condition')); ?>:</strong>
+        <?php echo h(t('form_check_in')); ?>: <?php echo h($check_in_date); ?> |
+        <?php echo h(t('form_check_out')); ?>: <?php echo h($check_out_date); ?> |
+        <?php echo h(t('form_num_guests')); ?>: <?php echo h(t('room_capacity_people', $num_guests)); ?>
+    </p>
+</div>
+
+
+<?php if (!empty($errors)): ?>
+    <div class="errors" style="color: red; border: 1px solid red; padding: 15px; margin-bottom: 20px;">
+        <?php foreach ($errors as $error): ?>
+            <p><?php echo h($error); ?></p>
+        <?php endforeach; ?>
+    </div>
+    <p><a href="javascript:history.back()" class="btn"><?php echo h(t('btn_fix_search')); ?></a></p>
+<?php elseif (!empty($available_rooms)): ?>
+    <div class="room-list">
+        <?php foreach ($available_rooms as $room): ?>
+            <div class="room-card">
+                <div class="room-image"><span>Room Image</span></div>
+                <div class="room-info">
+                    <h3><?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?></h3>
+                    <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>
+                    <p><?php echo h($current_lang === 'en' && !empty($room['description_en']) ? $room['description_en'] : $room['description']); ?></p>
+                    <ul class="room-details">
+                        <li><strong><?php echo h(t('room_type')); ?>:</strong> <?php echo h($current_lang === 'en' && !empty($room['type_name_en']) ? $room['type_name_en'] : $room['type_name']); ?></li>
+                        <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
+                    </ul>
+                    <a href="book.php?id=<?php echo h($room['id']); ?>&check_in=<?php echo h($check_in_date); ?>&check_out=<?php echo h($check_out_date); ?>&num_guests=<?php echo h($num_guests);?>" class="btn"><?php echo h(t('btn_book_this_room')); ?></a>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php else: ?>
+    <p><?php echo h(t('search_results_none')); ?></p>
+    <p><a href="javascript:history.back()" class="btn"><?php echo h(t('btn_fix_search')); ?></a></p>
+<?php endif; ?>
+
+<?php
+require_once 'includes/footer.php';
+?>
