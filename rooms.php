@@ -3,7 +3,7 @@
 require_once 'includes/header.php';
 
 try {
-    // 部屋タイプと結合して部屋の情報を取得するSQL
+    // 部屋タイプと結合し、各部屋のメイン画像も取得するSQL
     $sql = "SELECT
                 r.id,
                 r.name,
@@ -13,7 +13,8 @@ try {
                 rt.name_en AS type_name_en,
                 rt.capacity,
                 rt.description,
-                rt.description_en
+                rt.description_en,
+                (SELECT image_path FROM room_images WHERE room_id = r.id AND is_main = 1 LIMIT 1) AS main_image
             FROM rooms AS r
             JOIN room_types AS rt ON r.room_type_id = rt.id
             ORDER BY r.price ASC";
@@ -51,6 +52,12 @@ try {
     align-items: center;
     justify-content: center;
     color: #aaa;
+    overflow: hidden; /* 画像がコンテナからはみ出さないように */
+}
+.room-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 画像のアスペクト比を保ちつつコンテナを埋める */
 }
 .room-info {
     padding: 15px;
@@ -104,7 +111,11 @@ try {
         <?php foreach ($rooms as $room): ?>
             <div class="room-card">
                 <div class="room-image">
-                    <span>Room Image</span>
+                    <?php if (!empty($room['main_image'])): ?>
+                        <img src="<?php echo h($room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>">
+                    <?php else: ?>
+                        <span><?php echo h(t('no_image_available')); ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="room-info">
                     <h3><?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?></h3>
