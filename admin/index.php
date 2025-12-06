@@ -87,6 +87,7 @@ try {
     </ul>
 </div>
 
+<?php
 // フッターの読み込み
 require_once 'admin_footer.php';
 ?>
