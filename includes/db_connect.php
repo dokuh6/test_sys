@@ -13,6 +13,8 @@ try {
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     // 接続エラー時のメッセージ
-    echo 'データベース接続に失敗しました。: ' . $e->getMessage();
+    // 安全のため、詳細なエラーメッセージはユーザーに表示せず、ログに記録する
+    error_log('Database connection failed: ' . $e->getMessage());
+    echo 'ただいまシステムメンテナンス中です。しばらくしてから再度アクセスしてください。';
     exit();
 }

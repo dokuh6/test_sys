@@ -9,6 +9,31 @@ if (!$booking_id) {
     exit();
 }
 
+// セキュリティチェック: ユーザーがこの予約を見る権限があるか確認
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$can_view = false;
+// 1. 直前に予約したユーザー (セッションチェック)
+if (isset($_SESSION['last_booking_id']) && $_SESSION['last_booking_id'] == $booking_id) {
+    $can_view = true;
+}
+// 2. ログイン済みユーザーで、自分の予約の場合
+if (!$can_view && isset($_SESSION['user'])) {
+    // 後でDB照合する
+    $user_id = $_SESSION['user']['id'];
+} elseif (!$can_view) {
+    // 権限がない場合
+    // ただし、管理者(role=1)は確認できるべきだが、admin/以下のページで見るべきなのでここでは弾くか、
+    // 一般画面でも見れるようにするか。ここではシンプルに弾く。
+
+    // エラーではなく、汎用的な完了画面を表示するだけにする手もあるが、
+    // ここではエラーを表示。
+    die("このページを表示する権限がありません。");
+}
+
+
 // 2. データベースから予約情報を取得
 try {
     $sql = "SELECT
@@ -32,6 +57,22 @@ try {
     $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
     $stmt->execute();
     $booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // ログインユーザーの場合の所有者チェック
+    if ($booking && isset($user_id) && !$can_view) {
+        if ($booking['user_id'] == $user_id) {
+            $can_view = true;
+        } else {
+            // 管理者の場合は許可
+            if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 1) {
+                $can_view = true;
+            }
+        }
+    }
+
+    if (!$can_view) {
+         die("このページを表示する権限がありません。");
+    }
 
 } catch (PDOException $e) {
     die("データベースエラー: " . h($e->getMessage()));

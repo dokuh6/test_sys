@@ -13,7 +13,10 @@ if (empty($check_in_date) || empty($check_out_date) || empty($num_guests)) {
     if (strtotime($check_in_date) >= strtotime($check_out_date)) {
         $errors[] = t('error_checkout_after_checkin');
     }
-    if (strtotime($check_in_date) < time()) {
+    // チェックイン日は今日以降であること (時刻を無視して日付のみ比較)
+    $today = new DateTime('today');
+    $check_in_dt = new DateTime($check_in_date);
+    if ($check_in_dt < $today) {
         $errors[] = t('error_checkin_not_in_past');
     }
     if ($num_guests <= 0) {
@@ -47,7 +50,8 @@ if (empty($errors)) {
                             rt.name_en AS type_name_en,
                             rt.capacity,
                             rt.description,
-                            rt.description_en
+                            rt.description_en,
+                            (SELECT image_path FROM room_images WHERE room_id = r.id AND is_main = 1 LIMIT 1) AS main_image
                           FROM rooms AS r
                           JOIN room_types AS rt ON r.room_type_id = rt.id
                           WHERE rt.capacity >= :num_guests";
@@ -110,7 +114,13 @@ if (empty($errors)) {
     <div class="room-list">
         <?php foreach ($available_rooms as $room): ?>
             <div class="room-card">
-                <div class="room-image"><span>Room Image</span></div>
+                <div class="room-image">
+                    <?php if (!empty($room['main_image'])): ?>
+                        <img src="<?php echo h($room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>">
+                    <?php else: ?>
+                        <span><?php echo h(t('no_image_available')); ?></span>
+                    <?php endif; ?>
+                </div>
                 <div class="room-info">
                     <h3><?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?></h3>
                     <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>

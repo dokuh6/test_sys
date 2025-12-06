@@ -12,32 +12,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $total_price = filter_input(INPUT_POST, 'total_price', FILTER_VALIDATE_FLOAT);
     $guest_name = filter_input(INPUT_POST, 'guest_name');
     $guest_email = filter_input(INPUT_POST, 'guest_email', FILTER_VALIDATE_EMAIL);
-    // 本番では電話番号のバリデーションも追加
+    // 電話番号のバリデーション (簡易的なチェック: 数字とハイフンのみ、10桁以上)
     $guest_tel = filter_input(INPUT_POST, 'guest_tel');
+    if ($guest_tel && !preg_match('/^[0-9\-]{10,}$/', $guest_tel)) {
+        $guest_tel = false;
+    }
 
     $post_errors = [];
-    if (!$room_id || !$check_in || !$check_out || !$num_guests || !$total_price || !$guest_name || !$guest_email || !$guest_tel) {
+    if (!$room_id || !$check_in || !$check_out || !$num_guests || !$total_price || !$guest_name || !$guest_email) {
         $post_errors[] = "入力情報が不完全です。";
     }
-    // TODO: 他のバリデーションもここに追加
+    if (!$guest_tel) {
+        $post_errors[] = "電話番号の形式が正しくありません。";
+    }
 
     if (empty($post_errors)) {
         try {
             $dbh->beginTransaction();
 
-            // 2. 二重予約のチェック
-            $sql_check = "SELECT 1 FROM bookings b JOIN booking_rooms br ON b.id = br.booking_id WHERE br.room_id = :room_id AND b.status = 'confirmed' AND (b.check_in_date < :check_out_date AND b.check_out_date > :check_in_date)";
+            // 2. 排他制御: 部屋レコードをロックして、同時処理を防ぐ
+            // これにより、同時に同じ部屋に対して予約処理が走っても、片方が待機状態になる
+            $sql_lock = "SELECT id FROM rooms WHERE id = :room_id FOR UPDATE";
+            $stmt_lock = $dbh->prepare($sql_lock);
+            $stmt_lock->execute([':room_id' => $room_id]);
+
+            // 3. 二重予約のチェック
+            $sql_check = "SELECT b.id FROM bookings b
+                          JOIN booking_rooms br ON b.id = br.booking_id
+                          WHERE br.room_id = :room_id
+                          AND b.status = 'confirmed'
+                          AND (b.check_in_date < :check_out_date AND b.check_out_date > :check_in_date)";
+
             $stmt_check = $dbh->prepare($sql_check);
             $stmt_check->execute([
                 ':room_id' => $room_id,
                 ':check_in_date' => $check_in,
                 ':check_out_date' => $check_out
             ]);
+
             if ($stmt_check->fetch()) {
                 throw new Exception("申し訳ございませんが、タッチの差で他の方が予約されました。別の日程で再度お試しください。");
             }
 
-            // 3. bookingsテーブルへの登録
+            // 4. bookingsテーブルへの登録
             $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
 
             $sql_bookings = "INSERT INTO bookings (user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status) VALUES (:user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
@@ -64,6 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             send_booking_confirmation_email($booking_id, $dbh);
 
             // 5. 完了ページへのリダイレクト
+            // セッションに予約IDを保存して、confirm.phpでの閲覧権限とする
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['last_booking_id'] = $booking_id;
+
             header("Location: confirm.php?booking_id=" . $booking_id);
             exit();
 
