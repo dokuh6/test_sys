@@ -12,8 +12,10 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT '氏名',
   `email` varchar(255) NOT NULL COMMENT 'メールアドレス',
+  `phone` varchar(20) DEFAULT NULL COMMENT '電話番号',
   `password` varchar(255) NOT NULL COMMENT 'ハッシュ化されたパスワード',
   `role` int(1) NOT NULL DEFAULT 0 COMMENT '権限 (0: 一般ユーザー, 1: 管理者)',
+  `notes` text DEFAULT NULL COMMENT '特記事項',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -104,7 +106,11 @@ INSERT INTO `rooms` (`id`, `room_type_id`, `name`, `price`) VALUES
 (6, 4, '302号室 (和室)', '16000.00');
 
 -- 管理者アカウント
-INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES
-('管理者', 'admin@example.com', '$2y$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 1);
+INSERT INTO `users` (`name`, `email`, `password`, `role`, `notes`) VALUES
+('管理者', 'admin@example.com', '$2y$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 1, '初期管理者');
 -- 注意: 上記パスワードはダミーです。実際の開発時には必ず強力なパスワードに置き換えてください。
 -- 'password'をハッシュ化したものを設定してください。例: password_hash('password', PASSWORD_DEFAULT)
+
+-- 既存のシステムへのカラム追加（必要に応じて実行）
+-- ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(20) DEFAULT NULL COMMENT '電話番号' AFTER `email`;
+-- ALTER TABLE `users` ADD COLUMN `notes` TEXT DEFAULT NULL COMMENT '特記事項' AFTER `role`;

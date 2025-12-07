@@ -41,6 +41,7 @@
                 <li><a href="rooms.php">部屋管理</a></li>
                 <li><a href="room_types.php">部屋タイプ管理</a></li>
                 <li><a href="users.php">顧客管理</a></li>
+                <li><a href="calendar.php">空室カレンダー</a></li>
             </ul>
         </aside>
         <main class="admin-main">
