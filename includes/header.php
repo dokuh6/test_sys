@@ -20,6 +20,7 @@
         <nav>
             <ul>
                 <li><a href="rooms.php"><?php echo h(t('nav_rooms')); ?></a></li>
+                <li><a href="availability.php"><?php echo h(t('nav_availability') ?? '空室カレンダー'); ?></a></li>
                 <?php if (isset($_SESSION['user'])): ?>
                     <li><?php echo h(t('nav_welcome', $_SESSION['user']['name'])); ?></li>
                     <li><a href="mypage.php"><?php echo h(t('nav_mypage')); ?></a></li>
