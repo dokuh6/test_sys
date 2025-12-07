@@ -51,18 +51,12 @@ require_once 'admin_header.php';
                     var endDate = info.endStr.split('T')[0];
 
                     // 宿泊人数はデフォルト1とする（後で変更可能）
-                    var url = '../book.php?id=' + roomId +
+                    var url = 'add_booking.php?room_id=' + roomId +
                               '&check_in=' + startDate +
-                              '&check_out=' + endDate +
-                              '&num_guests=1';
+                              '&check_out=' + endDate;
 
-                    // 管理者が予約を入れる場合、既存の顧客向けbook.phpを流用するか、
-                    // 管理専用の予約作成画面を作るべきだが、ここでは既存フローを活用する。
-                    // ただし、book.phpはheader/footerが公開側用なので、
-                    // 本来的には admin/add_booking.php を作るのがベスト。
-                    // 今回は要件「空きスロットをクリックして新規予約を作成」を満たすため、
-                    // 簡易的にbook.phpへ飛ばすが、別タブで開く。
-                    window.open(url, '_blank');
+                    // 管理者用予約作成画面へ遷移
+                    window.location.href = url;
                 }
             },
             eventClick: function(info) {
