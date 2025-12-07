@@ -6,7 +6,11 @@ try {
     $sql = "SELECT id, name AS title FROM rooms ORDER BY id ASC";
     $stmt = $dbh->query($sql);
     $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // resourceIdは文字列である必要がある場合が多いが、intでも動く。FullCalendarはidキーを見る。
+    // IDを文字列にキャスト（JS側での不一致防止）
+    foreach ($rooms as &$room) {
+        $room['id'] = (string)$room['id'];
+    }
+    unset($room);
 } catch (PDOException $e) {
     $rooms = [];
     $error = "部屋情報の取得に失敗しました。";
