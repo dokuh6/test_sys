@@ -43,6 +43,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
     }
 }
 
+// パスワード変更処理
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
+    validate_csrf_token();
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    if (empty($new_password) || empty($confirm_password)) {
+        $error = "パスワードを入力してください。";
+    } elseif ($new_password !== $confirm_password) {
+        $error = "パスワードが一致しません。";
+    } elseif (strlen($new_password) < 8) {
+        $error = "パスワードは8文字以上で入力してください。";
+    } else {
+        try {
+            $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
+            $sql = "UPDATE users SET password = :password WHERE id = :id";
+            $stmt = $dbh->prepare($sql);
+            $stmt->bindParam(':password', $password_hash, PDO::PARAM_STR);
+            $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+
+            if ($stmt->execute()) {
+                $message = "パスワードを変更しました。";
+            } else {
+                $error = "パスワード変更に失敗しました。";
+            }
+        } catch (PDOException $e) {
+            $error = "データベースエラー: " . h($e->getMessage());
+        }
+    }
+}
+
 // ユーザー削除処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     validate_csrf_token();
@@ -168,6 +199,26 @@ require_once 'admin_header.php';
             </form>
 
             <div style="margin-top: 2rem; border-top: 1px solid #ddd; padding-top: 1rem;">
+                <h3>パスワード変更</h3>
+                <form action="user_detail.php?id=<?php echo h($user_id); ?>" method="post">
+                    <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
+                    <table style="width: 100%;">
+                        <tr>
+                            <th>新しいパスワード</th>
+                            <td><input type="password" name="new_password" required style="width: 100%;"></td>
+                        </tr>
+                        <tr>
+                            <th>パスワード確認</th>
+                            <td><input type="password" name="confirm_password" required style="width: 100%;"></td>
+                        </tr>
+                    </table>
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button type="submit" name="update_password" class="btn-admin" style="background-color: #f39c12;">変更する</button>
+                    </div>
+                </form>
+            </div>
+
+            <div style="margin-top: 2rem; border-top: 1px solid #ddd; padding-top: 1rem;">
                 <h3>アカウント操作</h3>
                 <form action="user_detail.php?id=<?php echo h($user_id); ?>" method="post" onsubmit="return confirm('本当にこのユーザーを削除しますか？\nこの操作は取り消せません。');">
                     <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
@@ -178,6 +229,7 @@ require_once 'admin_header.php';
 
         <div style="flex: 1;">
             <h3>予約履歴</h3>
+            <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
@@ -210,6 +262,7 @@ require_once 'admin_header.php';
                     <?php endif; ?>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
     <style>

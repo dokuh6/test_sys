@@ -56,10 +56,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 4. bookingsテーブルへの登録
             $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
+            // トークン生成
+            $booking_token = bin2hex(random_bytes(32));
 
-            $sql_bookings = "INSERT INTO bookings (user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status) VALUES (:user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
+            $sql_bookings = "INSERT INTO bookings (booking_token, user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status) VALUES (:booking_token, :user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
             $stmt_bookings = $dbh->prepare($sql_bookings);
             $stmt_bookings->execute([
+                ':booking_token' => $booking_token,
                 ':user_id' => $user_id,
                 ':guest_name' => $guest_name,
                 ':guest_email' => $guest_email,
@@ -81,13 +84,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             send_booking_confirmation_email($booking_id, $dbh);
 
             // 5. 完了ページへのリダイレクト
-            // セッションに予約IDを保存して、confirm.phpでの閲覧権限とする
+            // セッションに予約IDを保存して、confirm.phpでの閲覧権限とする（後方互換性のため残す）
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
             $_SESSION['last_booking_id'] = $booking_id;
 
-            header("Location: confirm.php?booking_id=" . $booking_id);
+            // トークン付きURLへリダイレクト
+            header("Location: confirm.php?token=" . $booking_token);
             exit();
 
         } catch (Exception $e) {

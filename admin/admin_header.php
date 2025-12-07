@@ -16,10 +16,21 @@
         .admin-sidebar li a { display: block; padding: 1rem; color: white; text-decoration: none; border-bottom: 1px solid #46627f; }
         .admin-sidebar li a:hover { background-color: #46627f; }
         .admin-main { flex: 1; padding: 2rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; background-color: white; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; background-color: white; min-width: 600px; }
         th, td { border: 1px solid #ddd; padding: 0.8rem; text-align: left; }
         th { background-color: #eaf2f5; }
         .btn-admin { padding: 8px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; text-decoration: none; display: inline-block; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .admin-container { flex-direction: column; }
+            .admin-sidebar { width: 100%; min-height: auto; }
+            .admin-sidebar ul { display: flex; flex-wrap: wrap; }
+            .admin-sidebar li { flex: 1; text-align: center; }
+            .admin-header { flex-direction: column; text-align: center; gap: 10px; }
+            .admin-main { padding: 1rem; }
+        }
         .btn-cancel { background-color: #e74c3c; }
         .btn-cancel:hover { background-color: #c0392b; }
     </style>
