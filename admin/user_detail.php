@@ -12,6 +12,7 @@ if (!$user_id) {
 
 // ユーザー更新処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
+    validate_csrf_token();
     $name = filter_input(INPUT_POST, 'name');
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
     $phone = filter_input(INPUT_POST, 'phone');
@@ -44,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
 
 // ユーザー削除処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
+    validate_csrf_token();
     if ($user_id == $_SESSION['user']['id']) {
         $error = "自分自身を削除することはできません。";
     } else {
@@ -106,6 +108,7 @@ if ($user) {
     }
 }
 
+$csrf_token = generate_csrf_token();
 require_once 'admin_header.php';
 ?>
 
@@ -123,6 +126,7 @@ require_once 'admin_header.php';
         <div style="flex: 1;">
             <h3>基本情報</h3>
             <form action="user_detail.php?id=<?php echo h($user_id); ?>" method="post">
+                <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
                 <table style="width: 100%;">
                     <tr>
                         <th>ID</th>
@@ -166,6 +170,7 @@ require_once 'admin_header.php';
             <div style="margin-top: 2rem; border-top: 1px solid #ddd; padding-top: 1rem;">
                 <h3>アカウント操作</h3>
                 <form action="user_detail.php?id=<?php echo h($user_id); ?>" method="post" onsubmit="return confirm('本当にこのユーザーを削除しますか？\nこの操作は取り消せません。');">
+                    <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
                     <button type="submit" name="delete_user" class="btn-admin btn-cancel">このユーザーを削除</button>
                 </form>
             </div>
