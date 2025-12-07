@@ -68,10 +68,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 予約作成
             // 管理者作成の予約は user_id = NULL とする（ゲスト予約扱い）
             // 将来的には既存ユーザーを選択するUIを追加することも可能
-            $sql = "INSERT INTO bookings (user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status)
-                    VALUES (NULL, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
+            $booking_token = bin2hex(random_bytes(32));
+
+            $sql = "INSERT INTO bookings (booking_token, user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status)
+                    VALUES (:booking_token, NULL, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
             $stmt = $dbh->prepare($sql);
             $stmt->execute([
+                ':booking_token' => $booking_token,
                 ':guest_name' => $guest_name,
                 ':guest_email' => $guest_email ? $guest_email : '', // email任意の場合は空文字
                 ':check_in_date' => $check_in,
@@ -183,12 +186,50 @@ require_once 'admin_header.php';
         }
     }
 
-    document.getElementById('room_select').addEventListener('change', calculatePrice);
-    document.getElementById('check_in').addEventListener('change', calculatePrice);
-    document.getElementById('check_out').addEventListener('change', calculatePrice);
+    // 空室チェック関数
+    function checkAvailability() {
+        const roomSelect = document.getElementById('room_select');
+        const checkInInput = document.getElementById('check_in');
+        const checkOutInput = document.getElementById('check_out');
+        const roomId = roomSelect.value;
+        const checkIn = checkInInput.value;
+        const checkOut = checkOutInput.value;
+
+        if (!roomId || !checkIn || !checkOut) return;
+
+        // API呼び出し
+        fetch(`api/check_availability.php?room_id=${roomId}&check_in=${checkIn}&check_out=${checkOut}`)
+            .then(response => response.json())
+            .then(data => {
+                const warningDiv = document.getElementById('availability_warning');
+                if (!data.available) {
+                    if (!warningDiv) {
+                        const div = document.createElement('div');
+                        div.id = 'availability_warning';
+                        div.style.color = 'red';
+                        div.style.fontWeight = 'bold';
+                        div.style.marginBottom = '10px';
+                        div.innerText = '警告: ' + data.message;
+                        document.querySelector('form').insertBefore(div, document.querySelector('form').firstChild);
+                    } else {
+                        warningDiv.innerText = '警告: ' + data.message;
+                    }
+                } else {
+                    if (warningDiv) {
+                        warningDiv.remove();
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    document.getElementById('room_select').addEventListener('change', () => { calculatePrice(); checkAvailability(); });
+    document.getElementById('check_in').addEventListener('change', () => { calculatePrice(); checkAvailability(); });
+    document.getElementById('check_out').addEventListener('change', () => { calculatePrice(); checkAvailability(); });
 
     // 初期表示時に計算
     calculatePrice();
+    checkAvailability();
 </script>
 
 <?php

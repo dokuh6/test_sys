@@ -1,43 +1,50 @@
 <?php
 require_once 'includes/header.php';
 
-// 1. URLから予約IDを取得
+// 1. URLから情報を取得
 $booking_id = filter_input(INPUT_GET, 'booking_id', FILTER_VALIDATE_INT);
-if (!$booking_id) {
-    // IDが無効な場合はトップページへ
+$token = filter_input(INPUT_GET, 'token');
+
+if (!$booking_id && !$token) {
+    // どちらも無い場合はトップページへ
     header('Location: index.php');
     exit();
 }
 
-// セキュリティチェック: ユーザーがこの予約を見る権限があるか確認
+// セッション開始
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 $can_view = false;
-// 1. 直前に予約したユーザー (セッションチェック)
-if (isset($_SESSION['last_booking_id']) && $_SESSION['last_booking_id'] == $booking_id) {
-    $can_view = true;
-}
-// 2. ログイン済みユーザーで、自分の予約の場合
-if (!$can_view && isset($_SESSION['user'])) {
-    // 後でDB照合する
-    $user_id = $_SESSION['user']['id'];
-} elseif (!$can_view) {
-    // 権限がない場合
-    // ただし、管理者(role=1)は確認できるべきだが、admin/以下のページで見るべきなのでここでは弾くか、
-    // 一般画面でも見れるようにするか。ここではシンプルに弾く。
+$user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
 
-    // エラーではなく、汎用的な完了画面を表示するだけにする手もあるが、
-    // ここではエラーを表示。
-    die("このページを表示する権限がありません。");
-}
+// トークンがある場合は、トークンで予約を特定
+if ($token) {
+    // トークン検証はDB検索時に行う
+    $search_by_token = true;
+} else {
+    $search_by_token = false;
+    // booking_idのみの場合のセキュリティチェック
 
+    // 1. 直前に予約したユーザー (セッションチェック)
+    if (isset($_SESSION['last_booking_id']) && $_SESSION['last_booking_id'] == $booking_id) {
+        $can_view = true;
+    }
+    // 2. ログイン済みユーザーで、自分の予約の場合 (後でDB照合)
+    elseif (isset($user_id)) {
+        // チェックロジックはデータ取得後
+    }
+    else {
+        die("このページを表示する権限がありません。");
+    }
+}
 
 // 2. データベースから予約情報を取得
 try {
     $sql = "SELECT
                 b.id,
+                b.user_id,
                 b.guest_name,
                 b.check_in_date,
                 b.check_out_date,
@@ -50,22 +57,37 @@ try {
             FROM bookings b
             JOIN booking_rooms br ON b.id = br.booking_id
             JOIN rooms r ON br.room_id = r.id
-            JOIN room_types rt ON r.room_type_id = rt.id
-            WHERE b.id = :booking_id";
+            JOIN room_types rt ON r.room_type_id = rt.id";
+
+    if ($search_by_token) {
+        $sql .= " WHERE b.booking_token = :token";
+    } else {
+        $sql .= " WHERE b.id = :booking_id";
+    }
 
     $stmt = $dbh->prepare($sql);
-    $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
+
+    if ($search_by_token) {
+        $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+    } else {
+        $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
+    }
+
     $stmt->execute();
     $booking = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // ログインユーザーの場合の所有者チェック
-    if ($booking && isset($user_id) && !$can_view) {
-        if ($booking['user_id'] == $user_id) {
+    // 予約が見つかった場合の権限チェック (トークン利用時はトークン合致でOKとする = 鍵を持ってる)
+    if ($booking) {
+        if ($search_by_token) {
             $can_view = true;
         } else {
-            // 管理者の場合は許可
-            if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 1) {
-                $can_view = true;
+            // ID指定の場合の所有者チェック
+            if (isset($user_id)) {
+                if ($booking['user_id'] == $user_id) {
+                    $can_view = true;
+                } elseif (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 1) {
+                    $can_view = true; // 管理者
+                }
             }
         }
     }

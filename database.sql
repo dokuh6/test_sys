@@ -56,6 +56,7 @@ CREATE TABLE `rooms` (
 --
 CREATE TABLE `bookings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_token` varchar(64) DEFAULT NULL COMMENT '予約トークン',
   `user_id` int(11) DEFAULT NULL COMMENT '顧客ID (ゲスト予約の場合はNULL)',
   `guest_name` varchar(255) DEFAULT NULL COMMENT 'ゲストの氏名',
   `guest_email` varchar(255) DEFAULT NULL COMMENT 'ゲストのメールアドレス',
@@ -68,6 +69,7 @@ CREATE TABLE `bookings` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
+  KEY `idx_booking_token` (`booking_token`),
   CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
