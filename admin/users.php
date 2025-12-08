@@ -12,7 +12,7 @@ if (isset($_SESSION['message'])) {
 // ユーザー一覧取得
 $search_query = filter_input(INPUT_GET, 'q');
 try {
-    $sql = "SELECT id, name, email, phone, role, created_at FROM users";
+    $sql = "SELECT `id`, `name`, `email`, `phone`, `role`, `created_at` FROM users";
     if ($search_query) {
         $sql .= " WHERE name LIKE :q OR email LIKE :q";
     }

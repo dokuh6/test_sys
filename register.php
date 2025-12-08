@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // パスワードをハッシュ化
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            $sql = "INSERT INTO users (name, email, password, role) VALUES (:name, :email, :password, 0)";
+            $sql = "INSERT INTO users (`name`, `email`, `password`, `role`) VALUES (:name, :email, :password, 0)";
             $stmt = $dbh->prepare($sql);
             $stmt->bindParam(':name', $name, PDO::PARAM_STR);
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);

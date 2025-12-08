@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
 
     if ($name && $email && ($role === 0 || $role === 1)) {
         try {
-            $sql = "UPDATE users SET name = :name, email = :email, phone = :phone, role = :role, notes = :notes WHERE id = :id";
+            $sql = "UPDATE users SET `name` = :name, `email` = :email, `phone` = :phone, `role` = :role, `notes` = :notes WHERE `id` = :id";
             $stmt = $dbh->prepare($sql);
             $stmt->bindParam(':name', $name, PDO::PARAM_STR);
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);
