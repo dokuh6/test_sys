@@ -26,6 +26,7 @@
                     <li><a href="mypage.php"><?php echo h(t('nav_mypage')); ?></a></li>
                     <li><a href="logout.php"><?php echo h(t('nav_logout')); ?></a></li>
                 <?php else: ?>
+                    <li><a href="check_booking.php"><?php echo h(t('nav_check_booking') ?? '予約確認'); ?></a></li>
                     <li><a href="login.php"><?php echo h(t('nav_login')); ?></a></li>
                     <li><a href="register.php"><?php echo h(t('nav_register')); ?></a></li>
                 <?php endif; ?>
