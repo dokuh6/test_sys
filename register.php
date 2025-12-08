@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
     $password = filter_input(INPUT_POST, 'password');
     $password_confirm = filter_input(INPUT_POST, 'password_confirm');
+    $phone = filter_input(INPUT_POST, 'phone');
 
     // バリデーション
     if (empty($name)) {
@@ -26,6 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = t('register_error_password_mismatch');
     }
 
+    if ($phone && mb_strlen($phone) > 20) {
+        $errors[] = '電話番号は20文字以内で入力してください。';
+    }
+
     // メールアドレスの重複チェック
     if (empty($errors)) {
         try {
@@ -37,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = t('register_error_email_in_use');
             }
         } catch (PDOException $e) {
-            $errors[] = t('error_db');
+            $errors[] = t('error_db') . ' (Select check failed: ' . $e->getMessage() . ')';
         }
     }
 
@@ -46,12 +51,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             // パスワードをハッシュ化
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $current_time = date('Y-m-d H:i:s');
+            $notes_default = "";
+            $phone_val = $phone ? $phone : "";
 
-            $sql = "INSERT INTO users (name, email, password, role) VALUES (:name, :email, :password, 0)";
+            $sql = "INSERT INTO users (`name`, `email`, `password`, `phone`, `role`, `notes`, `created_at`, `updated_at`)
+                    VALUES (:name, :email, :password, :phone, 0, :notes, :created_at, :updated_at)";
             $stmt = $dbh->prepare($sql);
             $stmt->bindParam(':name', $name, PDO::PARAM_STR);
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);
             $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
+            $stmt->bindParam(':phone', $phone_val, PDO::PARAM_STR);
+            $stmt->bindParam(':notes', $notes_default, PDO::PARAM_STR);
+            $stmt->bindParam(':created_at', $current_time, PDO::PARAM_STR);
+            $stmt->bindParam(':updated_at', $current_time, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
                 // 登録成功
@@ -63,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         } catch (PDOException $e) {
-            $errors[] = t('error_db');
+            $errors[] = t('error_db') . ' (Insert failed: ' . $e->getMessage() . ')';
         }
     }
 }
@@ -105,6 +118,10 @@ $csrf_token = generate_csrf_token();
         <div class="form-group">
             <label for="email"><?php echo h(t('form_email')); ?></label>
             <input type="email" id="email" name="email" value="<?php echo isset($email) ? h($email) : ''; ?>" required>
+        </div>
+        <div class="form-group">
+            <label for="phone"><?php echo h(t('form_tel')); ?></label>
+            <input type="text" id="phone" name="phone" value="<?php echo isset($phone) ? h($phone) : ''; ?>">
         </div>
         <div class="form-group">
             <label for="password"><?php echo h(t('form_password')); ?> (8+ characters)</label>

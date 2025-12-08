@@ -14,7 +14,7 @@ try {
     $confirmed_bookings_count = $stmt_bookings->fetchColumn();
 
     // 顧客数 (role=0)
-    $stmt_users = $dbh->query("SELECT COUNT(*) FROM users WHERE role = 0");
+    $stmt_users = $dbh->query("SELECT COUNT(*) FROM users WHERE `role` = 0");
     $users_count = $stmt_users->fetchColumn();
 
     // 部屋数
