@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = t('register_error_email_in_use');
             }
         } catch (PDOException $e) {
-            $errors[] = t('error_db');
+            $errors[] = t('error_db') . ' (Select check failed: ' . $e->getMessage() . ')';
         }
     }
 
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         } catch (PDOException $e) {
-            $errors[] = t('error_db');
+            $errors[] = t('error_db') . ' (Insert failed: ' . $e->getMessage() . ')';
         }
     }
 }
