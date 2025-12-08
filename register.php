@@ -27,6 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = t('register_error_password_mismatch');
     }
 
+    if ($phone && mb_strlen($phone) > 20) {
+        $errors[] = '電話番号は20文字以内で入力してください。';
+    }
+
     // メールアドレスの重複チェック
     if (empty($errors)) {
         try {
@@ -38,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = t('register_error_email_in_use');
             }
         } catch (PDOException $e) {
-            $errors[] = t('error_db');
+            $errors[] = t('error_db') . ' (Select check failed: ' . $e->getMessage() . ')';
         }
     }
 
@@ -47,13 +51,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             // パスワードをハッシュ化
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $current_time = date('Y-m-d H:i:s');
+            $notes_default = "";
+            $phone_val = $phone ? $phone : "";
 
-            $sql = "INSERT INTO users (`name`, `email`, `password`, `phone`, `role`) VALUES (:name, :email, :password, :phone, 0)";
+            $sql = "INSERT INTO users (`name`, `email`, `password`, `phone`, `role`, `notes`, `created_at`, `updated_at`)
+                    VALUES (:name, :email, :password, :phone, 0, :notes, :created_at, :updated_at)";
             $stmt = $dbh->prepare($sql);
             $stmt->bindParam(':name', $name, PDO::PARAM_STR);
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);
             $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
-            $stmt->bindParam(':phone', $phone, PDO::PARAM_STR);
+            $stmt->bindParam(':phone', $phone_val, PDO::PARAM_STR);
+            $stmt->bindParam(':notes', $notes_default, PDO::PARAM_STR);
+            $stmt->bindParam(':created_at', $current_time, PDO::PARAM_STR);
+            $stmt->bindParam(':updated_at', $current_time, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
                 // 登録成功
@@ -65,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         } catch (PDOException $e) {
-            $errors[] = t('error_db');
+            $errors[] = t('error_db') . ' (Insert failed: ' . $e->getMessage() . ')';
         }
     }
 }
