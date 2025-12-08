@@ -165,6 +165,9 @@ if (!$room) {
         <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>
 
         <div class="booking-form-section">
+            <h3><?php echo h(t('availability_calendar_title')); ?></h3>
+            <div id='calendar' style="margin-bottom: 20px;"></div>
+
             <h3><?php echo h(t('room_detail_book_form_title')); ?></h3>
             <p><?php echo h(t('room_detail_book_form_text')); ?></p>
             <form action="book.php" method="GET">
@@ -192,6 +195,30 @@ if (!$room) {
 </div>
 <br>
 <a href="rooms.php" class="btn"><?php echo h(t('btn_back_to_rooms')); ?></a>
+
+<!-- FullCalendar -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: '<?php echo $current_lang ?? "ja"; ?>',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth'
+            },
+            events: 'api/get_public_availability.php?room_id=<?php echo $room_id; ?>',
+            height: 'auto',
+            businessHours: true,
+            validRange: {
+                start: '<?php echo date("Y-m-d"); ?>'
+            }
+        });
+        calendar.render();
+    });
+</script>
 
 <?php
 require_once 'includes/footer.php';

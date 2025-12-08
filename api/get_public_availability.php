@@ -11,8 +11,8 @@ require_once '../includes/db_connect.php';
 
 try {
     // 予約データを取得
-    // FullCalendar Resource Timeline Viewに必要な形式に合わせる
-    // event: { id, resourceId, title, start, end, color }
+    $room_id = isset($_GET['room_id']) ? (int)$_GET['room_id'] : null;
+
     $sql = "SELECT
                 br.room_id AS resourceId,
                 b.check_in_date AS start,
@@ -21,7 +21,16 @@ try {
             JOIN booking_rooms AS br ON b.id = br.booking_id
             WHERE b.status = 'confirmed'";
 
+    if ($room_id) {
+        $sql .= " AND br.room_id = :room_id";
+    }
+
     $stmt = $dbh->prepare($sql);
+
+    if ($room_id) {
+        $stmt->bindValue(':room_id', $room_id, PDO::PARAM_INT);
+    }
+
     $stmt->execute();
     $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
