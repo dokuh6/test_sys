@@ -151,6 +151,30 @@ if (empty($errors)) {
     $nights = $interval->days;
     $total_price = $nights * $room['price'];
 }
+
+// 4. ユーザー情報の取得（ログイン時）
+$default_name = '';
+$default_email = '';
+$default_tel = '';
+
+if (isset($_SESSION['user']['id'])) {
+    try {
+        $sql_user = "SELECT name, email, phone FROM users WHERE id = :id";
+        $stmt_user = $dbh->prepare($sql_user);
+        $stmt_user->bindParam(':id', $_SESSION['user']['id'], PDO::PARAM_INT);
+        $stmt_user->execute();
+        $user_info = $stmt_user->fetch(PDO::FETCH_ASSOC);
+
+        if ($user_info) {
+            $default_name = $user_info['name'];
+            $default_email = $user_info['email'];
+            $default_tel = $user_info['phone'];
+        }
+    } catch (PDOException $e) {
+        // エラーが発生しても、予約処理自体は続行させる（自動入力が失敗するだけ）
+        error_log("User fetch failed in book.php: " . $e->getMessage());
+    }
+}
 ?>
 
 <?php
@@ -209,15 +233,15 @@ $csrf_token = generate_csrf_token();
 
             <div class="form-group">
                 <label for="guest_name"><?php echo h(t('form_name')); ?></label>
-                <input type="text" id="guest_name" name="guest_name" required>
+                <input type="text" id="guest_name" name="guest_name" value="<?php echo h($default_name); ?>" required>
             </div>
             <div class="form-group">
                 <label for="guest_email"><?php echo h(t('form_email')); ?></label>
-                <input type="email" id="guest_email" name="guest_email" required>
+                <input type="email" id="guest_email" name="guest_email" value="<?php echo h($default_email); ?>" required>
             </div>
             <div class="form-group">
                 <label for="guest_tel"><?php echo h(t('form_tel')); ?></label>
-                <input type="tel" id="guest_tel" name="guest_tel" required>
+                <input type="tel" id="guest_tel" name="guest_tel" value="<?php echo h($default_tel); ?>" required>
             </div>
             <hr>
             <button type="submit" class="btn"><?php echo h(t('btn_confirm_booking')); ?></button>
