@@ -4,8 +4,9 @@ require_once 'includes/header.php';
 // 1. URLから情報を取得
 $booking_id = filter_input(INPUT_GET, 'booking_id', FILTER_VALIDATE_INT);
 $token = filter_input(INPUT_GET, 'token');
+$booking_number = filter_input(INPUT_GET, 'booking_number');
 
-if (!$booking_id && !$token) {
+if (!$booking_id && !$token && !$booking_number) {
     // どちらも無い場合はトップページへ
     header('Location: index.php');
     exit();
@@ -23,6 +24,11 @@ $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
 if ($token) {
     // トークン検証はDB検索時に行う
     $search_by_token = true;
+} elseif ($booking_number) {
+    $search_by_token = false; // booking_numberは公開IDに近いが、推測は少し難しい。ここでは表示OKとするか、あるいは認証が必要とするか。
+    // 要件「予約番号から予約確認できるようにしたい」より、予約番号を知っていれば表示OKとするのが自然。
+    // ただし、セキュリティ的には氏名や電話番号などの追加入力を求めるのがベストだが、ここでは簡易的に許可する。
+    $can_view = true;
 } else {
     $search_by_token = false;
     // booking_idのみの場合のセキュリティチェック
@@ -44,6 +50,7 @@ if ($token) {
 try {
     $sql = "SELECT
                 b.id,
+                b.booking_number,
                 b.user_id,
                 b.guest_name,
                 b.check_in_date,
@@ -61,6 +68,8 @@ try {
 
     if ($search_by_token) {
         $sql .= " WHERE b.booking_token = :token";
+    } elseif ($booking_number) {
+        $sql .= " WHERE b.booking_number = :booking_number";
     } else {
         $sql .= " WHERE b.id = :booking_id";
     }
@@ -69,6 +78,8 @@ try {
 
     if ($search_by_token) {
         $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+    } elseif ($booking_number) {
+        $stmt->bindParam(':booking_number', $booking_number, PDO::PARAM_STR);
     } else {
         $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
     }
@@ -78,7 +89,7 @@ try {
 
     // 予約が見つかった場合の権限チェック (トークン利用時はトークン合致でOKとする = 鍵を持ってる)
     if ($booking) {
-        if ($search_by_token) {
+        if ($search_by_token || $booking_number) {
             $can_view = true;
         } else {
             // ID指定の場合の所有者チェック
@@ -145,7 +156,12 @@ $nights = $datetime1->diff($datetime2)->days;
     <h2><?php echo h(t('confirm_title')); ?></h2>
     <p><?php echo h(t('confirm_text_1')); ?></p>
     <p><?php echo h(t('confirm_text_2')); ?></p>
-    <p><strong><?php echo h(t('confirm_booking_id')); ?>: <?php echo h($booking['id']); ?></strong></p>
+
+    <?php if (!empty($booking['booking_number'])): ?>
+        <p><strong><?php echo h(t('confirm_booking_id')); ?>: <span style="font-size: 1.5em; color: #d9534f;"><?php echo h($booking['booking_number']); ?></span></strong></p>
+    <?php else: ?>
+        <p><strong><?php echo h(t('confirm_booking_id')); ?>: <?php echo h($booking['id']); ?></strong></p>
+    <?php endif; ?>
 
     <div class="booking-details">
         <h3><?php echo h(t('confirm_summary_title')); ?></h3>
