@@ -8,6 +8,7 @@
     "nav_welcome": "Welcome, %s",
     "nav_mypage": "My Page",
     "nav_logout": "Logout",
+    "nav_check_booking": "Check Booking",
 
     "index_welcome_title": "Welcome to Guesthouse Marusho",
     "index_welcome_subtitle": "Please enjoy a relaxing time.",
@@ -67,6 +68,12 @@
     "booking_info_guests": "Number of Guests",
     "booking_info_total_price": "Total Price",
     "booking_customer_form_title": "Your Information",
+    "processing_wait": "Processing...",
+
+    "check_booking_title": "Check Booking",
+    "check_booking_desc": "Enter your booking number and email address to check your reservation.",
+    "booking_number": "Booking Number",
+    "btn_check_booking": "Check",
 
     "confirm_title": "Thank you for your reservation!",
     "confirm_text_1": "Your reservation has been successfully completed.",

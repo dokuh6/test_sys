@@ -8,6 +8,7 @@
     "nav_welcome": "ようこそ、%s様",
     "nav_mypage": "マイページ",
     "nav_logout": "ログアウト",
+    "nav_check_booking": "予約確認",
 
     "index_welcome_title": "ようこそ、ゲストハウス丸正へ",
     "index_welcome_subtitle": "心安らぐひとときをお過ごしください。",
@@ -67,6 +68,12 @@
     "booking_info_guests": "ご利用人数",
     "booking_info_total_price": "合計金額",
     "booking_customer_form_title": "お客様情報の入力",
+    "processing_wait": "処理中...",
+
+    "check_booking_title": "予約確認",
+    "check_booking_desc": "予約番号とメールアドレスを入力して、予約内容を確認できます。",
+    "booking_number": "予約番号",
+    "btn_check_booking": "確認する",
 
     "confirm_title": "ご予約ありがとうございました！",
     "confirm_text_1": "お客様のご予約が正常に完了いたしました。",
