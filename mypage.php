@@ -15,6 +15,7 @@ $user_id = $_SESSION['user']['id'];
 try {
     $sql = "SELECT
                 b.id,
+                b.booking_number,
                 b.check_in_date,
                 b.check_out_date,
                 b.total_price,
@@ -89,6 +90,10 @@ try {
 
     <p><?php echo h(t('mypage_welcome', $_SESSION['user']['name'])); ?></p>
 
+    <div style="margin: 10px 0;">
+        <a href="change_password.php" class="btn" style="padding: 5px 10px; font-size: 0.9em;">パスワード変更</a>
+    </div>
+
     <hr>
 
     <h3><?php echo h(t('mypage_history_title')); ?></h3>
@@ -110,7 +115,13 @@ try {
             <tbody>
                 <?php foreach ($bookings as $booking): ?>
                     <tr>
-                        <td><?php echo h($booking['id']); ?></td>
+                        <td>
+                            <?php if (!empty($booking['booking_number'])): ?>
+                                <?php echo h($booking['booking_number']); ?>
+                            <?php else: ?>
+                                <?php echo h($booking['id']); ?>
+                            <?php endif; ?>
+                        </td>
                         <td><?php echo h($current_lang === 'en' && !empty($booking['room_name_en']) ? $booking['room_name_en'] : $booking['room_name']); ?></td>
                         <td><?php echo h($booking['check_in_date']); ?></td>
                         <td><?php echo h($booking['check_out_date']); ?></td>

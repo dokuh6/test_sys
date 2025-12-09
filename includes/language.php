@@ -3,6 +3,11 @@
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/db_connect.php';
 
+// 設定定数
+if (!defined('ADMIN_EMAIL')) {
+    define('ADMIN_EMAIL', 'admin@example.com');
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

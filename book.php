@@ -58,11 +58,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
             // トークン生成
             $booking_token = bin2hex(random_bytes(32));
+            // 予約番号生成 (YYYYMMDD-XXXXXXXX)
+            $booking_number = date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
 
-            $sql_bookings = "INSERT INTO bookings (booking_token, user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status) VALUES (:booking_token, :user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
+            $sql_bookings = "INSERT INTO bookings (booking_token, booking_number, user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status) VALUES (:booking_token, :booking_number, :user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
             $stmt_bookings = $dbh->prepare($sql_bookings);
             $stmt_bookings->execute([
                 ':booking_token' => $booking_token,
+                ':booking_number' => $booking_number,
                 ':user_id' => $user_id,
                 ':guest_name' => $guest_name,
                 ':guest_email' => $guest_email,
@@ -82,6 +85,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 4. 予約確認メールの送信
             send_booking_confirmation_email($booking_id, $dbh);
+
+            // 管理者へ通知メール送信
+            // (簡易的な実装: エラーハンドリングは最小限)
+            try {
+                // 管理者メールアドレス
+                $admin_email = defined('ADMIN_EMAIL') ? ADMIN_EMAIL : 'admin@example.com';
+                $admin_subject = '【新規予約】予約が入りました (' . $booking_number . ')';
+                $admin_body = "新しい予約が入りました。\n\n";
+                $admin_body .= "予約番号: " . $booking_number . "\n";
+                $admin_body .= "ゲスト名: " . $guest_name . "\n";
+                $admin_body .= "チェックイン: " . $check_in . "\n";
+                $admin_body .= "チェックアウト: " . $check_out . "\n";
+                $admin_body .= "合計金額: ¥" . number_format($total_price) . "\n";
+
+                $admin_headers = "From: noreply@example.com\r\n";
+                $admin_headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+
+                mb_send_mail($admin_email, $admin_subject, $admin_body, $admin_headers);
+            } catch (Exception $e) {
+                error_log("Admin email failed: " . $e->getMessage());
+            }
 
             // 5. 完了ページへのリダイレクト
             // セッションに予約IDを保存して、confirm.phpでの閲覧権限とする（後方互換性のため残す）
@@ -222,7 +246,7 @@ $csrf_token = generate_csrf_token();
 
     <div class="customer-form">
         <h3><?php echo h(t('booking_customer_form_title')); ?></h3>
-        <form action="book.php" method="POST">
+        <form action="book.php" method="POST" id="bookingForm">
             <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
             <!-- 予約情報をhiddenフィールドで渡す -->
             <input type="hidden" name="room_id" value="<?php echo h($room_id); ?>">
@@ -244,9 +268,16 @@ $csrf_token = generate_csrf_token();
                 <input type="tel" id="guest_tel" name="guest_tel" value="<?php echo h($default_tel); ?>" required>
             </div>
             <hr>
-            <button type="submit" class="btn"><?php echo h(t('btn_confirm_booking')); ?></button>
+            <button type="submit" class="btn" id="submitBtn"><?php echo h(t('btn_confirm_booking')); ?></button>
         </form>
     </div>
+    <script>
+        document.getElementById('bookingForm').addEventListener('submit', function() {
+            var btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = '<?php echo h(t('processing_wait')); ?>...'; // 言語ファイルに対応させる場合、または '処理中...'
+        });
+    </script>
 <?php endif; ?>
 
 <?php

@@ -4,8 +4,10 @@ require_once 'includes/header.php';
 // 1. URLから情報を取得
 $booking_id = filter_input(INPUT_GET, 'booking_id', FILTER_VALIDATE_INT);
 $token = filter_input(INPUT_GET, 'token');
+$booking_number = filter_input(INPUT_GET, 'booking_number');
+$email = filter_input(INPUT_GET, 'guest_email'); // 追加: メールアドレスによる認証用
 
-if (!$booking_id && !$token) {
+if (!$booking_id && !$token && !$booking_number) {
     // どちらも無い場合はトップページへ
     header('Location: index.php');
     exit();
@@ -23,6 +25,11 @@ $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
 if ($token) {
     // トークン検証はDB検索時に行う
     $search_by_token = true;
+} elseif ($booking_number && $email) {
+    $search_by_token = false;
+    // 予約番号 + メールアドレス での認証
+    // ここではフラグだけ立てて、実際のデータ照合はDBクエリ後に行う
+    $search_by_number_email = true;
 } else {
     $search_by_token = false;
     // booking_idのみの場合のセキュリティチェック
@@ -44,6 +51,7 @@ if ($token) {
 try {
     $sql = "SELECT
                 b.id,
+                b.booking_number,
                 b.user_id,
                 b.guest_name,
                 b.check_in_date,
@@ -61,16 +69,30 @@ try {
 
     if ($search_by_token) {
         $sql .= " WHERE b.booking_token = :token";
+    } elseif (isset($search_by_number_email) && $search_by_number_email) {
+        $sql .= " WHERE b.booking_number = :booking_number AND b.guest_email = :email";
     } else {
-        $sql .= " WHERE b.id = :booking_id";
+        // booking_id指定、または booking_numberのみ（詳細表示不可）
+        if ($booking_number) {
+             $sql .= " WHERE b.booking_number = :booking_number";
+        } else {
+             $sql .= " WHERE b.id = :booking_id";
+        }
     }
 
     $stmt = $dbh->prepare($sql);
 
     if ($search_by_token) {
         $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+    } elseif (isset($search_by_number_email) && $search_by_number_email) {
+        $stmt->bindParam(':booking_number', $booking_number, PDO::PARAM_STR);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     } else {
-        $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
+        if ($booking_number) {
+            $stmt->bindParam(':booking_number', $booking_number, PDO::PARAM_STR);
+        } else {
+            $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
+        }
     }
 
     $stmt->execute();
@@ -79,6 +101,9 @@ try {
     // 予約が見つかった場合の権限チェック (トークン利用時はトークン合致でOKとする = 鍵を持ってる)
     if ($booking) {
         if ($search_by_token) {
+            $can_view = true;
+        } elseif (isset($search_by_number_email) && $search_by_number_email) {
+            // メールアドレスと予約番号が一致した場合
             $can_view = true;
         } else {
             // ID指定の場合の所有者チェック
@@ -145,7 +170,12 @@ $nights = $datetime1->diff($datetime2)->days;
     <h2><?php echo h(t('confirm_title')); ?></h2>
     <p><?php echo h(t('confirm_text_1')); ?></p>
     <p><?php echo h(t('confirm_text_2')); ?></p>
-    <p><strong><?php echo h(t('confirm_booking_id')); ?>: <?php echo h($booking['id']); ?></strong></p>
+
+    <?php if (!empty($booking['booking_number'])): ?>
+        <p><strong><?php echo h(t('confirm_booking_id')); ?>: <span style="font-size: 1.5em; color: #d9534f;"><?php echo h($booking['booking_number']); ?></span></strong></p>
+    <?php else: ?>
+        <p><strong><?php echo h(t('confirm_booking_id')); ?>: <?php echo h($booking['id']); ?></strong></p>
+    <?php endif; ?>
 
     <div class="booking-details">
         <h3><?php echo h(t('confirm_summary_title')); ?></h3>
