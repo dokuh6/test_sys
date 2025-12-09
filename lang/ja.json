@@ -8,6 +8,7 @@
     "nav_welcome": "ようこそ、%s様",
     "nav_mypage": "マイページ",
     "nav_logout": "ログアウト",
+    "nav_check_booking": "予約確認",
 
     "index_welcome_title": "ようこそ、ゲストハウス丸正へ",
     "index_welcome_subtitle": "心安らぐひとときをお過ごしください。",
@@ -56,6 +57,11 @@
     "room_detail_not_found": "お探しの部屋は見つかりませんでした",
     "room_detail_book_form_title": "ご予約はこちらから",
     "room_detail_book_form_text": "日付を選択して空室状況を確認し、予約手続きへお進みください。",
+
+    "check_booking_title": "予約確認",
+    "check_booking_desc": "予約番号とメールアドレスを入力して、予約内容を確認できます。",
+    "booking_number": "予約番号",
+    "btn_check_booking": "確認する",
 
     "booking_title": "ご予約内容の確認",
     "booking_summary_title": "予約情報",
