@@ -1,5 +1,15 @@
 <?php
 
+// PHPMailerの読み込み (Composer未使用のため手動require)
+require_once __DIR__ . '/mail_config.php';
+require_once __DIR__ . '/phpmailer/src/Exception.php';
+require_once __DIR__ . '/phpmailer/src/PHPMailer.php';
+require_once __DIR__ . '/phpmailer/src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
 /**
  * HTMLエスケープ（XSS対策）
  * @param string $s
@@ -7,6 +17,54 @@
  */
 function h($s) {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * 汎用メール送信関数 (SMTP版)
+ *
+ * @param string $to 送信先メールアドレス
+ * @param string $subject 件名
+ * @param string $body 本文
+ * @param string|null $from_name 送信者名 (指定がない場合は設定ファイルのデフォルト)
+ * @param string|null $from_email 送信元メールアドレス (指定がない場合は設定ファイルのデフォルト)
+ * @return bool 送信成功:true, 失敗:false
+ */
+function send_email_smtp($to, $subject, $body, $from_name = null, $from_email = null) {
+    $mail = new PHPMailer(true);
+
+    try {
+        // サーバー設定
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USERNAME;
+        $mail->Password   = SMTP_PASSWORD;
+        $mail->SMTPSecure = (SMTP_ENCRYPTION === 'ssl') ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = SMTP_PORT;
+
+        // 文字コード設定
+        $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
+
+        // 送信元・送信先
+        $senderName = $from_name ?: MAIL_FROM_NAME;
+        $senderEmail = $from_email ?: MAIL_FROM_ADDRESS;
+
+        $mail->setFrom($senderEmail, $senderName);
+        $mail->addAddress($to);
+
+        // コンテンツ
+        $mail->isHTML(false); // テキストメール
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
+
+        $mail->send();
+        return true;
+
+    } catch (Exception $e) {
+        error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+        return false;
+    }
 }
 
 /**
@@ -36,14 +94,9 @@ function send_booking_confirmation_email($booking_id, $dbh) {
             return false; // 予約が見つからない
         }
 
-        // メール設定
+        // メール内容
         $to = $booking['guest_email'];
         $subject = '【ゲストハウス丸正】ご予約確定のお知らせ';
-        $from_name = 'ゲストハウス丸正';
-        $from_email = 'noreply@example.com'; // 送信元メールアドレス(サーバーに合わせて要変更)
-
-        $headers = "From: " . mb_encode_mimeheader($from_name) . "<" . $from_email . ">\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
         // メッセージ本文
         $body = "{$booking['guest_name']} 様\n\n";
@@ -63,11 +116,8 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         $body .= "ゲストハウス丸正\n";
         $body .= "HP: (ここに実際のURLを記載)\n";
 
-        // メール送信
-        mb_language("Japanese");
-        mb_internal_encoding("UTF-8");
-
-        return mb_send_mail($to, $subject, $body, $headers);
+        // SMTP送信関数を利用
+        return send_email_smtp($to, $subject, $body);
 
     } catch (Exception $e) {
         // エラーログなどを記録すると良い
