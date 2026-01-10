@@ -1,5 +1,6 @@
 <?php
-require_once 'includes/admin_header.php';
+require_once 'admin_check.php';
+require_once 'admin_header.php';
 
 // ページネーション設定
 $limit = 20;
