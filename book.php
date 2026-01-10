@@ -130,10 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $admin_body .= "チェックアウト: " . $check_out . "\n";
                 $admin_body .= "合計金額: ¥" . number_format($total_price) . "\n";
 
-                $admin_headers = "From: noreply@example.com\r\n";
-                $admin_headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-
-                mb_send_mail($admin_email, $admin_subject, $admin_body, $admin_headers);
+                // 新しいSMTP送信関数を使用
+                send_email_smtp($admin_email, $admin_subject, $admin_body);
             } catch (Exception $e) {
                 error_log("Admin email failed: " . $e->getMessage());
             }
