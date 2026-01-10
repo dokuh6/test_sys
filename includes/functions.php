@@ -10,35 +10,6 @@ function h($s) {
 }
 
 /**
- * 翻訳ヘルパー関数
- * @param string $key
- * @param array $params
- * @return string
- */
-function t($key, $params = []) {
-    global $lang_data;
-    $text = isset($lang_data[$key]) ? $lang_data[$key] : $key;
-    if (!empty($params)) {
-        foreach ($params as $k => $v) {
-            $text = str_replace('%' . $k . '%', $v, $text);
-        }
-        // 数値インデックスの置換にも対応 (例: %0%, %1%)
-        foreach ($params as $k => $v) {
-             $text = str_replace('%' . $k . '%', $v, $text);
-        }
-        // sprintf形式の置換 (%d, %sなど)
-        if (strpos($text, '%') !== false && count($params) > 0) {
-             // 単純な置換で済ますか、vsprintfを使うか。
-             // ここでは簡易的に、もしキーが数値ならvsprintfを試みる
-             if (array_keys($params) === range(0, count($params) - 1)) {
-                 $text = vsprintf($text, $params);
-             }
-        }
-    }
-    return $text;
-}
-
-/**
  * メール送信履歴を記録する
  * @param string $to
  * @param string $subject
