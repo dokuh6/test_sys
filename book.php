@@ -133,9 +133,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $admin_headers = "From: noreply@example.com\r\n";
                 $admin_headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
-                mb_send_mail($admin_email, $admin_subject, $admin_body, $admin_headers);
+                $admin_mail_result = mb_send_mail($admin_email, $admin_subject, $admin_body, $admin_headers);
+
+                // ログ記録
+                log_email_history($admin_email, $admin_subject, $admin_body, $admin_headers, $admin_mail_result ? 'success' : 'failure', $admin_mail_result ? '' : 'mb_send_mail returned false', $dbh);
+
             } catch (Exception $e) {
                 error_log("Admin email failed: " . $e->getMessage());
+                // 管理者メール送信失敗のログも記録（変数が定義されている場合）
+                 if (isset($admin_email) && isset($admin_subject)) {
+                     log_email_history($admin_email, $admin_subject, isset($admin_body) ? $admin_body : '', isset($admin_headers) ? $admin_headers : '', 'failure', $e->getMessage(), $dbh);
+                }
             }
 
             exit();
