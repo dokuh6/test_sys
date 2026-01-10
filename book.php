@@ -83,6 +83,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $dbh->commit();
 
+            // 5. 完了ページへのリダイレクト (ユーザー待機時間を減らすため、メール送信前にレスポンスを返す)
+            // セッションに予約IDを保存して、confirm.phpでの閲覧権限とする（後方互換性のため残す）
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['last_booking_id'] = $booking_id;
+            // セッションロックを解放
+            session_write_close();
+
+            // トークン付きURLへリダイレクト
+            header("Location: confirm.php?token=" . $booking_token);
+            // コンテンツ長を0にして、ボディがないことを伝える
+            header("Content-Length: 0");
+            header("Connection: close");
+
+            // 出力バッファをクリアしてフラッシュし、ブラウザにレスポンスを完了させる
+            while (ob_get_level()) {
+                ob_end_clean();
+            }
+            flush();
+
+            // FastCGI環境の場合、リクエストをここで終了させる
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+
+            // --- ここからバックグラウンド処理 ---
+            // ユーザーが切断してもスクリプトの実行を継続する
+            ignore_user_abort(true);
+            set_time_limit(0); // タイムアウト防止
+
             // 4. 予約確認メールの送信
             send_booking_confirmation_email($booking_id, $dbh);
 
@@ -107,15 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log("Admin email failed: " . $e->getMessage());
             }
 
-            // 5. 完了ページへのリダイレクト
-            // セッションに予約IDを保存して、confirm.phpでの閲覧権限とする（後方互換性のため残す）
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-            $_SESSION['last_booking_id'] = $booking_id;
-
-            // トークン付きURLへリダイレクト
-            header("Location: confirm.php?token=" . $booking_token);
             exit();
 
         } catch (Exception $e) {
