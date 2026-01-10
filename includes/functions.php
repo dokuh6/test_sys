@@ -10,6 +10,72 @@ function h($s) {
 }
 
 /**
+ * 翻訳ヘルパー関数
+ * @param string $key
+ * @param array $params
+ * @return string
+ */
+function t($key, $params = []) {
+    global $lang_data;
+    $text = isset($lang_data[$key]) ? $lang_data[$key] : $key;
+    if (!empty($params)) {
+        foreach ($params as $k => $v) {
+            $text = str_replace('%' . $k . '%', $v, $text);
+        }
+        // 数値インデックスの置換にも対応 (例: %0%, %1%)
+        foreach ($params as $k => $v) {
+             $text = str_replace('%' . $k . '%', $v, $text);
+        }
+        // sprintf形式の置換 (%d, %sなど)
+        if (strpos($text, '%') !== false && count($params) > 0) {
+             // 単純な置換で済ますか、vsprintfを使うか。
+             // ここでは簡易的に、もしキーが数値ならvsprintfを試みる
+             if (array_keys($params) === range(0, count($params) - 1)) {
+                 $text = vsprintf($text, $params);
+             }
+        }
+    }
+    return $text;
+}
+
+/**
+ * メール送信履歴を記録する
+ * @param string $to
+ * @param string $subject
+ * @param string $body
+ * @param string $headers
+ * @param string $status
+ * @param string $error_message
+ */
+function log_email_history($to, $subject, $body, $headers, $status, $error_message = '') {
+    // データベース接続を取得 (グローバル変数または引数で渡す必要があるが、ここでは新しく接続するかグローバルを利用)
+    // functions.php は通常 db_connect.php の後に読み込まれるか、global $dbh が使える前提
+    global $dbh;
+
+    if (!$dbh) {
+        // もし$dbhがない場合（稀なケース）、接続を試みるかログだけファイルに残すが、
+        // ここではグローバル接続があると仮定。
+        error_log("DB Connection not found in log_email_history");
+        return;
+    }
+
+    try {
+        $sql = "INSERT INTO email_logs (to_email, subject, body, headers, status, error_message, sent_at) VALUES (:to, :subject, :body, :headers, :status, :error_message, NOW())";
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([
+            ':to' => $to,
+            ':subject' => $subject,
+            ':body' => $body,
+            ':headers' => $headers,
+            ':status' => $status,
+            ':error_message' => $error_message
+        ]);
+    } catch (Exception $e) {
+        error_log("Failed to log email history: " . $e->getMessage());
+    }
+}
+
+/**
  * 予約確認メールを送信する
  * @param int $booking_id 予約ID
  * @param PDO $dbh データベース接続オブジェクト
@@ -20,6 +86,7 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         // 予約情報を取得
         $sql = "SELECT
                     b.id, b.guest_name, b.guest_email, b.check_in_date, b.check_out_date, b.num_guests, b.total_price,
+                    b.booking_number,
                     r.name as room_name, rt.name as type_name
                 FROM bookings b
                 JOIN booking_rooms br ON b.id = br.booking_id
@@ -52,7 +119,7 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         $body .= "-------------------------------------------------\n";
         $body .= "ご予約内容\n";
         $body .= "-------------------------------------------------\n";
-        $body .= "予約番号: {$booking['id']}\n";
+        $body .= "予約番号: " . (isset($booking['booking_number']) ? $booking['booking_number'] : $booking['id']) . "\n";
         $body .= "お部屋: {$booking['room_name']} ({$booking['type_name']})\n";
         $body .= "チェックイン日: {$booking['check_in_date']}\n";
         $body .= "チェックアウト日: {$booking['check_out_date']}\n";
@@ -67,11 +134,23 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         mb_language("Japanese");
         mb_internal_encoding("UTF-8");
 
-        return mb_send_mail($to, $subject, $body, $headers);
+        $result = mb_send_mail($to, $subject, $body, $headers);
+
+        // ログ記録
+        log_email_history($to, $subject, $body, $headers, $result ? 'success' : 'failure', $result ? '' : 'mb_send_mail returned false');
+
+        return $result;
 
     } catch (Exception $e) {
         // エラーログなどを記録すると良い
         error_log('Email sending failed: ' . $e->getMessage());
+        // ログ記録 (失敗)
+        // ここでは変数 $to, $subject 等が定義されていない可能性もあるため注意が必要だが、
+        // tryブロックの最初の方でコケた場合はログに残せないかもしれない。
+        // 変数がセットされているか確認して記録
+        if (isset($to) && isset($subject)) {
+             log_email_history($to, $subject, isset($body) ? $body : '', isset($headers) ? $headers : '', 'failure', $e->getMessage());
+        }
         return false;
     }
 }
