@@ -19,5 +19,5 @@ session_destroy();
 // ログアウトメッセージを次のページに渡すためにセッションを再開する（任意）
 session_start();
 $_SESSION['success_message'] = "ログアウトしました。";
-header('Location: index.php');
+header('Location: ../index.php');
 exit();

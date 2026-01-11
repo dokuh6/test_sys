@@ -1,11 +1,12 @@
 <?php
-require_once 'includes/header.php';
+$root_path = '../';
+require_once $root_path . 'includes/header.php';
 
 // 1. URLから部屋IDを取得し、検証する
 $room_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$room_id) {
     // IDが無効な場合はトップページにリダイレクト
-    header('Location: index.php');
+    header('Location: ' . $root_path . 'index.php');
     exit();
 }
 
@@ -59,8 +60,8 @@ if (!$room) {
     // 404 Not Found的なメッセージを表示
     header("HTTP/1.0 404 Not Found");
     echo "<h2>" . h(t('room_detail_not_found')) . "</h2>";
-    echo "<p><a href='rooms.php' class='btn'>" . h(t('btn_back_to_rooms')) . "</a></p>";
-    require_once 'includes/footer.php';
+    echo "<p><a href='index.php' class='btn'>" . h(t('btn_back_to_rooms')) . "</a></p>";
+    require_once $root_path . 'includes/footer.php';
     exit();
 }
 ?>
@@ -138,7 +139,7 @@ if (!$room) {
     <div class="room-images-section">
         <div class="main-image-container">
             <?php if ($main_image): ?>
-                <img src="<?php echo h($main_image); ?>" alt="<?php echo h($room['name']); ?>">
+                <img src="<?php echo h($root_path . $main_image); ?>" alt="<?php echo h($room['name']); ?>">
             <?php else: ?>
                 <span style="color: #aaa; font-size: 1.5rem;"><?php echo h(t('no_image_available')); ?></span>
             <?php endif; ?>
@@ -147,7 +148,7 @@ if (!$room) {
             <div class="sub-images-container">
                 <?php foreach ($sub_images as $sub_image): ?>
                     <div class="sub-image-item">
-                        <img src="<?php echo h($sub_image); ?>" alt="Sub image for <?php echo h($room['name']); ?>">
+                        <img src="<?php echo h($root_path . $sub_image); ?>" alt="Sub image for <?php echo h($room['name']); ?>">
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -170,7 +171,7 @@ if (!$room) {
 
             <h3><?php echo h(t('room_detail_book_form_title')); ?></h3>
             <p><?php echo h(t('room_detail_book_form_text')); ?></p>
-            <form action="book.php" method="GET">
+            <form action="<?php echo $root_path; ?>booking/book.php" method="GET">
                 <input type="hidden" name="id" value="<?php echo h($room['id']); ?>">
                 <div>
                     <label for="check_in_date"><?php echo h(t('form_check_in')); ?>:</label>
@@ -194,7 +195,7 @@ if (!$room) {
     </div>
 </div>
 <br>
-<a href="rooms.php" class="btn"><?php echo h(t('btn_back_to_rooms')); ?></a>
+<a href="index.php" class="btn"><?php echo h(t('btn_back_to_rooms')); ?></a>
 
 <!-- FullCalendar -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
@@ -209,7 +210,7 @@ if (!$room) {
                 center: 'title',
                 right: 'dayGridMonth'
             },
-            events: 'api/get_public_availability.php?room_id=<?php echo $room_id; ?>',
+            events: '<?php echo $root_path; ?>api/get_public_availability.php?room_id=<?php echo $room_id; ?>',
             height: 'auto',
             businessHours: true,
             validRange: {
@@ -221,5 +222,5 @@ if (!$room) {
 </script>
 
 <?php
-require_once 'includes/footer.php';
+require_once $root_path . 'includes/footer.php';
 ?>

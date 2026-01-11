@@ -1,5 +1,6 @@
 <?php
-require_once 'includes/header.php';
+$root_path = '../';
+require_once $root_path . 'includes/header.php';
 
 // 部屋リソースを取得してJSに渡す
 try {
@@ -40,7 +41,7 @@ try {
             resourceAreaWidth: '20%',
             resourceAreaHeaderContent: '<?php echo h(t('room') ?? "部屋"); ?>',
             resources: <?php echo json_encode($rooms); ?>,
-            events: 'api/get_public_availability.php',
+            events: '<?php echo $root_path; ?>api/get_public_availability.php',
             height: 'auto',
             businessHours: true,
             nowIndicator: true,
@@ -72,5 +73,5 @@ try {
 </style>
 
 <?php
-require_once 'includes/footer.php';
+require_once $root_path . 'includes/footer.php';
 ?>
