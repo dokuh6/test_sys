@@ -20,6 +20,33 @@ function h($s) {
 }
 
 /**
+ * メール送信履歴をデータベースに記録する
+ *
+ * @param PDO $dbh
+ * @param string $to
+ * @param string $subject
+ * @param string $body
+ * @param string $status
+ * @param string|null $error_message
+ */
+function log_email_history($dbh, $to, $subject, $body, $status, $error_message = null) {
+    if (!$dbh) return;
+
+    try {
+        $sql = "INSERT INTO email_logs (to_email, subject, body, status, error_message, created_at) VALUES (:to, :subject, :body, :status, :error_message, NOW())";
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindValue(':to', $to, PDO::PARAM_STR);
+        $stmt->bindValue(':subject', $subject, PDO::PARAM_STR);
+        $stmt->bindValue(':body', $body, PDO::PARAM_STR);
+        $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+        $stmt->bindValue(':error_message', $error_message, PDO::PARAM_STR);
+        $stmt->execute();
+    } catch (Exception $e) {
+        error_log("Email log insertion failed: " . $e->getMessage());
+    }
+}
+
+/**
  * 汎用メール送信関数 (SMTP版)
  *
  * @param string $to 送信先メールアドレス
@@ -27,10 +54,13 @@ function h($s) {
  * @param string $body 本文
  * @param string|null $from_name 送信者名 (指定がない場合は設定ファイルのデフォルト)
  * @param string|null $from_email 送信元メールアドレス (指定がない場合は設定ファイルのデフォルト)
+ * @param PDO|null $dbh DB接続オブジェクト (ログ記録用)
  * @return bool 送信成功:true, 失敗:false
  */
-function send_email_smtp($to, $subject, $body, $from_name = null, $from_email = null) {
+function send_email_smtp($to, $subject, $body, $from_name = null, $from_email = null, $dbh = null) {
     $mail = new PHPMailer(true);
+    $status = 'failure';
+    $error_msg = null;
 
     try {
         // サーバー設定
@@ -59,10 +89,23 @@ function send_email_smtp($to, $subject, $body, $from_name = null, $from_email = 
         $mail->Body    = $body;
 
         $mail->send();
+        $status = 'success';
+
+        // ログ記録
+        if ($dbh) {
+            log_email_history($dbh, $to, $subject, $body, $status, null);
+        }
+
         return true;
 
     } catch (Exception $e) {
-        error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+        $error_msg = $mail->ErrorInfo;
+        error_log("Message could not be sent. Mailer Error: {$error_msg}");
+
+        // ログ記録 (エラー時)
+        if ($dbh) {
+            log_email_history($dbh, $to, $subject, $body, 'failure', $error_msg);
+        }
         return false;
     }
 }
@@ -77,7 +120,7 @@ function send_booking_confirmation_email($booking_id, $dbh) {
     try {
         // 予約情報を取得
         $sql = "SELECT
-                    b.id, b.guest_name, b.guest_email, b.check_in_date, b.check_out_date, b.num_guests, b.total_price,
+                    b.id, b.booking_number, b.guest_name, b.guest_email, b.check_in_date, b.check_out_date, b.num_guests, b.total_price,
                     r.name as room_name, rt.name as type_name
                 FROM bookings b
                 JOIN booking_rooms br ON b.id = br.booking_id
@@ -105,7 +148,7 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         $body .= "-------------------------------------------------\n";
         $body .= "ご予約内容\n";
         $body .= "-------------------------------------------------\n";
-        $body .= "予約番号: {$booking['id']}\n";
+        $body .= "予約番号: {$booking['booking_number']}\n";
         $body .= "お部屋: {$booking['room_name']} ({$booking['type_name']})\n";
         $body .= "チェックイン日: {$booking['check_in_date']}\n";
         $body .= "チェックアウト日: {$booking['check_out_date']}\n";
@@ -117,7 +160,7 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         $body .= "HP: (ここに実際のURLを記載)\n";
 
         // SMTP送信関数を利用
-        return send_email_smtp($to, $subject, $body);
+        return send_email_smtp($to, $subject, $body, null, null, $dbh);
 
     } catch (Exception $e) {
         // エラーログなどを記録すると良い
