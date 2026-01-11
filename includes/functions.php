@@ -1,5 +1,15 @@
 <?php
 
+// PHPMailerの読み込み
+require_once __DIR__ . '/mail_config.php';
+require_once __DIR__ . '/phpmailer/src/Exception.php';
+require_once __DIR__ . '/phpmailer/src/PHPMailer.php';
+require_once __DIR__ . '/phpmailer/src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as MailerException;
+use PHPMailer\PHPMailer\SMTP;
+
 /**
  * HTMLエスケープ（XSS対策）
  * @param string $s
@@ -17,11 +27,12 @@ function h($s) {
  * @param string $headers
  * @param string $status
  * @param string $error_message
+ * @param PDO|null $dbh
  */
-function log_email_history($to, $subject, $body, $headers, $status, $error_message = '') {
-    // データベース接続を取得 (グローバル変数または引数で渡す必要があるが、ここでは新しく接続するかグローバルを利用)
-    // functions.php は通常 db_connect.php の後に読み込まれるか、global $dbh が使える前提
-    global $dbh;
+function log_email_history($to, $subject, $body, $headers, $status, $error_message = '', $dbh = null) {
+    if (!$dbh) {
+        global $dbh;
+    }
 
     if (!$dbh) {
         // もし$dbhがない場合（稀なケース）、接続を試みるかログだけファイルに残すが、
@@ -44,6 +55,59 @@ function log_email_history($to, $subject, $body, $headers, $status, $error_messa
     } catch (Exception $e) {
         error_log("Failed to log email history: " . $e->getMessage());
     }
+}
+
+/**
+ * SMTPを使用してメールを送信する
+ * @param string $to
+ * @param string $subject
+ * @param string $body
+ * @param PDO|null $dbh
+ * @return bool
+ */
+function send_email_smtp($to, $subject, $body, $dbh = null) {
+    $mail = new PHPMailer(true);
+    $status = 'failure';
+    $error_message = '';
+    // ログ用にヘッダー情報を記録（PHPMailerが生成するものとは完全に一致しないが、主要な情報として）
+    $log_headers = "From: " . MAIL_FROM_NAME . " <" . MAIL_FROM_ADDRESS . ">" . "\r\n";
+    $log_headers .= "Content-Type: text/plain; charset=UTF-8";
+
+    try {
+        // サーバー設定
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USERNAME;
+        $mail->Password   = SMTP_PASSWORD;
+        $mail->SMTPSecure = SMTP_ENCRYPTION;
+        $mail->Port       = SMTP_PORT;
+        $mail->CharSet    = 'UTF-8';
+
+        // 送信元・送信先
+        $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
+        $mail->addAddress($to);
+
+        // コンテンツ
+        $mail->isHTML(false);
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
+
+        $mail->send();
+        $status = 'success';
+        $result = true;
+    } catch (MailerException $e) {
+        $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        // PHPMailerの例外メッセージをログに残す
+        $result = false;
+    } catch (Exception $e) {
+        $error_message = "An unexpected error occurred: " . $e->getMessage();
+        $result = false;
+    }
+
+    log_email_history($to, $subject, $body, $log_headers, $status, $error_message, $dbh);
+
+    return $result;
 }
 
 /**
@@ -77,11 +141,6 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         // メール設定
         $to = $booking['guest_email'];
         $subject = '【ゲストハウス丸正】ご予約確定のお知らせ';
-        $from_name = 'ゲストハウス丸正';
-        $from_email = 'noreply@example.com'; // 送信元メールアドレス(サーバーに合わせて要変更)
-
-        $headers = "From: " . mb_encode_mimeheader($from_name) . "<" . $from_email . ">\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
         // メッセージ本文
         $body = "{$booking['guest_name']} 様\n\n";
@@ -101,27 +160,11 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         $body .= "ゲストハウス丸正\n";
         $body .= "HP: (ここに実際のURLを記載)\n";
 
-        // メール送信
-        mb_language("Japanese");
-        mb_internal_encoding("UTF-8");
-
-        $result = mb_send_mail($to, $subject, $body, $headers);
-
-        // ログ記録
-        log_email_history($to, $subject, $body, $headers, $result ? 'success' : 'failure', $result ? '' : 'mb_send_mail returned false');
-
-        return $result;
+        // SMTP送信関数を呼び出し
+        return send_email_smtp($to, $subject, $body, $dbh);
 
     } catch (Exception $e) {
-        // エラーログなどを記録すると良い
-        error_log('Email sending failed: ' . $e->getMessage());
-        // ログ記録 (失敗)
-        // ここでは変数 $to, $subject 等が定義されていない可能性もあるため注意が必要だが、
-        // tryブロックの最初の方でコケた場合はログに残せないかもしれない。
-        // 変数がセットされているか確認して記録
-        if (isset($to) && isset($subject)) {
-             log_email_history($to, $subject, isset($body) ? $body : '', isset($headers) ? $headers : '', 'failure', $e->getMessage());
-        }
+        error_log('Email sending failed in send_booking_confirmation_email: ' . $e->getMessage());
         return false;
     }
 }
