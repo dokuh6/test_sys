@@ -100,15 +100,15 @@ function send_email_smtp($to, $subject, $body, $dbh) {
         $mail->isSMTP();
         $mail->Host       = SMTP_HOST;
         $mail->SMTPAuth   = true;
-        $mail->Username   = SMTP_USER;
-        $mail->Password   = SMTP_PASS;
-        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Username   = SMTP_USERNAME;
+        $mail->Password   = SMTP_PASSWORD;
+        $mail->SMTPSecure = SMTP_ENCRYPTION;
         $mail->Port       = SMTP_PORT;
         $mail->CharSet    = 'UTF-8';
         $mail->Encoding   = 'base64';
 
         // 受信者設定
-        $mail->setFrom(FROM_EMAIL, FROM_NAME);
+        $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
         $mail->addAddress($to);
 
         // コンテンツ設定
