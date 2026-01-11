@@ -34,6 +34,7 @@ try {
     // ユーザー情報と部屋情報を結合して全予約を取得
     $sql = "SELECT
                 b.id,
+                b.booking_number,
                 COALESCE(u.name, b.guest_name) AS customer_name,
                 r.name AS room_name,
                 b.check_in_date,
@@ -70,6 +71,7 @@ require_once 'admin_header.php';
     <thead>
         <tr>
             <th>予約ID</th>
+            <th>予約番号</th>
             <th>顧客名</th>
             <th>部屋名</th>
             <th>チェックイン</th>
@@ -82,12 +84,13 @@ require_once 'admin_header.php';
     <tbody>
         <?php if (empty($all_bookings)): ?>
             <tr>
-                <td colspan="8" style="text-align: center;">予約はまだありません。</td>
+                <td colspan="9" style="text-align: center;">予約はまだありません。</td>
             </tr>
         <?php else: ?>
             <?php foreach ($all_bookings as $booking): ?>
                 <tr>
                     <td><?php echo h($booking['id']); ?></td>
+                    <td><?php echo h($booking['booking_number']); ?></td>
                     <td><?php echo h($booking['customer_name']); ?></td>
                     <td><?php echo h($booking['room_name']); ?></td>
                     <td><?php echo h($booking['check_in_date']); ?></td>

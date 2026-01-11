@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $admin_body .= "合計金額: ¥" . number_format($total_price) . "\n";
 
                 // 新しいSMTP送信関数を使用
-                send_email_smtp($admin_email, $admin_subject, $admin_body);
+                send_email_smtp($admin_email, $admin_subject, $admin_body, null, null, $dbh);
             } catch (Exception $e) {
                 error_log("Admin email failed: " . $e->getMessage());
             }
