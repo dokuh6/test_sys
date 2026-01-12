@@ -40,7 +40,7 @@
         <h1><a href="index.php">管理画面</a></h1>
         <div class="admin-nav">
             <span>ようこそ、<?php echo h($_SESSION['user']['name']); ?>様</span>
-            <a href="../auth/logout.php">ログアウト</a>
+            <a href="../logout.php">ログアウト</a>
             <a href="../index.php" target="_blank">サイトを表示</a>
         </div>
     </header>

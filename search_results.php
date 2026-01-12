@@ -1,6 +1,5 @@
 <?php
-$root_path = '../';
-require_once $root_path . 'includes/header.php';
+require_once 'includes/header.php';
 
 // 1. 入力値の取得と検証
 $check_in_date = filter_input(INPUT_GET, 'check_in_date');
@@ -117,7 +116,7 @@ if (empty($errors)) {
             <div class="room-card">
                 <div class="room-image">
                     <?php if (!empty($room['main_image'])): ?>
-                        <img src="<?php echo h($root_path . $room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>">
+                        <img src="<?php echo h($room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>">
                     <?php else: ?>
                         <span><?php echo h(t('no_image_available')); ?></span>
                     <?php endif; ?>
@@ -131,7 +130,6 @@ if (empty($errors)) {
                         <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
                     </ul>
                     <a href="book.php?id=<?php echo h($room['id']); ?>&check_in=<?php echo h($check_in_date); ?>&check_out=<?php echo h($check_out_date); ?>&num_guests=<?php echo h($num_guests);?>" class="btn"><?php echo h(t('btn_book_this_room')); ?></a>
-                    <a href="<?php echo $root_path; ?>rooms/room_detail.php?id=<?php echo h($room['id']); ?>" class="btn" style="background-color: #5bc0de; margin-top: 5px;"><?php echo h(t('btn_view_details') ?? '詳細を見る'); ?></a>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -142,5 +140,5 @@ if (empty($errors)) {
 <?php endif; ?>
 
 <?php
-require_once $root_path . 'includes/footer.php';
+require_once 'includes/footer.php';
 ?>
