@@ -29,7 +29,9 @@ CREATE TABLE `users` (
 CREATE TABLE `room_types` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT '部屋タイプ名',
+  `name_en` varchar(255) DEFAULT NULL COMMENT '部屋タイプ名 (英語)',
   `description` text DEFAULT NULL COMMENT '説明',
+  `description_en` text DEFAULT NULL COMMENT '説明 (英語)',
   `capacity` int(11) NOT NULL COMMENT '収容人数',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -42,6 +44,7 @@ CREATE TABLE `rooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `room_type_id` int(11) NOT NULL COMMENT '部屋タイプID',
   `name` varchar(255) NOT NULL COMMENT '部屋名・番号 (例: 101号室)',
+  `name_en` varchar(255) DEFAULT NULL COMMENT '部屋名 (英語)',
   `price` decimal(10,2) NOT NULL COMMENT '一泊あたりの料金',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -51,15 +54,31 @@ CREATE TABLE `rooms` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
+-- テーブル構造: `room_images`
+-- 部屋の画像
+--
+CREATE TABLE `room_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `room_id` int(11) NOT NULL COMMENT '部屋ID',
+  `image_path` varchar(255) NOT NULL COMMENT '画像パス',
+  `is_main` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'メイン画像フラグ',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `room_id` (`room_id`),
+  CONSTRAINT `room_images_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
 -- テーブル構造: `bookings`
 -- 予約情報
 --
 CREATE TABLE `bookings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `booking_token` varchar(64) DEFAULT NULL COMMENT '予約トークン',
+  `booking_number` varchar(64) DEFAULT NULL COMMENT '予約番号',
   `user_id` int(11) DEFAULT NULL COMMENT '顧客ID (ゲスト予約の場合はNULL)',
   `guest_name` varchar(255) DEFAULT NULL COMMENT 'ゲストの氏名',
   `guest_email` varchar(255) DEFAULT NULL COMMENT 'ゲストのメールアドレス',
+  `guest_phone` varchar(20) DEFAULT NULL COMMENT 'ゲスト電話番号',
   `check_in_date` date NOT NULL COMMENT 'チェックイン日',
   `check_out_date` date NOT NULL COMMENT 'チェックアウト日',
   `num_guests` int(11) NOT NULL COMMENT '宿泊人数',
@@ -69,7 +88,7 @@ CREATE TABLE `bookings` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  KEY `idx_booking_token` (`booking_token`),
+  KEY `idx_booking_number` (`booking_number`),
   CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -89,33 +108,6 @@ CREATE TABLE `booking_rooms` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- 初期データの挿入（サンプル）
---
--- 部屋タイプ
-INSERT INTO `room_types` (`id`, `name`, `description`, `capacity`) VALUES
-(1, 'シングルルーム', 'お一人様向けのコンパクトで機能的なお部屋です。', 1),
-(2, 'ツインルーム', 'ご友人やカップルでのご利用に最適なお部屋です。', 2),
-(3, 'デラックスツイン', '広々とした空間で、ゆったりとおくつろぎいただけます。', 2),
-(4, '和室', '日本の伝統的なお部屋で、落ち着いた時間をお過ごしください。', 4);
-
--- 部屋
-INSERT INTO `rooms` (`id`, `room_type_id`, `name`, `price`) VALUES
-(1, 1, '101号室', '8000.00'),
-(2, 1, '102号室', '8000.00'),
-(3, 2, '201号室', '12000.00'),
-(4, 2, '202号室', '12000.00'),
-(5, 3, '301号室', '15000.00'),
-(6, 4, '302号室 (和室)', '16000.00');
-
--- 管理者アカウント
-INSERT INTO `users` (`name`, `email`, `password`, `role`, `notes`) VALUES
-('管理者', 'admin@example.com', '$2y$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 1, '初期管理者');
--- 注意: 上記パスワードはダミーです。実際の開発時には必ず強力なパスワードに置き換えてください。
--- 'password'をハッシュ化したものを設定してください。例: password_hash('password', PASSWORD_DEFAULT)
-
--- 既存のシステムへのカラム追加（必要に応じて実行）
--- ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(20) DEFAULT NULL COMMENT '電話番号' AFTER `email`;
--- ALTER TABLE `users` ADD COLUMN `notes` TEXT DEFAULT NULL COMMENT '特記事項' AFTER `role`;
 -- テーブル構造: `email_logs`
 -- 送信メール履歴
 --
@@ -131,3 +123,27 @@ CREATE TABLE `email_logs` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 初期データの挿入（サンプル）
+--
+-- 部屋タイプ
+INSERT INTO `room_types` (`id`, `name`, `name_en`, `description`, `description_en`, `capacity`) VALUES
+(1, 'シングルルーム', 'Single Room', 'お一人様向けのコンパクトで機能的なお部屋です。', 'Compact and functional room for one person.', 1),
+(2, 'ツインルーム', 'Twin Room', 'ご友人やカップルでのご利用に最適なお部屋です。', 'Ideal for friends or couples.', 2),
+(3, 'デラックスツイン', 'Deluxe Twin', '広々とした空間で、ゆったりとおくつろぎいただけます。', 'Spacious room for a relaxing stay.', 2),
+(4, '和室', 'Japanese Style Room', '日本の伝統的なお部屋で、落ち着いた時間をお過ごしください。', 'Traditional Japanese room for a calm experience.', 4);
+
+-- 部屋
+INSERT INTO `rooms` (`id`, `room_type_id`, `name`, `name_en`, `price`) VALUES
+(1, 1, '101号室', 'Room 101', '8000.00'),
+(2, 1, '102号室', 'Room 102', '8000.00'),
+(3, 2, '201号室', 'Room 201', '12000.00'),
+(4, 2, '202号室', 'Room 202', '12000.00'),
+(5, 3, '301号室', 'Room 301', '15000.00'),
+(6, 4, '302号室 (和室)', 'Room 302 (Japanese)', '16000.00');
+
+-- 管理者アカウント
+INSERT INTO `users` (`name`, `email`, `password`, `role`, `notes`) VALUES
+('管理者', 'admin@example.com', '$2y$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 1, '初期管理者');
+-- 注意: 上記パスワードはダミーです。実際の開発時には必ず強力なパスワードに置き換えてください。
