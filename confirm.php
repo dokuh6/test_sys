@@ -1,7 +1,5 @@
 <?php
-// Define root path for subdirectories
-$root_path = '../';
-require_once '../includes/header.php';
+require_once 'includes/header.php';
 
 // 1. URLから情報を取得
 $booking_id = filter_input(INPUT_GET, 'booking_id', FILTER_VALIDATE_INT);
@@ -11,7 +9,7 @@ $email = filter_input(INPUT_GET, 'guest_email'); // 追加: メールアドレ�
 
 if (!$booking_id && !$token && !$booking_number) {
     // どちらも無い場合はトップページへ
-    header('Location: ../index.php');
+    header('Location: index.php');
     exit();
 }
 
@@ -132,9 +130,9 @@ if (!$booking) {
     header("HTTP/1.0 404 Not Found");
     echo "<div class='max-w-4xl mx-auto my-12 p-8 bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg text-center'>";
     echo "<h2 class='text-2xl font-bold text-gray-800 dark:text-white mb-4'>" . h(t('confirm_not_found')) . "</h2>";
-    echo "<a href='../index.php' class='inline-block bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-6 rounded-md shadow transition-colors duration-200'>" . h(t('btn_back_to_top')) . "</a>";
+    echo "<a href='index.php' class='inline-block bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-6 rounded-md shadow transition-colors duration-200'>" . h(t('btn_back_to_top')) . "</a>";
     echo "</div>";
-    require_once '../includes/footer.php';
+    require_once 'includes/footer.php';
     exit();
 }
 
@@ -200,7 +198,7 @@ $nights = $datetime1->diff($datetime2)->days;
         </div>
 
         <div class="bg-gray-50 dark:bg-gray-800/50 p-6 text-center border-t border-gray-100 dark:border-gray-700">
-            <a href="../index.php" class="inline-block bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-md shadow transition-colors duration-200">
+            <a href="index.php" class="inline-block bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-md shadow transition-colors duration-200">
                 <?php echo h(t('btn_back_to_top')); ?>
             </a>
         </div>
@@ -208,5 +206,5 @@ $nights = $datetime1->diff($datetime2)->days;
 </div>
 
 <?php
-require_once '../includes/footer.php';
+require_once 'includes/footer.php';
 ?>
