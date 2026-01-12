@@ -114,5 +114,15 @@
     "error_all_fields_required": "すべての日付と人数を入力してください。",
     "error_checkout_after_checkin": "チェックアウト日はチェックイン日より後の日付を選択してください。",
     "error_checkin_not_in_past": "チェックイン日は本日以降の日付を選択してください。",
-    "error_guests_positive": "人数は1名以上を選択してください。"
+    "error_guests_positive": "人数は1名以上を選択してください。",
+
+    "nav_amenities": "設備・アメニティ",
+    "nav_offers": "特別オファー",
+    "nav_about": "当館について",
+    "amenity_wifi": "高速Wi-Fi",
+    "amenity_ac": "空調設備",
+    "amenity_dining": "ルームサービス",
+    "amenity_pool": "プール利用",
+    "amenity_bar": "ミニバー",
+    "amenity_gym": "ジム利用"
 }

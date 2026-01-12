@@ -114,5 +114,15 @@
     "error_all_fields_required": "Please enter all dates and the number of guests.",
     "error_checkout_after_checkin": "The check-out date must be after the check-in date.",
     "error_checkin_not_in_past": "The check-in date cannot be in the past.",
-    "error_guests_positive": "The number of guests must be at least 1."
+    "error_guests_positive": "The number of guests must be at least 1.",
+
+    "nav_amenities": "Amenities",
+    "nav_offers": "Offers",
+    "nav_about": "About Us",
+    "amenity_wifi": "Ultra-fast Wi-Fi",
+    "amenity_ac": "Climate Control",
+    "amenity_dining": "In-room Dining",
+    "amenity_pool": "Pool Access",
+    "amenity_bar": "Mini Bar",
+    "amenity_gym": "Gym Access"
 }
