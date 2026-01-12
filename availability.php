@@ -16,11 +16,15 @@ try {
 }
 ?>
 
-<div class="container">
-    <h2><?php echo h(t('availability_calendar_title') ?? '空室カレンダー'); ?></h2>
-    <p><?php echo h(t('availability_calendar_desc') ?? 'カレンダーで空室状況を確認できます。赤色の部分は予約済みです。'); ?></p>
+<div class="max-w-7xl mx-auto my-8 px-4">
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('availability_calendar_title') ?? '空室カレンダー'); ?></h2>
+        <p class="text-gray-600 dark:text-gray-300"><?php echo h(t('availability_calendar_desc') ?? 'カレンダーで空室状況を確認できます。赤色の部分は予約済みです。'); ?></p>
+    </div>
 
-    <div id='calendar'></div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div id='calendar' class="text-gray-800 dark:text-white"></div>
+    </div>
 </div>
 
 <!-- FullCalendar Scheduler (Trial) -->
@@ -55,21 +59,6 @@ try {
         calendar.render();
     });
 </script>
-
-<style>
-    #calendar {
-        max-width: 100%;
-        margin: 20px auto;
-        background: white;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-</style>
 
 <?php
 require_once 'includes/footer.php';
