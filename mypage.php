@@ -36,118 +36,90 @@ try {
 } catch (PDOException $e) {
     die("データベースエラー: " . h($e->getMessage()));
 }
-
-
 ?>
-<style>
-.mypage-container {
-    max-width: 800px;
-    margin: 20px auto;
-}
-.booking-history-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-.booking-history-table th, .booking-history-table td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: left;
-}
-.booking-history-table th {
-    background-color: #f2f2f2;
-}
-.status-confirmed { color: green; font-weight: bold; }
-.status-cancelled { color: red; text-decoration: line-through; }
-.link-style-button {
-    background: none;
-    border: none;
-    color: #004080;
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 0;
-    font-size: inherit;
-    font-family: inherit;
-}
-.link-style-button:hover {
-    color: #0059b3;
-}
-</style>
 
-<div class="mypage-container">
-    <h2><?php echo h(t('mypage_title')); ?></h2>
+<div class="max-w-6xl mx-auto my-12 bg-surface-light dark:bg-surface-dark p-8 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white"><?php echo h(t('mypage_title')); ?></h2>
+        <p class="text-gray-600 dark:text-gray-300 mt-2 md:mt-0"><?php echo h(t('mypage_welcome', $_SESSION['user']['name'])); ?></p>
+    </div>
 
     <?php
     if (isset($_SESSION['message'])) {
-        echo '<p style="color:green;">' . h($_SESSION['message']) . '</p>';
+        echo '<div class="mb-6 p-4 rounded bg-green-50 text-green-700 border border-green-200">' . h($_SESSION['message']) . '</div>';
         unset($_SESSION['message']);
     }
     if (isset($_SESSION['error_message'])) {
-        echo '<p style="color:red;">' . h($_SESSION['error_message']) . '</p>';
+        echo '<div class="mb-6 p-4 rounded bg-red-50 text-red-700 border border-red-200">' . h($_SESSION['error_message']) . '</div>';
         unset($_SESSION['error_message']);
     }
     ?>
 
-    <p><?php echo h(t('mypage_welcome', $_SESSION['user']['name'])); ?></p>
-
-    <div style="margin: 10px 0;">
-        <a href="change_password.php" class="btn" style="padding: 5px 10px; font-size: 0.9em;">パスワード変更</a>
+    <div class="mb-8">
+        <a href="change_password.php" class="inline-block border border-primary text-primary hover:bg-primary hover:text-white px-4 py-2 rounded transition-colors text-sm font-semibold">
+            パスワード変更
+        </a>
     </div>
 
-    <hr>
+    <hr class="border-gray-200 dark:border-gray-700 mb-8">
 
-    <h3><?php echo h(t('mypage_history_title')); ?></h3>
+    <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white"><?php echo h(t('mypage_history_title')); ?></h3>
+
     <?php if (empty($bookings)): ?>
-        <p><?php echo h(t('mypage_no_bookings')); ?></p>
+        <p class="text-gray-600 dark:text-gray-400"><?php echo h(t('mypage_no_bookings')); ?></p>
     <?php else: ?>
-        <table class="booking-history-table">
-            <thead>
-                <tr>
-                    <th><?php echo h(t('history_booking_id')); ?></th>
-                    <th><?php echo h(t('history_room_name')); ?></th>
-                    <th><?php echo h(t('history_check_in')); ?></th>
-                    <th><?php echo h(t('history_check_out')); ?></th>
-                    <th><?php echo h(t('history_price')); ?></th>
-                    <th><?php echo h(t('history_status')); ?></th>
-                    <th><?php echo h(t('history_action')); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($bookings as $booking): ?>
-                    <tr>
-                        <td>
-                            <?php if (!empty($booking['booking_number'])): ?>
-                                <?php echo h($booking['booking_number']); ?>
-                            <?php else: ?>
-                                <?php echo h($booking['id']); ?>
-                            <?php endif; ?>
-                        </td>
-                        <td><?php echo h($current_lang === 'en' && !empty($booking['room_name_en']) ? $booking['room_name_en'] : $booking['room_name']); ?></td>
-                        <td><?php echo h($booking['check_in_date']); ?></td>
-                        <td><?php echo h($booking['check_out_date']); ?></td>
-                        <td>¥<?php echo h(number_format($booking['total_price'])); ?></td>
-                        <td>
-                            <?php if ($booking['status'] === 'confirmed'): ?>
-                                <span class="status-confirmed"><?php echo h(t('status_confirmed')); ?></span>
-                            <?php else: ?>
-                                <span class="status-cancelled"><?php echo h(t('status_cancelled')); ?></span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <?php if ($booking['status'] === 'confirmed'): ?>
-                                <form action="cancel_booking.php" method="POST" style="display:inline;">
-                                    <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
-                                    <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
-                                    <button type="submit" class="link-style-button" onclick="return confirm('本当にこの予約をキャンセルしますか？');">
-                                        <?php echo h(t('action_cancel')); ?>
-                                    </button>
-                                </form>
-                            <?php endif; ?>
-                        </td>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm uppercase leading-normal">
+                        <th class="py-3 px-6 font-bold"><?php echo h(t('history_booking_id')); ?></th>
+                        <th class="py-3 px-6 font-bold"><?php echo h(t('history_room_name')); ?></th>
+                        <th class="py-3 px-6 font-bold"><?php echo h(t('history_check_in')); ?></th>
+                        <th class="py-3 px-6 font-bold"><?php echo h(t('history_check_out')); ?></th>
+                        <th class="py-3 px-6 font-bold"><?php echo h(t('history_price')); ?></th>
+                        <th class="py-3 px-6 font-bold"><?php echo h(t('history_status')); ?></th>
+                        <th class="py-3 px-6 font-bold"><?php echo h(t('history_action')); ?></th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="text-gray-600 dark:text-gray-300 text-sm font-light">
+                    <?php foreach ($bookings as $booking): ?>
+                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <td class="py-3 px-6 whitespace-nowrap font-medium">
+                                <?php if (!empty($booking['booking_number'])): ?>
+                                    <?php echo h($booking['booking_number']); ?>
+                                <?php else: ?>
+                                    <?php echo h($booking['id']); ?>
+                                <?php endif; ?>
+                            </td>
+                            <td class="py-3 px-6">
+                                <?php echo h($current_lang === 'en' && !empty($booking['room_name_en']) ? $booking['room_name_en'] : $booking['room_name']); ?>
+                            </td>
+                            <td class="py-3 px-6"><?php echo h($booking['check_in_date']); ?></td>
+                            <td class="py-3 px-6"><?php echo h($booking['check_out_date']); ?></td>
+                            <td class="py-3 px-6">¥<?php echo h(number_format($booking['total_price'])); ?></td>
+                            <td class="py-3 px-6">
+                                <?php if ($booking['status'] === 'confirmed'): ?>
+                                    <span class="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs font-bold"><?php echo h(t('status_confirmed')); ?></span>
+                                <?php else: ?>
+                                    <span class="bg-red-200 text-red-700 py-1 px-3 rounded-full text-xs line-through font-bold"><?php echo h(t('status_cancelled')); ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="py-3 px-6">
+                                <?php if ($booking['status'] === 'confirmed'): ?>
+                                    <form action="cancel_booking.php" method="POST" class="inline">
+                                        <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
+                                        <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
+                                        <button type="submit" class="text-red-500 hover:text-red-700 hover:underline font-semibold" onclick="return confirm('本当にこの予約をキャンセルしますか？');">
+                                            <?php echo h(t('action_cancel')); ?>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     <?php endif; ?>
 </div>
 

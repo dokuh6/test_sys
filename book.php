@@ -234,81 +234,83 @@ if (isset($_SESSION['user']['id'])) {
 <?php
 $csrf_token = generate_csrf_token();
 ?>
-<style>
-.booking-summary, .customer-form {
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-.booking-summary ul { list-style: none; padding: 0; }
-.booking-summary li { margin-bottom: 10px; font-size: 1.1rem; }
-.total-price { font-size: 1.5rem; font-weight: bold; color: #d9534f; text-align: right; }
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; margin-bottom: 5px; }
-.form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-</style>
 
-<h2><?php echo h(t('booking_title')); ?></h2>
+<div class="max-w-4xl mx-auto my-12 px-4">
+    <h2 class="text-3xl font-bold mb-8 text-center text-gray-800 dark:text-white"><?php echo h(t('booking_title')); ?></h2>
 
-<?php if (!empty($errors)): ?>
-    <div class="errors" style="color: red; border: 1px solid red; padding: 15px; margin-bottom: 20px;">
-        <?php foreach ($errors as $error): ?>
-            <p><?php echo h($error); ?></p>
-        <?php endforeach; ?>
-        <p><a href="rooms.php" class="btn"><?php echo h(t('btn_back_to_rooms')); ?></a></p>
-    </div>
-<?php else: ?>
-    <div class="booking-summary">
-        <h3><?php echo h(t('booking_summary_title')); ?></h3>
-        <ul>
-            <li><strong><?php echo h(t('booking_info_room')); ?>:</strong> <?php echo h($room['name']); ?></li>
-            <li><strong><?php echo h(t('booking_info_check_in')); ?>:</strong> <?php echo h($check_in); ?></li>
-            <li><strong><?php echo h(t('booking_info_check_out')); ?>:</strong> <?php echo h($check_out); ?></li>
-            <li><strong><?php echo h(t('booking_info_nights')); ?>:</strong> <?php echo h(t('booking_info_nights_count', $nights)); ?></li>
-            <li><strong><?php echo h(t('booking_info_guests')); ?>:</strong> <?php echo h(t('room_capacity_people', $num_guests)); ?></li>
-        </ul>
-        <hr>
-        <p class="total-price"><?php echo h(t('booking_info_total_price')); ?>: ¥<?php echo h(number_format($total_price)); ?></p>
-    </div>
-
-    <div class="customer-form">
-        <h3><?php echo h(t('booking_customer_form_title')); ?></h3>
-        <form action="book.php" method="POST" id="bookingForm">
-            <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
-            <!-- 予約情報をhiddenフィールドで渡す -->
-            <input type="hidden" name="room_id" value="<?php echo h($room_id); ?>">
-            <input type="hidden" name="check_in" value="<?php echo h($check_in); ?>">
-            <input type="hidden" name="check_out" value="<?php echo h($check_out); ?>">
-            <input type="hidden" name="num_guests" value="<?php echo h($num_guests); ?>">
-            <input type="hidden" name="total_price" value="<?php echo h($total_price); ?>">
-
-            <div class="form-group">
-                <label for="guest_name"><?php echo h(t('form_name')); ?></label>
-                <input type="text" id="guest_name" name="guest_name" value="<?php echo h($default_name); ?>" required>
+    <?php if (!empty($errors)): ?>
+        <div class="bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg mb-8 text-center">
+            <?php foreach ($errors as $error): ?>
+                <p class="mb-2 last:mb-0"><?php echo h($error); ?></p>
+            <?php endforeach; ?>
+            <div class="mt-4">
+                <a href="rooms.php" class="inline-block bg-white border border-red-300 text-red-600 hover:bg-red-50 font-bold py-2 px-6 rounded shadow transition-colors duration-200">
+                    <?php echo h(t('btn_back_to_rooms')); ?>
+                </a>
             </div>
-            <div class="form-group">
-                <label for="guest_email"><?php echo h(t('form_email')); ?></label>
-                <input type="email" id="guest_email" name="guest_email" value="<?php echo h($default_email); ?>" required>
+        </div>
+    <?php else: ?>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Booking Summary -->
+            <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 h-fit">
+                <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                    <?php echo h(t('booking_summary_title')); ?>
+                </h3>
+                <ul class="space-y-3 text-gray-700 dark:text-gray-300 mb-6">
+                    <li><strong class="font-semibold"><?php echo h(t('booking_info_room')); ?>:</strong> <?php echo h($room['name']); ?></li>
+                    <li><strong class="font-semibold"><?php echo h(t('booking_info_check_in')); ?>:</strong> <?php echo h($check_in); ?></li>
+                    <li><strong class="font-semibold"><?php echo h(t('booking_info_check_out')); ?>:</strong> <?php echo h($check_out); ?></li>
+                    <li><strong class="font-semibold"><?php echo h(t('booking_info_nights')); ?>:</strong> <?php echo h(t('booking_info_nights_count', $nights)); ?></li>
+                    <li><strong class="font-semibold"><?php echo h(t('booking_info_guests')); ?>:</strong> <?php echo h(t('room_capacity_people', $num_guests)); ?></li>
+                </ul>
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4 text-right">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1"><?php echo h(t('booking_info_total_price')); ?></p>
+                    <p class="text-3xl font-bold text-red-500">¥<?php echo h(number_format($total_price)); ?></p>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="guest_tel"><?php echo h(t('form_tel')); ?></label>
-                <input type="tel" id="guest_tel" name="guest_tel" value="<?php echo h($default_tel); ?>" required>
+
+            <!-- Customer Form -->
+            <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
+                <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                    <?php echo h(t('booking_customer_form_title')); ?>
+                </h3>
+                <form action="book.php" method="POST" id="bookingForm" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
+                    <input type="hidden" name="room_id" value="<?php echo h($room_id); ?>">
+                    <input type="hidden" name="check_in" value="<?php echo h($check_in); ?>">
+                    <input type="hidden" name="check_out" value="<?php echo h($check_out); ?>">
+                    <input type="hidden" name="num_guests" value="<?php echo h($num_guests); ?>">
+                    <input type="hidden" name="total_price" value="<?php echo h($total_price); ?>">
+
+                    <div>
+                        <label for="guest_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_name')); ?></label>
+                        <input type="text" id="guest_name" name="guest_name" value="<?php echo h($default_name); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                    </div>
+                    <div>
+                        <label for="guest_email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_email')); ?></label>
+                        <input type="email" id="guest_email" name="guest_email" value="<?php echo h($default_email); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                    </div>
+                    <div>
+                        <label for="guest_tel" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_tel')); ?></label>
+                        <input type="tel" id="guest_tel" name="guest_tel" value="<?php echo h($default_tel); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md shadow transition-colors duration-200 mt-6" id="submitBtn">
+                        <?php echo h(t('btn_confirm_booking')); ?>
+                    </button>
+                </form>
             </div>
-            <hr>
-            <button type="submit" class="btn" id="submitBtn"><?php echo h(t('btn_confirm_booking')); ?></button>
-        </form>
-    </div>
-    <script>
-        document.getElementById('bookingForm').addEventListener('submit', function() {
-            var btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerText = '<?php echo h(t('processing_wait')); ?>...'; // 言語ファイルに対応させる場合、または '処理中...'
-        });
-    </script>
-<?php endif; ?>
+        </div>
+        <script>
+            document.getElementById('bookingForm').addEventListener('submit', function() {
+                var btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<?php echo h(t('processing_wait')); ?>...';
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+        </script>
+    <?php endif; ?>
+</div>
 
 <?php
 require_once 'includes/footer.php';

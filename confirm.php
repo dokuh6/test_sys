@@ -128,7 +128,10 @@ try {
 // 予約が見つからない場合
 if (!$booking) {
     header("HTTP/1.0 404 Not Found");
-    echo "<h2>" . h(t('confirm_not_found')) . "</h2>";
+    echo "<div class='max-w-4xl mx-auto my-12 p-8 bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg text-center'>";
+    echo "<h2 class='text-2xl font-bold text-gray-800 dark:text-white mb-4'>" . h(t('confirm_not_found')) . "</h2>";
+    echo "<a href='index.php' class='inline-block bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-6 rounded-md shadow transition-colors duration-200'>" . h(t('btn_back_to_top')) . "</a>";
+    echo "</div>";
     require_once 'includes/footer.php';
     exit();
 }
@@ -137,63 +140,70 @@ $datetime1 = new DateTime($booking['check_in_date']);
 $datetime2 = new DateTime($booking['check_out_date']);
 $nights = $datetime1->diff($datetime2)->days;
 ?>
-<style>
-.confirmation-container {
-    max-width: 700px;
-    margin: 20px auto;
-    padding: 30px;
-    text-align: center;
-    border: 2px solid #28a745;
-    border-radius: 10px;
-    background-color: #f8f9fa;
-}
-.confirmation-container h2 {
-    color: #28a745;
-}
-.booking-details {
-    text-align: left;
-    margin-top: 30px;
-    padding: 20px;
-    border-top: 1px solid #ddd;
-}
-.booking-details ul {
-    list-style: none;
-    padding: 0;
-}
-.booking-details li {
-    margin-bottom: 12px;
-    font-size: 1.1rem;
-}
-</style>
 
-<div class="confirmation-container">
-    <h2><?php echo h(t('confirm_title')); ?></h2>
-    <p><?php echo h(t('confirm_text_1')); ?></p>
-    <p><?php echo h(t('confirm_text_2')); ?></p>
+<div class="max-w-2xl mx-auto my-12 px-4">
+    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-green-200 dark:border-green-800 overflow-hidden">
+        <div class="bg-green-50 dark:bg-green-900/30 p-8 text-center border-b border-green-100 dark:border-green-800">
+            <span class="material-icons text-6xl text-green-500 mb-4">check_circle</span>
+            <h2 class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2"><?php echo h(t('confirm_title')); ?></h2>
+            <p class="text-gray-600 dark:text-gray-300"><?php echo h(t('confirm_text_1')); ?></p>
+            <p class="text-gray-600 dark:text-gray-300 text-sm mt-1"><?php echo h(t('confirm_text_2')); ?></p>
+        </div>
 
-    <?php if (!empty($booking['booking_number'])): ?>
-        <p><strong><?php echo h(t('confirm_booking_id')); ?>: <span style="font-size: 1.5em; color: #d9534f;"><?php echo h($booking['booking_number']); ?></span></strong></p>
-    <?php else: ?>
-        <p><strong><?php echo h(t('confirm_booking_id')); ?>: <?php echo h($booking['id']); ?></strong></p>
-    <?php endif; ?>
+        <div class="p-8">
+            <div class="text-center mb-8">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1"><?php echo h(t('confirm_booking_id')); ?></p>
+                <p class="text-3xl font-bold text-gray-800 dark:text-white tracking-wider">
+                    <?php if (!empty($booking['booking_number'])): ?>
+                        <?php echo h($booking['booking_number']); ?>
+                    <?php else: ?>
+                        <?php echo h($booking['id']); ?>
+                    <?php endif; ?>
+                </p>
+            </div>
 
-    <div class="booking-details">
-        <h3><?php echo h(t('confirm_summary_title')); ?></h3>
-        <ul>
-            <li><strong><?php echo h(t('form_name')); ?>:</strong> <?php echo h($booking['guest_name']); ?></li>
-            <li><strong><?php echo h(t('booking_info_room')); ?>:</strong> <?php echo h($current_lang === 'en' && !empty($booking['room_name_en']) ? $booking['room_name_en'] : $booking['room_name']); ?> (<?php echo h($current_lang === 'en' && !empty($booking['type_name_en']) ? $booking['type_name_en'] : $booking['type_name']); ?>)</li>
-            <li><strong><?php echo h(t('booking_info_check_in')); ?>:</strong> <?php echo h($booking['check_in_date']); ?></li>
-            <li><strong><?php echo h(t('booking_info_check_out')); ?>:</strong> <?php echo h($booking['check_out_date']); ?></li>
-            <li><strong><?php echo h(t('booking_info_nights')); ?>:</strong> <?php echo h(t('booking_info_nights_count', $nights)); ?></li>
-            <li><strong><?php echo h(t('booking_info_guests')); ?>:</strong> <?php echo h(t('room_capacity_people', $booking['num_guests'])); ?></li>
-            <li><strong><?php echo h(t('booking_info_total_price')); ?>:</strong> ¥<?php echo h(number_format($booking['total_price'])); ?></li>
-        </ul>
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white"><?php echo h(t('confirm_summary_title')); ?></h3>
+                <ul class="space-y-4 text-gray-700 dark:text-gray-300">
+                    <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
+                        <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('form_name')); ?></span>
+                        <span class="w-2/3"><?php echo h($booking['guest_name']); ?></span>
+                    </li>
+                    <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
+                        <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_room')); ?></span>
+                        <span class="w-2/3"><?php echo h($current_lang === 'en' && !empty($booking['room_name_en']) ? $booking['room_name_en'] : $booking['room_name']); ?> <span class="text-sm text-gray-500">(<?php echo h($current_lang === 'en' && !empty($booking['type_name_en']) ? $booking['type_name_en'] : $booking['type_name']); ?>)</span></span>
+                    </li>
+                    <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
+                        <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_check_in')); ?></span>
+                        <span class="w-2/3"><?php echo h($booking['check_in_date']); ?></span>
+                    </li>
+                    <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
+                        <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_check_out')); ?></span>
+                        <span class="w-2/3"><?php echo h($booking['check_out_date']); ?></span>
+                    </li>
+                    <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
+                        <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_nights')); ?></span>
+                        <span class="w-2/3"><?php echo h(t('booking_info_nights_count', $nights)); ?></span>
+                    </li>
+                    <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
+                        <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_guests')); ?></span>
+                        <span class="w-2/3"><?php echo h(t('room_capacity_people', $booking['num_guests'])); ?></span>
+                    </li>
+                    <li class="flex pt-2">
+                        <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_total_price')); ?></span>
+                        <span class="w-2/3 text-xl font-bold text-red-500">¥<?php echo h(number_format($booking['total_price'])); ?></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-gray-800/50 p-6 text-center border-t border-gray-100 dark:border-gray-700">
+            <a href="index.php" class="inline-block bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-md shadow transition-colors duration-200">
+                <?php echo h(t('btn_back_to_top')); ?>
+            </a>
+        </div>
     </div>
-    <p style="margin-top: 30px;">
-        <a href="index.php" class="btn"><?php echo h(t('btn_back_to_top')); ?></a>
-    </p>
 </div>
-
 
 <?php
 require_once 'includes/footer.php';

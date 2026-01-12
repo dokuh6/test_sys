@@ -1,36 +1,78 @@
-<?php require_once 'includes/language.php'; ?>
+<?php
+// Ensure language.php is loaded (handles session_start and DB)
+require_once __DIR__ . '/language.php';
+
+// Default root path if not set
+if (!isset($root_path)) {
+    $root_path = '';
+}
+?>
 <!DOCTYPE html>
-<html lang="<?php echo $current_lang; ?>">
+<html lang="<?php echo h($current_lang); ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo h(t('site_title')); ?></title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title><?php echo h(t('site_title')); ?> - Guesthouse Marusho</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#0f4c81", // Classic Blue
+              "primary-dark": "#0a355c",
+              "background-light": "#f4f4f5", // Zinc 100
+              "background-dark": "#18181b", // Zinc 900
+              "surface-light": "#ffffff",
+              "surface-dark": "#27272a", // Zinc 800
+              "text-light": "#333333",
+              "text-dark": "#e4e4e7", // Zinc 200
+            },
+            fontFamily: {
+              display: ['"Noto Sans JP"', "sans-serif"],
+              sans: ['"Noto Sans JP"', "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+            },
+          },
+        },
+      };
+    </script>
     <style>
-        .lang-switcher { text-align: right; padding: 0 20px 10px; background: #333; color: white; }
-        .lang-switcher a { color: white; margin: 0 5px; }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
     </style>
 </head>
-<body>
-    <header>
-        <div class="lang-switcher">
-            <a href="?lang=ja">日本語</a> | <a href="?lang=en">English</a>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-200 min-h-screen flex flex-col">
+    <div class="bg-gray-800 dark:bg-black text-gray-300 text-sm py-2 px-4">
+        <div class="max-w-6xl mx-auto flex justify-end items-center gap-4">
+            <a class="hover:text-white transition-colors" href="?lang=ja">日本語</a>
+            <span class="text-gray-500">|</span>
+            <a class="hover:text-white transition-colors" href="?lang=en">English</a>
         </div>
-        <h1><a href="index.php"><?php echo h(t('site_title')); ?></a></h1>
-        <nav>
-            <ul>
-                <li><a href="rooms.php"><?php echo h(t('nav_rooms')); ?></a></li>
-                <li><a href="availability.php"><?php echo h(t('nav_availability') ?? '空室カレンダー'); ?></a></li>
+    </div>
+    <header class="bg-primary shadow-lg">
+        <div class="max-w-6xl mx-auto py-6 px-4 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-6 tracking-wider">
+                <a href="<?php echo $root_path; ?>index.php" class="hover:text-white"><?php echo h(t('site_title')); ?></a>
+            </h1>
+            <nav class="flex flex-wrap justify-center gap-6 md:gap-8 text-white/90 font-medium text-sm md:text-base">
+                <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>rooms.php"><?php echo h(t('nav_rooms')); ?></a>
+                <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>availability.php"><?php echo h(t('nav_availability')); ?></a>
+                <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>check_booking.php"><?php echo h(t('nav_check_booking')); ?></a>
                 <?php if (isset($_SESSION['user'])): ?>
-                    <li><?php echo h(t('nav_welcome', $_SESSION['user']['name'])); ?></li>
-                    <li><a href="mypage.php"><?php echo h(t('nav_mypage')); ?></a></li>
-                    <li><a href="logout.php"><?php echo h(t('nav_logout')); ?></a></li>
+                    <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>mypage.php"><?php echo h(t('nav_mypage')); ?></a>
+                    <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>logout.php"><?php echo h(t('nav_logout')); ?></a>
                 <?php else: ?>
-                    <li><a href="check_booking.php"><?php echo h(t('nav_check_booking') ?? '予約確認'); ?></a></li>
-                    <li><a href="login.php"><?php echo h(t('nav_login')); ?></a></li>
-                    <li><a href="register.php"><?php echo h(t('nav_register')); ?></a></li>
+                    <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>login.php"><?php echo h(t('nav_login')); ?></a>
+                    <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>register.php"><?php echo h(t('nav_register')); ?></a>
                 <?php endif; ?>
-            </ul>
-        </nav>
+            </nav>
+        </div>
     </header>
-    <main>
+    <main class="flex-grow py-12 px-4">

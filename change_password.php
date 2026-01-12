@@ -56,39 +56,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-    <h2>パスワード変更</h2>
+<div class="max-w-md mx-auto my-12 bg-surface-light dark:bg-surface-dark p-8 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
+    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">パスワード変更</h2>
 
     <?php if ($message): ?>
-        <p style="color: green; background-color: #dff0d8; padding: 10px; border: 1px solid #d6e9c6;"><?php echo h($message); ?></p>
-        <p><a href="mypage.php">マイページに戻る</a></p>
+        <div class="mb-6 p-4 rounded bg-green-50 text-green-700 border border-green-200 text-center">
+            <p class="mb-4"><?php echo h($message); ?></p>
+            <a href="mypage.php" class="inline-block bg-primary hover:bg-primary-dark text-white font-bold py-2 px-6 rounded shadow transition-colors duration-200">マイページに戻る</a>
+        </div>
     <?php else: ?>
 
         <?php if ($error): ?>
-            <p style="color: red; background-color: #f2dede; padding: 10px; border: 1px solid #ebccd1;"><?php echo h($error); ?></p>
+            <div class="mb-6 p-4 rounded bg-red-50 text-red-700 border border-red-200">
+                <p><?php echo h($error); ?></p>
+            </div>
         <?php endif; ?>
 
-        <form action="change_password.php" method="POST">
+        <form action="change_password.php" method="POST" class="space-y-6">
             <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
 
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="current_password" style="display: block; margin-bottom: 5px;">現在のパスワード</label>
-                <input type="password" id="current_password" name="current_password" required style="width: 100%; padding: 8px;">
+            <div>
+                <label for="current_password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">現在のパスワード</label>
+                <input type="password" id="current_password" name="current_password" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
             </div>
 
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="new_password" style="display: block; margin-bottom: 5px;">新しいパスワード (8文字以上)</label>
-                <input type="password" id="new_password" name="new_password" required style="width: 100%; padding: 8px;">
+            <div>
+                <label for="new_password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">新しいパスワード (8+文字)</label>
+                <input type="password" id="new_password" name="new_password" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
             </div>
 
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="confirm_password" style="display: block; margin-bottom: 5px;">新しいパスワード (確認)</label>
-                <input type="password" id="confirm_password" name="confirm_password" required style="width: 100%; padding: 8px;">
+            <div>
+                <label for="confirm_password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">新しいパスワード (確認)</label>
+                <input type="password" id="confirm_password" name="confirm_password" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
             </div>
 
-            <div style="text-align: right;">
-                <a href="mypage.php" class="btn" style="background-color: #888; margin-right: 10px; text-decoration: none; padding: 8px 12px; color: white; border-radius: 4px;">キャンセル</a>
-                <button type="submit" class="btn" style="padding: 8px 12px; border-radius: 4px;">変更する</button>
+            <div class="flex justify-end gap-4 mt-8">
+                <a href="mypage.php" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 px-4 rounded-md shadow transition-colors duration-200">キャンセル</a>
+                <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-4 rounded-md shadow transition-colors duration-200">変更する</button>
             </div>
         </form>
     <?php endif; ?>
