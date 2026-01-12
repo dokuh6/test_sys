@@ -83,57 +83,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $csrf_token = generate_csrf_token();
 ?>
-<style>
-.form-container {
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; margin-bottom: 5px; }
-.form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-.error-messages { color: red; border: 1px solid red; padding: 15px; margin-bottom: 20px; }
-</style>
 
-<div class="form-container">
-    <h2><?php echo h(t('register_title')); ?></h2>
+<main class="flex-grow flex items-center justify-center py-20 px-4">
+    <div class="w-full max-w-md bg-white dark:bg-[#1a301d] rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-[#223a26]">
+        <h2 class="text-2xl font-bold text-center mb-8 text-[#0d1b10] dark:text-white"><?php echo h(t('register_title')); ?></h2>
 
-    <?php if (!empty($errors)): ?>
-        <div class="error-messages">
-            <?php foreach ($errors as $error): ?>
-                <p><?php echo h($error); ?></p>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
+        <?php if (!empty($errors)): ?>
+            <div class="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-lg p-4 mb-6">
+                <?php foreach ($errors as $error): ?>
+                    <p class="text-red-600 dark:text-red-400 text-sm text-center"><?php echo h($error); ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
 
-    <form action="register.php" method="POST">
-        <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
-        <div class="form-group">
-            <label for="name"><?php echo h(t('form_name')); ?></label>
-            <input type="text" id="name" name="name" value="<?php echo isset($name) ? h($name) : ''; ?>" required>
+        <form action="register.php" method="POST" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
+            <div>
+                <label for="name" class="block text-sm font-bold text-[#0d1b10] dark:text-white mb-2"><?php echo h(t('form_name')); ?></label>
+                <input type="text" id="name" name="name" value="<?php echo isset($name) ? h($name) : ''; ?>" required class="w-full bg-[#f6f8f6] dark:bg-[#102213] border border-gray-200 dark:border-[#2a452e] rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all">
+            </div>
+            <div>
+                <label for="email" class="block text-sm font-bold text-[#0d1b10] dark:text-white mb-2"><?php echo h(t('form_email')); ?></label>
+                <input type="email" id="email" name="email" value="<?php echo isset($email) ? h($email) : ''; ?>" required class="w-full bg-[#f6f8f6] dark:bg-[#102213] border border-gray-200 dark:border-[#2a452e] rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all">
+            </div>
+            <div>
+                <label for="phone" class="block text-sm font-bold text-[#0d1b10] dark:text-white mb-2"><?php echo h(t('form_tel')); ?></label>
+                <input type="text" id="phone" name="phone" value="<?php echo isset($phone) ? h($phone) : ''; ?>" class="w-full bg-[#f6f8f6] dark:bg-[#102213] border border-gray-200 dark:border-[#2a452e] rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all">
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-bold text-[#0d1b10] dark:text-white mb-2"><?php echo h(t('form_password')); ?> (8+ characters)</label>
+                <input type="password" id="password" name="password" required class="w-full bg-[#f6f8f6] dark:bg-[#102213] border border-gray-200 dark:border-[#2a452e] rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all">
+            </div>
+            <div>
+                <label for="password_confirm" class="block text-sm font-bold text-[#0d1b10] dark:text-white mb-2"><?php echo h(t('form_password_confirm')); ?></label>
+                <input type="password" id="password_confirm" name="password_confirm" required class="w-full bg-[#f6f8f6] dark:bg-[#102213] border border-gray-200 dark:border-[#2a452e] rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all">
+            </div>
+            <button type="submit" class="w-full bg-primary hover:bg-opacity-90 text-[#0d1b10] py-3 rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary/20">
+                <?php echo h(t('btn_register')); ?>
+            </button>
+        </form>
+
+        <div class="mt-8 text-center space-y-2">
+            <p class="text-sm text-gray-500">
+                Already have an account? <a href="login.php" class="text-primary font-bold hover:underline"><?php echo h(t('nav_login')); ?></a>
+            </p>
         </div>
-        <div class="form-group">
-            <label for="email"><?php echo h(t('form_email')); ?></label>
-            <input type="email" id="email" name="email" value="<?php echo isset($email) ? h($email) : ''; ?>" required>
-        </div>
-        <div class="form-group">
-            <label for="phone"><?php echo h(t('form_tel')); ?></label>
-            <input type="text" id="phone" name="phone" value="<?php echo isset($phone) ? h($phone) : ''; ?>">
-        </div>
-        <div class="form-group">
-            <label for="password"><?php echo h(t('form_password')); ?> (8+ characters)</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div class="form-group">
-            <label for="password_confirm"><?php echo h(t('form_password_confirm')); ?></label>
-            <input type="password" id="password_confirm" name="password_confirm" required>
-        </div>
-        <button type="submit" class="btn"><?php echo h(t('btn_register')); ?></button>
-    </form>
-</div>
+    </div>
+</main>
 
 <?php
 require_once 'includes/footer.php';
