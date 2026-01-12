@@ -1,6 +1,7 @@
 <?php
 // 共通関数の読み込みは header.php 内の language.php で行われる
 // ヘッダーの読み込み
+$root_path = '';
 require_once 'includes/header.php';
 ?>
 
@@ -12,7 +13,7 @@ require_once 'includes/header.php';
 
 <section id="search-section" style="margin-top: 30px; padding: 20px; background-color: #f9f9f9; border-radius: 5px; text-align: center;">
     <h3 style="margin-top:0;"><?php echo h(t('index_search_title')); ?></h3>
-    <form action="search_results.php" method="GET" style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
+    <form action="booking/search_results.php" method="GET" style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
         <div>
             <label for="check_in_date"><?php echo h(t('form_check_in')); ?>:</label><br>
             <input type="date" id="check_in_date" name="check_in_date" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">

@@ -1,5 +1,6 @@
 <?php
-require_once 'includes/header.php';
+$root_path = '../';
+require_once $root_path . 'includes/header.php';
 
 // ログインチェック
 if (!isset($_SESSION['user'])) {
@@ -61,14 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php if ($message): ?>
         <p style="color: green; background-color: #dff0d8; padding: 10px; border: 1px solid #d6e9c6;"><?php echo h($message); ?></p>
-        <p><a href="mypage.php">マイページに戻る</a></p>
+        <p><a href="<?php echo $root_path; ?>user/">マイページに戻る</a></p>
     <?php else: ?>
 
         <?php if ($error): ?>
             <p style="color: red; background-color: #f2dede; padding: 10px; border: 1px solid #ebccd1;"><?php echo h($error); ?></p>
         <?php endif; ?>
 
-        <form action="change_password.php" method="POST">
+        <form action="" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
 
             <div class="form-group" style="margin-bottom: 15px;">
@@ -87,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div style="text-align: right;">
-                <a href="mypage.php" class="btn" style="background-color: #888; margin-right: 10px; text-decoration: none; padding: 8px 12px; color: white; border-radius: 4px;">キャンセル</a>
+                <a href="<?php echo $root_path; ?>user/" class="btn" style="background-color: #888; margin-right: 10px; text-decoration: none; padding: 8px 12px; color: white; border-radius: 4px;">キャンセル</a>
                 <button type="submit" class="btn" style="padding: 8px 12px; border-radius: 4px;">変更する</button>
             </div>
         </form>
@@ -95,5 +96,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <?php
-require_once 'includes/footer.php';
+require_once $root_path . 'includes/footer.php';
 ?>
