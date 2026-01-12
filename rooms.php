@@ -23,116 +23,100 @@ try {
     $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
-    echo "エラー: " . h($e->getMessage());
+    echo "<div class='text-red-500 p-4'>エラー: " . h($e->getMessage()) . "</div>";
     $rooms = [];
 }
 ?>
 
-<style>
-/* rooms.php専用のスタイル */
-.room-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-.room-card {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    width: 300px;
-    overflow: hidden;
-    background: #fff;
-}
-.room-image {
-    width: 100%;
-    height: 200px;
-    background-color: #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #aaa;
-    overflow: hidden; /* 画像がコンテナからはみ出さないように */
-}
-.room-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 画像のアスペクト比を保ちつつコンテナを埋める */
-}
-.room-info {
-    padding: 15px;
-}
-.room-info h3 {
-    margin-top: 0;
-    font-size: 1.4rem;
-    color: #004080;
-}
-.room-price {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #d9534f;
-    margin-bottom: 10px;
-}
-.room-details ul {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0;
-}
-.room-details li {
-    margin-bottom: 5px;
-}
-</style>
+<main class="max-w-[1280px] mx-auto w-full px-4 lg:px-10 py-12">
 
-<section id="search-section" style="margin-bottom: 30px; padding: 20px; background-color: #f9f9f9; border-radius: 5px; text-align: center;">
-    <h3 style="margin-top:0;"><?php echo h(t('index_search_title')); ?></h3>
-    <form action="search_results.php" method="GET" style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
-        <div>
-            <label for="check_in_date"><?php echo h(t('form_check_in')); ?>:</label><br>
-            <input type="date" id="check_in_date" name="check_in_date" value="<?php echo isset($_GET['check_in_date']) ? h($_GET['check_in_date']) : ''; ?>" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-        </div>
-        <div>
-            <label for="check_out_date"><?php echo h(t('form_check_out')); ?>:</label><br>
-            <input type="date" id="check_out_date" name="check_out_date" value="<?php echo isset($_GET['check_out_date']) ? h($_GET['check_out_date']) : ''; ?>" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-        </div>
-        <div>
-            <label for="num_guests"><?php echo h(t('form_num_guests')); ?>:</label><br>
-            <input type="number" id="num_guests" name="num_guests" min="1" value="<?php echo isset($_GET['num_guests']) ? h($_GET['num_guests']) : '1'; ?>" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 60px;">
-        </div>
-        <div style="align-self: flex-end;">
-            <button type="submit" class="btn"><?php echo h(t('btn_search_again')); ?></button>
-        </div>
-    </form>
-</section>
-
-<h2><?php echo h(t('rooms_list_title')); ?></h2>
-
-<?php if (!empty($rooms)): ?>
-    <div class="room-list">
-        <?php foreach ($rooms as $room): ?>
-            <div class="room-card">
-                <div class="room-image">
-                    <?php if (!empty($room['main_image'])): ?>
-                        <img src="<?php echo h($room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>">
-                    <?php else: ?>
-                        <span><?php echo h(t('no_image_available')); ?></span>
-                    <?php endif; ?>
-                </div>
-                <div class="room-info">
-                    <h3><?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?></h3>
-                    <p class="room-price"><?php echo h(t('room_price_per_night', number_format($room['price']))); ?></p>
-                    <p><?php echo h($current_lang === 'en' && !empty($room['description_en']) ? $room['description_en'] : $room['description']); ?></p>
-                    <ul class="room-details">
-                        <li><strong><?php echo h(t('room_type')); ?>:</strong> <?php echo h($current_lang === 'en' && !empty($room['type_name_en']) ? $room['type_name_en'] : $room['type_name']); ?></li>
-                        <li><strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?></li>
-                    </ul>
-                    <a href="room_detail.php?id=<?php echo h($room['id']); ?>" class="btn"><?php echo h(t('btn_view_details')); ?></a>
-                </div>
+    <!-- Search Section -->
+    <section class="mb-12 bg-white dark:bg-[#1a301d] rounded-2xl shadow-sm border border-gray-100 dark:border-[#223a26] p-8">
+        <h3 class="text-2xl font-bold text-[#0d1b10] dark:text-white mb-6 text-center"><?php echo h(t('index_search_title')); ?></h3>
+        <form action="search_results.php" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+            <div>
+                <label for="check_in_date" class="block text-xs font-bold uppercase text-gray-500 mb-2"><?php echo h(t('form_check_in')); ?></label>
+                <input type="date" id="check_in_date" name="check_in_date" value="<?php echo isset($_GET['check_in_date']) ? h($_GET['check_in_date']) : ''; ?>" required class="w-full bg-background-light dark:bg-[#102213] border-none rounded-lg px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-primary text-[#0d1b10] dark:text-white">
             </div>
-        <?php endforeach; ?>
-    </div>
-<?php else: ?>
-    <p><?php echo h(t('rooms_none_available')); ?></p>
-<?php endif; ?>
+            <div>
+                <label for="check_out_date" class="block text-xs font-bold uppercase text-gray-500 mb-2"><?php echo h(t('form_check_out')); ?></label>
+                <input type="date" id="check_out_date" name="check_out_date" value="<?php echo isset($_GET['check_out_date']) ? h($_GET['check_out_date']) : ''; ?>" required class="w-full bg-background-light dark:bg-[#102213] border-none rounded-lg px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-primary text-[#0d1b10] dark:text-white">
+            </div>
+            <div>
+                <label for="num_guests" class="block text-xs font-bold uppercase text-gray-500 mb-2"><?php echo h(t('form_num_guests')); ?></label>
+                <input type="number" id="num_guests" name="num_guests" min="1" value="<?php echo isset($_GET['num_guests']) ? h($_GET['num_guests']) : '1'; ?>" required class="w-full bg-background-light dark:bg-[#102213] border-none rounded-lg px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-primary text-[#0d1b10] dark:text-white">
+            </div>
+            <div>
+                <button type="submit" class="w-full bg-primary hover:bg-opacity-90 text-[#0d1b10] py-3 rounded-lg font-bold text-sm transition-all shadow-md shadow-primary/20">
+                    <?php echo h(t('btn_search_again')); ?>
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <h2 class="text-3xl font-extrabold text-[#0d1b10] dark:text-white mb-8"><?php echo h(t('rooms_list_title')); ?></h2>
+
+    <?php if (!empty($rooms)): ?>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <?php foreach ($rooms as $room): ?>
+                <?php
+                    // 言語対応
+                    $r_name = ($current_lang === 'en' && !empty($room['name_en'])) ? $room['name_en'] : $room['name'];
+                    $r_desc = ($current_lang === 'en' && !empty($room['description_en'])) ? $room['description_en'] : $room['description'];
+                    $r_capacity = t('room_capacity_people', $room['capacity']);
+                    $r_image = !empty($room['main_image']) ? $room['main_image'] : 'https://via.placeholder.com/800x600?text=No+Image';
+                ?>
+                <!-- Card Template -->
+                <div class="bg-white dark:bg-[#1a301d] rounded-2xl shadow-lg border border-gray-100 dark:border-[#223a26] overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 h-full">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="<?php echo h($r_image); ?>" alt="<?php echo h($r_name); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 right-4 bg-white/90 dark:bg-black/80 px-3 py-1.5 rounded-full text-xs font-bold text-[#0d1b10] dark:text-white backdrop-blur-md shadow-sm">
+                            <?php echo h(t('room_price_per_night', number_format($room['price']))); ?>
+                        </div>
+                    </div>
+
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="text-xl font-bold text-[#0d1b10] dark:text-white mb-2 leading-tight">
+                            <?php echo h($r_name); ?>
+                        </h3>
+
+                        <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            <div class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[18px]">person</span>
+                                <span class="font-medium"><?php echo h($r_capacity); ?></span>
+                            </div>
+                            <!-- Bed info is not in DB explicitly as text, using Type Name -->
+                            <div class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[18px]">bed</span>
+                                <span class="font-medium"><?php echo h(($current_lang === 'en' && !empty($room['type_name_en'])) ? $room['type_name_en'] : $room['type_name']); ?></span>
+                            </div>
+                        </div>
+
+                        <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-6 flex-grow leading-relaxed">
+                            <?php echo h($r_desc); ?>
+                        </p>
+
+                        <div class="mt-auto grid grid-cols-2 gap-3">
+                            <a href="room_detail.php?id=<?php echo h($room['id']); ?>" class="flex items-center justify-center py-3 rounded-xl border border-[#cfe7d3] dark:border-[#2a452e] text-[#0d1b10] dark:text-white font-bold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <?php echo h(t('btn_view_details')); ?>
+                            </a>
+                            <a href="room_detail.php?id=<?php echo h($room['id']); ?>" class="flex items-center justify-center py-3 rounded-xl bg-primary text-[#0d1b10] font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">
+                                <?php echo h(t('btn_proceed_to_booking') ?? 'Reserve'); ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card Template -->
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <div class="flex flex-col items-center justify-center p-12 bg-gray-50 dark:bg-[#1a301d] rounded-2xl border border-gray-100 dark:border-[#223a26]">
+            <span class="material-symbols-outlined text-4xl text-gray-400 mb-4">sentiment_dissatisfied</span>
+            <p class="text-gray-500 font-medium"><?php echo h(t('rooms_none_available')); ?></p>
+        </div>
+    <?php endif; ?>
+
+</main>
 
 <?php
 require_once 'includes/footer.php';
