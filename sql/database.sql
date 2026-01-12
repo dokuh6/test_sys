@@ -51,15 +51,32 @@ CREATE TABLE `rooms` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
+-- テーブル構造: `room_images`
+-- 部屋の画像情報
+--
+CREATE TABLE `room_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `room_id` int(11) NOT NULL COMMENT '部屋ID',
+  `image_path` varchar(255) NOT NULL COMMENT '画像パス',
+  `is_main` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'メイン画像フラグ (1: メイン, 0: その他)',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `room_id` (`room_id`),
+  CONSTRAINT `room_images_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
 -- テーブル構造: `bookings`
 -- 予約情報
 --
 CREATE TABLE `bookings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_number` varchar(20) DEFAULT NULL COMMENT '予約番号 (YYYYMMDD-XXXXXXXX)',
   `booking_token` varchar(64) DEFAULT NULL COMMENT '予約トークン',
   `user_id` int(11) DEFAULT NULL COMMENT '顧客ID (ゲスト予約の場合はNULL)',
   `guest_name` varchar(255) DEFAULT NULL COMMENT 'ゲストの氏名',
   `guest_email` varchar(255) DEFAULT NULL COMMENT 'ゲストのメールアドレス',
+  `guest_phone` varchar(20) DEFAULT NULL COMMENT 'ゲスト電話番号',
   `check_in_date` date NOT NULL COMMENT 'チェックイン日',
   `check_out_date` date NOT NULL COMMENT 'チェックアウト日',
   `num_guests` int(11) NOT NULL COMMENT '宿泊人数',
@@ -70,6 +87,7 @@ CREATE TABLE `bookings` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `idx_booking_token` (`booking_token`),
+  KEY `idx_booking_number` (`booking_number`),
   CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -113,9 +131,6 @@ INSERT INTO `users` (`name`, `email`, `password`, `role`, `notes`) VALUES
 -- 注意: 上記パスワードはダミーです。実際の開発時には必ず強力なパスワードに置き換えてください。
 -- 'password'をハッシュ化したものを設定してください。例: password_hash('password', PASSWORD_DEFAULT)
 
--- 既存のシステムへのカラム追加（必要に応じて実行）
--- ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(20) DEFAULT NULL COMMENT '電話番号' AFTER `email`;
--- ALTER TABLE `users` ADD COLUMN `notes` TEXT DEFAULT NULL COMMENT '特記事項' AFTER `role`;
 -- テーブル構造: `email_logs`
 -- 送信メール履歴
 --
