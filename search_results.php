@@ -58,8 +58,11 @@ if (empty($errors)) {
 
         if (!empty($booked_room_ids)) {
             // 予約済みの部屋を除外する
-            $placeholders = implode(',', array_fill(0, count($booked_room_ids), '?'));
-            $sql_available .= " AND r.id NOT IN ($placeholders)";
+            $exclude_placeholders = [];
+            foreach ($booked_room_ids as $k => $id) {
+                $exclude_placeholders[] = ":exclude_id_" . $k;
+            }
+            $sql_available .= " AND r.id NOT IN (" . implode(',', $exclude_placeholders) . ")";
         }
         $sql_available .= " ORDER BY r.price ASC";
 
@@ -68,7 +71,7 @@ if (empty($errors)) {
 
         if (!empty($booked_room_ids)) {
             foreach ($booked_room_ids as $k => $id) {
-                $stmt_available->bindValue(($k + 1), $id, PDO::PARAM_INT);
+                $stmt_available->bindValue(":exclude_id_" . $k, $id, PDO::PARAM_INT);
             }
         }
 
