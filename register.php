@@ -1,6 +1,5 @@
 <?php
-$root_path = '../';
-require_once $root_path . 'includes/header.php';
+require_once 'includes/header.php';
 
 $errors = [];
 $success_message = '';
@@ -110,7 +109,7 @@ $csrf_token = generate_csrf_token();
         </div>
     <?php endif; ?>
 
-    <form action="" method="POST">
+    <form action="register.php" method="POST">
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <div class="form-group">
             <label for="name"><?php echo h(t('form_name')); ?></label>
@@ -137,5 +136,5 @@ $csrf_token = generate_csrf_token();
 </div>
 
 <?php
-require_once $root_path . 'includes/footer.php';
+require_once 'includes/footer.php';
 ?>

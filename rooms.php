@@ -1,14 +1,9 @@
 <?php
-$root_path = '../';
-require_once $root_path . 'includes/header.php';
-
-// 部屋情報の取得
-$check_in = filter_input(INPUT_GET, 'check_in_date');
-$check_out = filter_input(INPUT_GET, 'check_out_date');
-$num_guests = filter_input(INPUT_GET, 'num_guests', FILTER_VALIDATE_INT);
+// db_connect and functions are loaded via language.php in header
+require_once 'includes/header.php';
 
 try {
-    // 部屋一覧の取得
+    // 部屋タイプと結合し、各部屋のメイン画像も取得するSQL
     $sql = "SELECT
                 r.id,
                 r.name,
@@ -21,45 +16,20 @@ try {
                 rt.description_en,
                 (SELECT image_path FROM room_images WHERE room_id = r.id AND is_main = 1 LIMIT 1) AS main_image
             FROM rooms AS r
-            JOIN room_types AS rt ON r.room_type_id = rt.id";
+            JOIN room_types AS rt ON r.room_type_id = rt.id
+            ORDER BY r.price ASC";
 
-    // 検索条件がある場合
-    if ($check_in && $check_out && $num_guests) {
-         // 簡単なキャパシティチェックのみ（本来は空室チェックも必要だがここでは簡略化、または検索結果ページへ飛ばす）
-         // 検索結果ページへ飛ばすのが自然だが、ここでは一覧表示
-         // なので、WHERE句でフィルタ
-         $sql .= " WHERE rt.capacity >= :num_guests";
-    }
-
-    $sql .= " ORDER BY r.price ASC";
-
-    $stmt = $dbh->prepare($sql);
-    if ($check_in && $check_out && $num_guests) {
-        $stmt->bindParam(':num_guests', $num_guests, PDO::PARAM_INT);
-    }
-    $stmt->execute();
+    $stmt = $dbh->query($sql);
     $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
+    echo "エラー: " . h($e->getMessage());
     $rooms = [];
-    error_log("Failed to fetch rooms: " . $e->getMessage());
 }
 ?>
 
 <style>
-.search-container {
-    background-color: #e9ecef;
-    padding: 20px;
-    border-radius: 5px;
-    margin-bottom: 30px;
-}
-.search-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: center;
-    justify-content: center;
-}
+/* rooms.php専用のスタイル */
 .room-list {
     display: flex;
     flex-wrap: wrap;
@@ -73,8 +43,6 @@ try {
     width: 300px;
     overflow: hidden;
     background: #fff;
-    display: flex;
-    flex-direction: column;
 }
 .room-image {
     width: 100%;
@@ -84,17 +52,15 @@ try {
     align-items: center;
     justify-content: center;
     color: #aaa;
+    overflow: hidden; /* 画像がコンテナからはみ出さないように */
 }
 .room-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* 画像のアスペクト比を保ちつつコンテナを埋める */
 }
 .room-info {
     padding: 15px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
 }
 .room-info h3 {
     margin-top: 0;
@@ -115,24 +81,11 @@ try {
 .room-details li {
     margin-bottom: 5px;
 }
-.btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    text-align: center;
-    margin-top: auto;
-}
-.btn:hover {
-    background-color: #0056b3;
-}
 </style>
 
-<section class="search-container">
-    <h2><?php echo h(t('search_title')); ?></h2>
-    <form action="<?php echo $root_path; ?>booking/search_results.php" method="GET" class="search-form">
+<section id="search-section" style="margin-bottom: 30px; padding: 20px; background-color: #f9f9f9; border-radius: 5px; text-align: center;">
+    <h3 style="margin-top:0;"><?php echo h(t('index_search_title')); ?></h3>
+    <form action="search_results.php" method="GET" style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
         <div>
             <label for="check_in_date"><?php echo h(t('form_check_in')); ?>:</label><br>
             <input type="date" id="check_in_date" name="check_in_date" value="<?php echo isset($_GET['check_in_date']) ? h($_GET['check_in_date']) : ''; ?>" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
@@ -159,7 +112,7 @@ try {
             <div class="room-card">
                 <div class="room-image">
                     <?php if (!empty($room['main_image'])): ?>
-                        <img src="<?php echo h($root_path . $room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>">
+                        <img src="<?php echo h($room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>">
                     <?php else: ?>
                         <span><?php echo h(t('no_image_available')); ?></span>
                     <?php endif; ?>
@@ -182,5 +135,5 @@ try {
 <?php endif; ?>
 
 <?php
-require_once $root_path . 'includes/footer.php';
+require_once 'includes/footer.php';
 ?>

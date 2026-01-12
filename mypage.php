@@ -1,12 +1,11 @@
 <?php
-$root_path = '../';
-require_once $root_path . 'includes/header.php';
+require_once 'includes/header.php';
 $csrf_token = generate_csrf_token();
 
 // ログインチェック
 if (!isset($_SESSION['user'])) {
     $_SESSION['error_message'] = "マイページを閲覧するにはログインが必要です。";
-    header('Location: ' . $root_path . 'auth/login.php');
+    header('Location: login.php');
     exit();
 }
 
@@ -14,13 +13,6 @@ $user_id = $_SESSION['user']['id'];
 
 // ユーザーの予約履歴を取得
 try {
-    // 予約時にuser_idを保存するように修正したので、user_idで検索する
-    // 古いデータでuser_idがない場合はメールアドレスで検索する（念のためOR条件にするか、移行期間中として両方見る）
-    // しかし、security的にはuser_idのみが望ましい。
-    // ここでは、user_idがある場合はuser_idで、なければemailで... というのはSQLで書くのが少し面倒だが、
-    // user_idがNULLのレコードも拾いたいなら `(user_id = :uid OR (user_id IS NULL AND guest_email = :email))` のようにできる。
-    // 今回はシンプルに user_id で検索する（修正方針に従う）
-
     $sql = "SELECT
                 b.id,
                 b.booking_number,
@@ -99,7 +91,7 @@ try {
     <p><?php echo h(t('mypage_welcome', $_SESSION['user']['name'])); ?></p>
 
     <div style="margin: 10px 0;">
-        <a href="<?php echo $root_path; ?>auth/change_password.php" class="btn" style="padding: 5px 10px; font-size: 0.9em;">パスワード変更</a>
+        <a href="change_password.php" class="btn" style="padding: 5px 10px; font-size: 0.9em;">パスワード変更</a>
     </div>
 
     <hr>
@@ -143,7 +135,7 @@ try {
                         </td>
                         <td>
                             <?php if ($booking['status'] === 'confirmed'): ?>
-                                <form action="<?php echo $root_path; ?>booking/cancel_booking.php" method="POST" style="display:inline;">
+                                <form action="cancel_booking.php" method="POST" style="display:inline;">
                                     <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
                                     <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
                                     <button type="submit" class="link-style-button" onclick="return confirm('本当にこの予約をキャンセルしますか？');">
@@ -160,5 +152,5 @@ try {
 </div>
 
 <?php
-require_once $root_path . 'includes/footer.php';
+require_once 'includes/footer.php';
 ?>
