@@ -117,5 +117,8 @@
     "cancel_confirm_title": "Confirm Cancellation",
     "cancel_confirm_text": "Are you sure you want to cancel this booking? This action cannot be undone.",
     "btn_close": "Close",
-    "btn_execute_cancel": "Cancel Booking"
+    "btn_execute_cancel": "Cancel Booking",
+    "cancelled_title": "Reservation Cancelled",
+    "cancelled_text_1": "This reservation has been cancelled.",
+    "cancelled_text_2": "Please check the details below."
 }

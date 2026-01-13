@@ -117,5 +117,8 @@
     "cancel_confirm_title": "予約キャンセルの確認",
     "cancel_confirm_text": "本当にこの予約をキャンセルしますか？この操作は取り消せません。",
     "btn_close": "閉じる",
-    "btn_execute_cancel": "キャンセルする"
+    "btn_execute_cancel": "キャンセルする",
+    "cancelled_title": "予約はキャンセルされました",
+    "cancelled_text_1": "この予約はキャンセル済みです。",
+    "cancelled_text_2": "詳細は下記をご確認ください。"
 }

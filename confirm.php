@@ -151,13 +151,22 @@ $nights = $datetime1->diff($datetime2)->days;
 ?>
 
 <div class="max-w-2xl mx-auto my-12 px-4">
-    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-green-200 dark:border-green-800 overflow-hidden">
-        <div class="bg-green-50 dark:bg-green-900/30 p-8 text-center border-b border-green-100 dark:border-green-800">
-            <span class="material-icons text-6xl text-green-500 mb-4">check_circle</span>
-            <h2 class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2"><?php echo h(t('confirm_title')); ?></h2>
-            <p class="text-gray-600 dark:text-gray-300"><?php echo h(t('confirm_text_1')); ?></p>
-            <p class="text-gray-600 dark:text-gray-300 text-sm mt-1"><?php echo h(t('confirm_text_2')); ?></p>
-        </div>
+    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <?php if ($booking['status'] === 'cancelled'): ?>
+            <div class="bg-gray-100 dark:bg-gray-800 p-8 text-center border-b border-gray-200 dark:border-gray-700">
+                <span class="material-icons text-6xl text-gray-500 mb-4">cancel</span>
+                <h2 class="text-3xl font-bold text-gray-600 dark:text-gray-400 mb-2"><?php echo h(t('cancelled_title')); ?></h2>
+                <p class="text-gray-600 dark:text-gray-300"><?php echo h(t('cancelled_text_1')); ?></p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm mt-1"><?php echo h(t('cancelled_text_2')); ?></p>
+            </div>
+        <?php else: ?>
+            <div class="bg-green-50 dark:bg-green-900/30 p-8 text-center border-b border-green-100 dark:border-green-800">
+                <span class="material-icons text-6xl text-green-500 mb-4">check_circle</span>
+                <h2 class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2"><?php echo h(t('confirm_title')); ?></h2>
+                <p class="text-gray-600 dark:text-gray-300"><?php echo h(t('confirm_text_1')); ?></p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm mt-1"><?php echo h(t('confirm_text_2')); ?></p>
+            </div>
+        <?php endif; ?>
 
         <div class="p-8">
             <div class="text-center mb-8">
