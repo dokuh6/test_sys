@@ -55,6 +55,7 @@ try {
                 b.check_out_date,
                 b.num_guests,
                 b.total_price,
+                b.status,
                 r.name as room_name,
                 r.name_en as room_name_en,
                 rt.name as type_name,
