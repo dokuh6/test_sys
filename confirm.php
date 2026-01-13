@@ -1,6 +1,12 @@
 <?php
 require_once 'includes/init.php';
 
+// Initialize variables
+$errors = [];
+$booking = null;
+$can_view = false;
+$nights = 0;
+
 // 1. URLから情報を取得
 $booking_id = filter_input(INPUT_GET, 'booking_id', FILTER_VALIDATE_INT);
 $token = filter_input(INPUT_GET, 'token');
@@ -15,7 +21,6 @@ if (!$booking_id && !$token && !$booking_number) {
 
 // セッション開始 (init.phpで処理済み)
 
-$can_view = false;
 $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
 
 // トークンがある場合は、トークンで予約を特定
@@ -40,105 +45,106 @@ if ($token) {
         // チェックロジックはデータ取得後
     }
     else {
-        die("このページを表示する権限がありません。");
+        $errors[] = "このページを表示する権限がありません。";
     }
 }
 
-// 2. データベースから予約情報を取得
-try {
-    $sql = "SELECT
-                b.id,
-                b.booking_number,
-                b.user_id,
-                b.guest_name,
-                b.check_in_date,
-                b.check_out_date,
-                b.num_guests,
-                b.total_price,
-                b.status,
-                r.name as room_name,
-                r.name_en as room_name_en,
-                rt.name as type_name,
-                rt.name_en as type_name_en
-            FROM bookings b
-            JOIN booking_rooms br ON b.id = br.booking_id
-            JOIN rooms r ON br.room_id = r.id
-            JOIN room_types rt ON r.room_type_id = rt.id";
+// 2. データベースから予約情報を取得 (権限エラーがない場合のみ)
+if (empty($errors)) {
+    try {
+        $sql = "SELECT
+                    b.id,
+                    b.booking_number,
+                    b.user_id,
+                    b.guest_name,
+                    b.check_in_date,
+                    b.check_out_date,
+                    b.num_guests,
+                    b.total_price,
+                    b.status,
+                    r.name as room_name,
+                    r.name_en as room_name_en,
+                    rt.name as type_name,
+                    rt.name_en as type_name_en
+                FROM bookings b
+                JOIN booking_rooms br ON b.id = br.booking_id
+                JOIN rooms r ON br.room_id = r.id
+                JOIN room_types rt ON r.room_type_id = rt.id";
 
-    if ($search_by_token) {
-        $sql .= " WHERE b.booking_token = :token";
-    } elseif (isset($search_by_number_email) && $search_by_number_email) {
-        $sql .= " WHERE b.booking_number = :booking_number AND b.guest_email = :email";
-    } else {
-        // booking_id指定、または booking_numberのみ（詳細表示不可）
-        if ($booking_number) {
-             $sql .= " WHERE b.booking_number = :booking_number";
-        } else {
-             $sql .= " WHERE b.id = :booking_id";
-        }
-    }
-
-    $stmt = $dbh->prepare($sql);
-
-    if ($search_by_token) {
-        $stmt->bindParam(':token', $token, PDO::PARAM_STR);
-    } elseif (isset($search_by_number_email) && $search_by_number_email) {
-        $stmt->bindParam(':booking_number', $booking_number, PDO::PARAM_STR);
-        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-    } else {
-        if ($booking_number) {
-            $stmt->bindParam(':booking_number', $booking_number, PDO::PARAM_STR);
-        } else {
-            $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
-        }
-    }
-
-    $stmt->execute();
-    $booking = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // 予約が見つかった場合の権限チェック (トークン利用時はトークン合致でOKとする = 鍵を持ってる)
-    if ($booking) {
         if ($search_by_token) {
-            $can_view = true;
+            $sql .= " WHERE b.booking_token = :token";
         } elseif (isset($search_by_number_email) && $search_by_number_email) {
-            // メールアドレスと予約番号が一致した場合
-            $can_view = true;
+            $sql .= " WHERE b.booking_number = :booking_number AND b.guest_email = :email";
         } else {
-            // ID指定の場合の所有者チェック
-            if (isset($user_id)) {
-                if ($booking['user_id'] == $user_id) {
-                    $can_view = true;
-                } elseif (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 1) {
-                    $can_view = true; // 管理者
+            // booking_id指定、または booking_numberのみ（詳細表示不可）
+            if ($booking_number) {
+                 $sql .= " WHERE b.booking_number = :booking_number";
+            } else {
+                 $sql .= " WHERE b.id = :booking_id";
+            }
+        }
+
+        $stmt = $dbh->prepare($sql);
+
+        if ($search_by_token) {
+            $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+        } elseif (isset($search_by_number_email) && $search_by_number_email) {
+            $stmt->bindParam(':booking_number', $booking_number, PDO::PARAM_STR);
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        } else {
+            if ($booking_number) {
+                $stmt->bindParam(':booking_number', $booking_number, PDO::PARAM_STR);
+            } else {
+                $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
+            }
+        }
+
+        $stmt->execute();
+        $booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // 予約が見つかった場合の権限チェック (トークン利用時はトークン合致でOKとする = 鍵を持ってる)
+        if ($booking) {
+            if ($search_by_token) {
+                $can_view = true;
+            } elseif (isset($search_by_number_email) && $search_by_number_email) {
+                // メールアドレスと予約番号が一致した場合
+                $can_view = true;
+            } else {
+                // ID指定の場合の所有者チェック
+                if (isset($user_id)) {
+                    if ($booking['user_id'] == $user_id) {
+                        $can_view = true;
+                    } elseif (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 1) {
+                        $can_view = true; // 管理者
+                    }
                 }
             }
         }
-    }
 
-    if (!$can_view) {
-         die("このページを表示する権限がありません。");
-    }
+        if (!$can_view && empty($errors)) {
+             $errors[] = "このページを表示する権限がありません。";
+        }
 
-} catch (PDOException $e) {
-    die("データベースエラー: " . h($e->getMessage()));
+    } catch (PDOException $e) {
+        $errors[] = "データベースエラー: " . h($e->getMessage());
+    }
 }
 
 // ここからHTML出力
 require_once 'includes/header.php';
 
-// 予約が見つからない場合
-if (!$booking) {
-    // header.php is already included, so we can't send 404 header easily without output buffering logic,
-    // but typically we can just show the error content.
-    // If exact 404 status is needed, it should be done before header.php.
-    // However, the previous logic did: header("HTTP/1.0 404 Not Found"); echo ...; require footer; exit;
-    // Since header.php outputs HTML, sending a header now might fail if output buffering isn't catching it.
-    // For safety in this refactor, I will assume buffering or accept that the status code might not be set if headers sent.
-    // Ideally, we check $booking before including header.php, but $booking fetch needs DB which needs init.php.
-    // The main validation redirect (missing params) is handled before header.php.
-
+// エラーがある場合
+if (!empty($errors) || !$booking) {
     echo "<div class='max-w-4xl mx-auto my-12 p-8 bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg text-center'>";
-    echo "<h2 class='text-2xl font-bold text-gray-800 dark:text-white mb-4'>" . h(t('confirm_not_found')) . "</h2>";
+    if (!empty($errors)) {
+         echo "<div class='bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg mb-8 text-center'>";
+         foreach ($errors as $error) {
+             echo "<p class='mb-2 last:mb-0'>" . h($error) . "</p>";
+         }
+         echo "</div>";
+    } else {
+        echo "<h2 class='text-2xl font-bold text-gray-800 dark:text-white mb-4'>" . h(t('confirm_not_found')) . "</h2>";
+    }
     echo "<a href='index.php' class='inline-block bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-6 rounded-md shadow transition-colors duration-200'>" . h(t('btn_back_to_top')) . "</a>";
     echo "</div>";
     require_once 'includes/footer.php';
