@@ -1,15 +1,9 @@
 <?php
-// Always load base functions and db connection
-require_once __DIR__ . '/functions.php';
-require_once __DIR__ . '/db_connect.php';
+// Note: This file should be included via includes/init.php which handles session_start()
 
-// 設定定数
+// 設定定数 (Ensure this is defined if not already)
 if (!defined('ADMIN_EMAIL')) {
     define('ADMIN_EMAIL', 'admin@example.com');
-}
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
 }
 
 // 1. 言語の決定ロジック
@@ -52,15 +46,14 @@ if (file_exists($lang_file_path)) {
 // 3. 翻訳ヘルパー関数の定義
 // この関数はグローバルスコープで定義されるため、どこからでも呼び出せる
 // 引数を可変長にして、sprintfに対応
-function t($key, ...$args) {
-    global $lang_text;
-    $string = isset($lang_text[$key]) ? $lang_text[$key] : $key;
-    if (!empty($args)) {
-        return vsprintf($string, $args);
+if (!function_exists('t')) {
+    function t($key, ...$args) {
+        global $lang_text;
+        $string = isset($lang_text[$key]) ? $lang_text[$key] : $key;
+        if (!empty($args)) {
+            return vsprintf($string, $args);
+        }
+        return $string;
     }
-    return $string;
 }
-
-// このファイルを各ページの先頭で読み込むことで、$lang_text と t() が利用可能になる
-// 例: require_once 'includes/language.php';
 ?>

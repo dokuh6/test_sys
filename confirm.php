@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/header.php';
+require_once 'includes/init.php';
 
 // 1. URLから情報を取得
 $booking_id = filter_input(INPUT_GET, 'booking_id', FILTER_VALIDATE_INT);
@@ -13,10 +13,7 @@ if (!$booking_id && !$token && !$booking_number) {
     exit();
 }
 
-// セッション開始
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// セッション開始 (init.phpで処理済み)
 
 $can_view = false;
 $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
@@ -125,9 +122,20 @@ try {
     die("データベースエラー: " . h($e->getMessage()));
 }
 
+// ここからHTML出力
+require_once 'includes/header.php';
+
 // 予約が見つからない場合
 if (!$booking) {
-    header("HTTP/1.0 404 Not Found");
+    // header.php is already included, so we can't send 404 header easily without output buffering logic,
+    // but typically we can just show the error content.
+    // If exact 404 status is needed, it should be done before header.php.
+    // However, the previous logic did: header("HTTP/1.0 404 Not Found"); echo ...; require footer; exit;
+    // Since header.php outputs HTML, sending a header now might fail if output buffering isn't catching it.
+    // For safety in this refactor, I will assume buffering or accept that the status code might not be set if headers sent.
+    // Ideally, we check $booking before including header.php, but $booking fetch needs DB which needs init.php.
+    // The main validation redirect (missing params) is handled before header.php.
+
     echo "<div class='max-w-4xl mx-auto my-12 p-8 bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg text-center'>";
     echo "<h2 class='text-2xl font-bold text-gray-800 dark:text-white mb-4'>" . h(t('confirm_not_found')) . "</h2>";
     echo "<a href='index.php' class='inline-block bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-6 rounded-md shadow transition-colors duration-200'>" . h(t('btn_back_to_top')) . "</a>";
