@@ -112,5 +112,13 @@
     "error_all_fields_required": "Please enter all dates and the number of guests.",
     "error_checkout_after_checkin": "The check-out date must be after the check-in date.",
     "error_checkin_not_in_past": "The check-in date cannot be in the past.",
-    "error_guests_positive": "The number of guests must be at least 1."
+    "error_guests_positive": "The number of guests must be at least 1.",
+    "btn_cancel_booking": "Cancel Booking",
+    "cancel_confirm_title": "Confirm Cancellation",
+    "cancel_confirm_text": "Are you sure you want to cancel this booking? This action cannot be undone.",
+    "btn_close": "Close",
+    "btn_execute_cancel": "Cancel Booking",
+    "cancelled_title": "Reservation Cancelled",
+    "cancelled_text_1": "This reservation has been cancelled.",
+    "cancelled_text_2": "Please check the details below."
 }

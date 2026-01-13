@@ -112,5 +112,13 @@
     "error_all_fields_required": "すべての日付と人数を入力してください。",
     "error_checkout_after_checkin": "チェックアウト日はチェックイン日より後の日付を選択してください。",
     "error_checkin_not_in_past": "チェックイン日は本日以降の日付を選択してください。",
-    "error_guests_positive": "人数は1名以上を選択してください。"
+    "error_guests_positive": "人数は1名以上を選択してください。",
+    "btn_cancel_booking": "予約をキャンセルする",
+    "cancel_confirm_title": "予約キャンセルの確認",
+    "cancel_confirm_text": "本当にこの予約をキャンセルしますか？この操作は取り消せません。",
+    "btn_close": "閉じる",
+    "btn_execute_cancel": "キャンセルする",
+    "cancelled_title": "予約はキャンセルされました",
+    "cancelled_text_1": "この予約はキャンセル済みです。",
+    "cancelled_text_2": "詳細は下記をご確認ください。"
 }

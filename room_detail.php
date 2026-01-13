@@ -149,6 +149,18 @@ if (!$room) {
                         <input type="number" id="num_guests" name="num_guests" min="1" max="<?php echo h($room['capacity']); ?>" value="1" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
                     </div>
 
+                    <!-- Dynamic Price Display -->
+                    <div id="price-calculation-result" class="hidden p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_nights_count', '<span id="total-nights">0</span>')); ?></span>
+                            <span class="text-xs text-gray-400">× ¥<?php echo h(number_format($room['price'])); ?></span>
+                        </div>
+                        <div class="flex justify-between items-end border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+                            <span class="font-bold text-gray-700 dark:text-gray-200">Total</span>
+                            <span class="text-2xl font-bold text-primary dark:text-blue-400">¥<span id="total-price">0</span></span>
+                        </div>
+                    </div>
+
                     <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md shadow transition-colors duration-200 flex items-center justify-center gap-2 mt-4">
                         <?php echo h(t('btn_proceed_to_booking')); ?>
                         <span class="material-icons text-sm">arrow_forward</span>
@@ -204,9 +216,49 @@ if (!$room) {
 
                 checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 checkInInput.focus();
+
+                // Trigger change event to update price
+                checkInInput.dispatchEvent(new Event('change'));
+                checkOutInput.dispatchEvent(new Event('change'));
             }
         });
         calendar.render();
+
+        // Dynamic Price Calculation Script
+        const pricePerNight = <?php echo (int)$room['price']; ?>;
+        const checkInInput = document.getElementById('check_in_date');
+        const checkOutInput = document.getElementById('check_out_date');
+        const resultDiv = document.getElementById('price-calculation-result');
+        const totalNightsSpan = document.getElementById('total-nights');
+        const totalPriceSpan = document.getElementById('total-price');
+
+        function updatePrice() {
+            const checkInVal = checkInInput.value;
+            const checkOutVal = checkOutInput.value;
+
+            if (checkInVal && checkOutVal) {
+                const checkIn = new Date(checkInVal);
+                const checkOut = new Date(checkOutVal);
+
+                if (checkOut > checkIn) {
+                    const diffTime = Math.abs(checkOut - checkIn);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    const total = diffDays * pricePerNight;
+
+                    if (totalNightsSpan) totalNightsSpan.textContent = diffDays;
+                    if (totalPriceSpan) totalPriceSpan.textContent = total.toLocaleString();
+                    if (resultDiv) resultDiv.classList.remove('hidden');
+                } else {
+                    if (resultDiv) resultDiv.classList.add('hidden');
+                }
+            } else {
+                if (resultDiv) resultDiv.classList.add('hidden');
+            }
+        }
+
+        checkInInput.addEventListener('change', updatePrice);
+        checkOutInput.addEventListener('change', updatePrice);
     });
 </script>
 

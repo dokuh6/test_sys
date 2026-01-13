@@ -55,6 +55,7 @@ try {
                 b.check_out_date,
                 b.num_guests,
                 b.total_price,
+                b.status,
                 r.name as room_name,
                 r.name_en as room_name_en,
                 rt.name as type_name,
@@ -150,13 +151,22 @@ $nights = $datetime1->diff($datetime2)->days;
 ?>
 
 <div class="max-w-2xl mx-auto my-12 px-4">
-    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-green-200 dark:border-green-800 overflow-hidden">
-        <div class="bg-green-50 dark:bg-green-900/30 p-8 text-center border-b border-green-100 dark:border-green-800">
-            <span class="material-icons text-6xl text-green-500 mb-4">check_circle</span>
-            <h2 class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2"><?php echo h(t('confirm_title')); ?></h2>
-            <p class="text-gray-600 dark:text-gray-300"><?php echo h(t('confirm_text_1')); ?></p>
-            <p class="text-gray-600 dark:text-gray-300 text-sm mt-1"><?php echo h(t('confirm_text_2')); ?></p>
-        </div>
+    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <?php if ($booking['status'] === 'cancelled'): ?>
+            <div class="bg-gray-100 dark:bg-gray-800 p-8 text-center border-b border-gray-200 dark:border-gray-700">
+                <span class="material-icons text-6xl text-gray-500 mb-4">cancel</span>
+                <h2 class="text-3xl font-bold text-gray-600 dark:text-gray-400 mb-2"><?php echo h(t('cancelled_title')); ?></h2>
+                <p class="text-gray-600 dark:text-gray-300"><?php echo h(t('cancelled_text_1')); ?></p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm mt-1"><?php echo h(t('cancelled_text_2')); ?></p>
+            </div>
+        <?php else: ?>
+            <div class="bg-green-50 dark:bg-green-900/30 p-8 text-center border-b border-green-100 dark:border-green-800">
+                <span class="material-icons text-6xl text-green-500 mb-4">check_circle</span>
+                <h2 class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2"><?php echo h(t('confirm_title')); ?></h2>
+                <p class="text-gray-600 dark:text-gray-300"><?php echo h(t('confirm_text_1')); ?></p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm mt-1"><?php echo h(t('confirm_text_2')); ?></p>
+            </div>
+        <?php endif; ?>
 
         <div class="p-8">
             <div class="text-center mb-8">
@@ -209,7 +219,46 @@ $nights = $datetime1->diff($datetime2)->days;
             <a href="index.php" class="inline-block bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-md shadow transition-colors duration-200">
                 <?php echo h(t('btn_back_to_top')); ?>
             </a>
+
+            <?php if (isset($booking['status']) && $booking['status'] === 'confirmed'): ?>
+                <div class="mt-6">
+                    <button onclick="document.getElementById('cancel-modal').classList.remove('hidden')" class="text-red-500 hover:text-red-700 underline text-sm">
+                        <?php echo h(t('btn_cancel_booking') ?? '予約をキャンセルする'); ?>
+                    </button>
+                </div>
+            <?php endif; ?>
         </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+<div id="cancel-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+        <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white"><?php echo h(t('cancel_confirm_title') ?? '予約キャンセルの確認'); ?></h3>
+        <p class="mb-6 text-gray-600 dark:text-gray-300"><?php echo h(t('cancel_confirm_text') ?? '本当にこの予約をキャンセルしますか？この操作は取り消せません。'); ?></p>
+
+        <form action="cancel_booking.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo h(generate_csrf_token()); ?>">
+            <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
+            <?php if ($token): ?>
+                <input type="hidden" name="token" value="<?php echo h($token); ?>">
+            <?php endif; ?>
+            <?php if ($booking_number): ?>
+                <input type="hidden" name="booking_number" value="<?php echo h($booking_number); ?>">
+            <?php endif; ?>
+            <?php if ($email): ?>
+                <input type="hidden" name="email" value="<?php echo h($email); ?>">
+            <?php endif; ?>
+
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('cancel-modal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded">
+                    <?php echo h(t('btn_close') ?? '閉じる'); ?>
+                </button>
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    <?php echo h(t('btn_execute_cancel') ?? 'キャンセルする'); ?>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
