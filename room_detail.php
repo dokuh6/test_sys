@@ -175,6 +175,7 @@ if (!$room) {
             initialView: 'dayGridMonth',
             locale: '<?php echo $current_lang ?? "ja"; ?>',
             selectable: true,
+            selectOverlap: false,
             selectMirror: true,
             headerToolbar: {
                 left: 'prev,next',

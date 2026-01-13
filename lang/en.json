@@ -54,6 +54,7 @@
     "room_detail_not_found": "The requested room was not found.",
     "room_detail_book_form_title": "Book From Here",
     "room_detail_book_form_text": "Select dates to check availability and proceed with your booking.",
+    "availability_calendar_title": "Availability",
 
     "check_booking_title": "Check Booking",
     "check_booking_desc": "You can check your booking details by entering your booking number and email address.",
