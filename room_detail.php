@@ -152,7 +152,7 @@ if (!$room) {
                     <!-- Dynamic Price Display -->
                     <div id="price-calculation-result" class="hidden p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_nights_count', '<span id="total-nights">0</span>')); ?></span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo t('booking_info_nights_count', '<span id="total-nights">0</span>'); ?></span>
                             <span class="text-xs text-gray-400">× ¥<?php echo h(number_format($room['price'])); ?></span>
                         </div>
                         <div class="flex justify-between items-end border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
