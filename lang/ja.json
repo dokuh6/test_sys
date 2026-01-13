@@ -54,6 +54,7 @@
     "room_detail_not_found": "お探しの部屋は見つかりませんでした",
     "room_detail_book_form_title": "ご予約はこちらから",
     "room_detail_book_form_text": "日付を選択して空室状況を確認し、予約手続きへお進みください。",
+    "availability_calendar_title": "空室状況",
 
     "check_booking_title": "予約確認",
     "check_booking_desc": "予約番号とメールアドレスを入力して、予約内容を確認できます。",
