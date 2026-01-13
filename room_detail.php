@@ -174,6 +174,8 @@ if (!$room) {
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: '<?php echo $current_lang ?? "ja"; ?>',
+            selectable: true,
+            selectMirror: true,
             headerToolbar: {
                 left: 'prev,next',
                 center: 'title',
@@ -184,6 +186,23 @@ if (!$room) {
             businessHours: true,
             validRange: {
                 start: '<?php echo date("Y-m-d"); ?>'
+            },
+            select: function(info) {
+                var checkInInput = document.getElementById('check_in_date');
+                var checkOutInput = document.getElementById('check_out_date');
+
+                checkInInput.value = info.startStr;
+
+                if (info.endStr) {
+                     checkOutInput.value = info.endStr;
+                } else {
+                     var date = new Date(info.start);
+                     date.setDate(date.getDate() + 1);
+                     checkOutInput.value = date.toISOString().split('T')[0];
+                }
+
+                checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                checkInInput.focus();
             }
         });
         calendar.render();
