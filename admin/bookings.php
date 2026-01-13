@@ -42,6 +42,11 @@ try {
                 r.name AS room_name,
                 b.check_in_date,
                 b.check_out_date,
+                b.check_in_time,
+                b.check_out_time,
+                b.num_guests,
+                b.num_children,
+                b.notes,
                 b.total_price,
                 b.status
             FROM bookings AS b
@@ -121,6 +126,7 @@ require_once 'admin_header.php';
             <th>部屋名</th>
             <th>チェックイン</th>
             <th>チェックアウト</th>
+            <th>人数</th>
             <th>料金</th>
             <th>ステータス</th>
             <th>操作</th>
@@ -129,16 +135,31 @@ require_once 'admin_header.php';
     <tbody>
         <?php if (empty($all_bookings)): ?>
             <tr>
-                <td colspan="8" style="text-align: center;">予約はまだありません。</td>
+                <td colspan="9" style="text-align: center;">予約はまだありません。</td>
             </tr>
         <?php else: ?>
             <?php foreach ($all_bookings as $booking): ?>
                 <tr>
                     <td><?php echo h($booking['id']); ?></td>
-                    <td><?php echo h($booking['customer_name']); ?></td>
+                    <td>
+                        <?php echo h($booking['customer_name']); ?>
+                        <?php if ($booking['notes']): ?>
+                            <br><span style="font-size:0.8em; color:gray;">(備考あり)</span>
+                        <?php endif; ?>
+                    </td>
                     <td><?php echo h($booking['room_name']); ?></td>
-                    <td><?php echo h($booking['check_in_date']); ?></td>
-                    <td><?php echo h($booking['check_out_date']); ?></td>
+                    <td>
+                        <?php echo h($booking['check_in_date']); ?>
+                        <?php if($booking['check_in_time']) echo '<br><small>' . h($booking['check_in_time']) . '</small>'; ?>
+                    </td>
+                    <td>
+                        <?php echo h($booking['check_out_date']); ?>
+                        <?php if($booking['check_out_time']) echo '<br><small>' . h($booking['check_out_time']) . '</small>'; ?>
+                    </td>
+                    <td>
+                        大人:<?php echo h($booking['num_guests']); ?><br>
+                        子供:<?php echo h($booking['num_children']); ?>
+                    </td>
                     <td>¥<?php echo h(number_format($booking['total_price'])); ?></td>
                     <td>
                         <span class="status-<?php echo h($booking['status']); ?>">

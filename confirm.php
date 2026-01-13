@@ -59,9 +59,13 @@ if (empty($errors)) {
                     b.guest_name,
                     b.check_in_date,
                     b.check_out_date,
+                    b.check_in_time,
+                    b.check_out_time,
                     b.num_guests,
+                    b.num_children,
                     b.total_price,
                     b.status,
+                    b.notes,
                     r.name as room_name,
                     r.name_en as room_name_en,
                     rt.name as type_name,
@@ -199,11 +203,11 @@ $nights = $datetime1->diff($datetime2)->days;
                     </li>
                     <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
                         <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_check_in')); ?></span>
-                        <span class="w-2/3"><?php echo h($booking['check_in_date']); ?></span>
+                        <span class="w-2/3"><?php echo h($booking['check_in_date']); ?> <?php if(!empty($booking['check_in_time'])) echo '(' . h($booking['check_in_time']) . ')'; ?></span>
                     </li>
                     <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
                         <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_check_out')); ?></span>
-                        <span class="w-2/3"><?php echo h($booking['check_out_date']); ?></span>
+                        <span class="w-2/3"><?php echo h($booking['check_out_date']); ?> <?php if(!empty($booking['check_out_time'])) echo '(' . h($booking['check_out_time']) . ')'; ?></span>
                     </li>
                     <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
                         <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_nights')); ?></span>
@@ -211,8 +215,14 @@ $nights = $datetime1->diff($datetime2)->days;
                     </li>
                     <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
                         <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_guests')); ?></span>
-                        <span class="w-2/3"><?php echo h(t('room_capacity_people', $booking['num_guests'])); ?></span>
+                        <span class="w-2/3"><?php echo h($booking['num_guests']); ?>名 (子供: <?php echo h($booking['num_children']); ?>名)</span>
                     </li>
+                    <?php if (!empty($booking['notes'])): ?>
+                    <li class="flex border-b border-gray-100 dark:border-gray-800 pb-2">
+                        <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400">備考</span>
+                        <span class="w-2/3"><?php echo nl2br(h($booking['notes'])); ?></span>
+                    </li>
+                    <?php endif; ?>
                     <li class="flex pt-2">
                         <span class="w-1/3 font-semibold text-gray-500 dark:text-gray-400"><?php echo h(t('booking_info_total_price')); ?></span>
                         <span class="w-2/3 text-xl font-bold text-red-500">¥<?php echo h(number_format($booking['total_price'])); ?></span>

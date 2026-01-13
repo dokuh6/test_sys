@@ -117,7 +117,7 @@ function send_booking_confirmation_email($booking_id, $dbh) {
     try {
         // 予約情報を取得
         $sql = "SELECT
-                    b.id, b.guest_name, b.guest_email, b.check_in_date, b.check_out_date, b.num_guests, b.total_price,
+                    b.id, b.guest_name, b.guest_email, b.check_in_date, b.check_out_date, b.check_in_time, b.check_out_time, b.num_guests, b.num_children, b.notes, b.total_price,
                     b.booking_number,
                     r.name as room_name, rt.name as type_name
                 FROM bookings b
@@ -181,16 +181,17 @@ function send_booking_confirmation_email($booking_id, $dbh) {
                         </tr>
                         <tr>
                             <th>チェックイン</th>
-                            <td>{$booking['check_in_date']}</td>
+                            <td>{$booking['check_in_date']} " . ($booking['check_in_time'] ? "({$booking['check_in_time']})" : "") . "</td>
                         </tr>
                         <tr>
                             <th>チェックアウト</th>
-                            <td>{$booking['check_out_date']}</td>
+                            <td>{$booking['check_out_date']} " . ($booking['check_out_time'] ? "({$booking['check_out_time']})" : "") . "</td>
                         </tr>
                         <tr>
                             <th>ご利用人数</th>
-                            <td>{$booking['num_guests']}名様</td>
+                            <td>大人: {$booking['num_guests']}名, 子供: {$booking['num_children']}名</td>
                         </tr>
+                        " . ($booking['notes'] ? "<tr><th>備考</th><td>" . nl2br(h($booking['notes'])) . "</td></tr>" : "") . "
                         <tr>
                             <th>合計金額</th>
                             <td><span style='color: #c0392b; font-weight: bold;'>¥{$formatted_price}</span></td>

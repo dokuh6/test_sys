@@ -15,13 +15,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $check_in_date = filter_input(INPUT_POST, 'check_in_date');
     $check_out_date = filter_input(INPUT_POST, 'check_out_date');
     $num_guests = filter_input(INPUT_POST, 'num_guests', FILTER_VALIDATE_INT);
+    $num_children = filter_input(INPUT_POST, 'num_children', FILTER_VALIDATE_INT) ?? 0;
+    $check_in_time = filter_input(INPUT_POST, 'check_in_time');
+    $check_out_time = filter_input(INPUT_POST, 'check_out_time');
+    $notes = filter_input(INPUT_POST, 'notes');
     $status = filter_input(INPUT_POST, 'status');
-    // TODO: 料金の再計算ロジック
+    // TODO: 料金の再計算ロジック (管理画面編集時は一旦再計算しない、必要なら手動修正フィールド追加など)
     // $total_price = ...
 
     if ($guest_name && $guest_email && $check_in_date && $check_out_date && $num_guests && $status) {
         try {
-            $sql = "UPDATE bookings SET guest_name = :guest_name, guest_email = :guest_email, check_in_date = :check_in_date, check_out_date = :check_out_date, num_guests = :num_guests, status = :status WHERE id = :id";
+            $sql = "UPDATE bookings SET guest_name = :guest_name, guest_email = :guest_email, check_in_date = :check_in_date, check_out_date = :check_out_date, num_guests = :num_guests, num_children = :num_children, check_in_time = :check_in_time, check_out_time = :check_out_time, notes = :notes, status = :status WHERE id = :id";
             $stmt = $dbh->prepare($sql);
             $stmt->execute([
                 ':guest_name' => $guest_name,
@@ -29,6 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':check_in_date' => $check_in_date,
                 ':check_out_date' => $check_out_date,
                 ':num_guests' => $num_guests,
+                ':num_children' => $num_children,
+                ':check_in_time' => $check_in_time,
+                ':check_out_time' => $check_out_time,
+                ':notes' => $notes,
                 ':status' => $status,
                 ':id' => $id
             ]);
@@ -95,8 +103,47 @@ require_once 'admin_header.php';
             <input type="date" id="check_out_date" name="check_out_date" value="<?php echo h($booking['check_out_date']); ?>" required>
         </div>
         <div class="form-row">
-            <label for="num_guests">人数:</label>
+            <label for="num_guests">人数 (大人):</label>
             <input type="number" id="num_guests" name="num_guests" min="1" value="<?php echo h($booking['num_guests']); ?>" required>
+        </div>
+        <div class="form-row">
+            <label for="num_children">人数 (子供):</label>
+            <input type="number" id="num_children" name="num_children" min="0" value="<?php echo h($booking['num_children']); ?>">
+        </div>
+        <div class="form-row">
+            <label for="check_in_time">到着予定:</label>
+            <select id="check_in_time" name="check_in_time">
+                <option value="">選択してください</option>
+                <?php for($i = 15; $i <= 22; $i++): ?>
+                    <?php $t = $i . ':00'; $sel = ($booking['check_in_time'] == $t) ? 'selected' : ''; ?>
+                    <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
+                    <?php $t = $i . ':30'; $sel = ($booking['check_in_time'] == $t) ? 'selected' : ''; ?>
+                    <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
+                <?php endfor; ?>
+                <!-- Custom value fallback -->
+                <?php if ($booking['check_in_time'] && !preg_match('/^(1[5-9]|2[0-2]):(00|30)$/', $booking['check_in_time'])): ?>
+                    <option value="<?php echo h($booking['check_in_time']); ?>" selected><?php echo h($booking['check_in_time']); ?></option>
+                <?php endif; ?>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="check_out_time">出発予定:</label>
+            <select id="check_out_time" name="check_out_time">
+                <option value="">選択してください</option>
+                <?php for($i = 6; $i <= 11; $i++): ?>
+                    <?php $t = $i . ':00'; $sel = ($booking['check_out_time'] == $t) ? 'selected' : ''; ?>
+                    <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
+                    <?php $t = $i . ':30'; $sel = ($booking['check_out_time'] == $t) ? 'selected' : ''; ?>
+                    <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
+                <?php endfor; ?>
+                <?php if ($booking['check_out_time'] && !preg_match('/^([6-9]|10|11):(00|30)$/', $booking['check_out_time'])): ?>
+                    <option value="<?php echo h($booking['check_out_time']); ?>" selected><?php echo h($booking['check_out_time']); ?></option>
+                <?php endif; ?>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="notes">備考:</label>
+            <textarea id="notes" name="notes" rows="4" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"><?php echo h($booking['notes']); ?></textarea>
         </div>
         <div class="form-row">
             <label for="status">ステータス:</label>

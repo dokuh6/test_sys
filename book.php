@@ -10,6 +10,10 @@ $room_id = null;
 $check_in = '';
 $check_out = '';
 $num_guests = 0;
+$num_children = 0;
+$check_in_time = '';
+$check_out_time = '';
+$notes = '';
 $total_price = 0;
 $guest_name = '';
 $guest_email = '';
@@ -24,6 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $check_in = filter_input(INPUT_POST, 'check_in');
     $check_out = filter_input(INPUT_POST, 'check_out');
     $num_guests = filter_input(INPUT_POST, 'num_guests', FILTER_VALIDATE_INT);
+    $num_children = filter_input(INPUT_POST, 'num_children', FILTER_VALIDATE_INT) ?? 0;
+    $check_in_time = filter_input(INPUT_POST, 'check_in_time');
+    $check_out_time = filter_input(INPUT_POST, 'check_out_time');
+    $notes = filter_input(INPUT_POST, 'notes');
     $total_price = filter_input(INPUT_POST, 'total_price', FILTER_VALIDATE_FLOAT);
     $guest_name = filter_input(INPUT_POST, 'guest_name');
     $guest_email = filter_input(INPUT_POST, 'guest_email', FILTER_VALIDATE_EMAIL);
@@ -80,27 +88,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // 4. 価格の再計算（セキュリティ対策: クライアント側での改ざん防止）
-            $sql_price = "SELECT price FROM rooms WHERE id = :room_id";
-            $stmt_price = $dbh->prepare($sql_price);
-            $stmt_price->execute([':room_id' => $room_id]);
-            $room_price = $stmt_price->fetchColumn();
-
-            if ($room_price === false) {
-                 throw new Exception("部屋情報の取得に失敗しました。");
-            }
+            // 旧ロジック: $room_price = $stmt_price->fetchColumn(); $total_price = $nights_calc * $room_price;
+            // 新ロジック: (大人 * 大人料金 + 子供 * 子供料金) * 泊数
+            // rooms.price は使用しない
 
             $datetime1 = new DateTime($check_in);
             $datetime2 = new DateTime($check_out);
             $interval = $datetime1->diff($datetime2);
             $nights_calc = $interval->days;
-            $total_price = $nights_calc * $room_price;
+
+            $total_price = $nights_calc * ($num_guests * PRICE_PER_ADULT + $num_children * PRICE_PER_CHILD);
 
             // 5. bookingsテーブルへの登録
             $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
             $booking_token = bin2hex(random_bytes(32));
             $booking_number = date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
 
-            $sql_bookings = "INSERT INTO bookings (booking_token, booking_number, user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status) VALUES (:booking_token, :booking_number, :user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
+            $sql_bookings = "INSERT INTO bookings (booking_token, booking_number, user_id, guest_name, guest_email, check_in_date, check_out_date, check_in_time, check_out_time, num_guests, num_children, notes, total_price, status) VALUES (:booking_token, :booking_number, :user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :check_in_time, :check_out_time, :num_guests, :num_children, :notes, :total_price, 'confirmed')";
             $stmt_bookings = $dbh->prepare($sql_bookings);
             $stmt_bookings->execute([
                 ':booking_token' => $booking_token,
@@ -110,7 +114,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':guest_email' => $guest_email,
                 ':check_in_date' => $check_in,
                 ':check_out_date' => $check_out,
+                ':check_in_time' => $check_in_time,
+                ':check_out_time' => $check_out_time,
                 ':num_guests' => $num_guests,
+                ':num_children' => $num_children,
+                ':notes' => $notes,
                 ':total_price' => $total_price
             ]);
             $booking_id = $dbh->lastInsertId();
@@ -243,13 +251,11 @@ if ($room && $check_in && $check_out) {
         // POSTで計算済みのtotal_priceがある場合はそれを使うが、
         // 改ざん防止のため基本は再計算するか、POST値を信頼するか。
         // ここでは表示用として再計算を行う（予約処理ではPOST値を使ったが、整合性のため）
-        // ただし、動的プライシングがある場合はJS側とサーバー側でロジック共有が必要。
-        // 現状は単純な price * nights なので再計算でOK。
-        $calc_price = $nights * $room['price'];
+
+        $calc_price = $nights * ($num_guests * PRICE_PER_ADULT + $num_children * PRICE_PER_CHILD);
 
         // もしPOSTされていて、total_priceが入っているなら、念のためそれを使う（割引等あった場合に対応できるようにするため）
-        // しかし、セキュリティ的には再計算が正しい。今回は元のロジックがJS計算依存だったので、
-        // 表示に関しては再計算値を優先し、POST時はhidden値を採用している。
+        // しかし、セキュリティ的には再計算が正しい。
         // ここでは表示の整合性を取るため再計算値を表示する。
         $total_price = $calc_price;
 
@@ -292,10 +298,13 @@ $csrf_token = generate_csrf_token();
                 </h3>
                 <ul class="space-y-3 text-gray-700 dark:text-gray-300 mb-6">
                     <li><strong class="font-semibold"><?php echo h(t('booking_info_room')); ?>:</strong> <?php echo h($room['name']); ?></li>
-                    <li><strong class="font-semibold"><?php echo h(t('booking_info_check_in')); ?>:</strong> <?php echo h($check_in); ?></li>
-                    <li><strong class="font-semibold"><?php echo h(t('booking_info_check_out')); ?>:</strong> <?php echo h($check_out); ?></li>
+                    <li><strong class="font-semibold"><?php echo h(t('booking_info_check_in')); ?>:</strong> <?php echo h($check_in); ?> <?php if($check_in_time) echo '(' . h($check_in_time) . ')'; ?></li>
+                    <li><strong class="font-semibold"><?php echo h(t('booking_info_check_out')); ?>:</strong> <?php echo h($check_out); ?> <?php if($check_out_time) echo '(' . h($check_out_time) . ')'; ?></li>
                     <li><strong class="font-semibold"><?php echo h(t('booking_info_nights')); ?>:</strong> <?php echo h(t('booking_info_nights_count', $nights)); ?></li>
-                    <li><strong class="font-semibold"><?php echo h(t('booking_info_guests')); ?>:</strong> <?php echo h(t('room_capacity_people', $num_guests)); ?></li>
+                    <li><strong class="font-semibold"><?php echo h(t('booking_info_guests')); ?>:</strong> <?php echo h($num_guests); ?>名 (子供: <?php echo h($num_children); ?>名)</li>
+                    <?php if ($notes): ?>
+                        <li><strong class="font-semibold">備考:</strong> <?php echo nl2br(h($notes)); ?></li>
+                    <?php endif; ?>
                 </ul>
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-4 text-right">
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-1"><?php echo h(t('booking_info_total_price')); ?></p>
@@ -314,6 +323,10 @@ $csrf_token = generate_csrf_token();
                     <input type="hidden" name="check_in" value="<?php echo h($check_in); ?>">
                     <input type="hidden" name="check_out" value="<?php echo h($check_out); ?>">
                     <input type="hidden" name="num_guests" value="<?php echo h($num_guests); ?>">
+                    <input type="hidden" name="num_children" value="<?php echo h($num_children); ?>">
+                    <input type="hidden" name="check_in_time" value="<?php echo h($check_in_time); ?>">
+                    <input type="hidden" name="check_out_time" value="<?php echo h($check_out_time); ?>">
+                    <input type="hidden" name="notes" value="<?php echo h($notes); ?>">
                     <input type="hidden" name="total_price" value="<?php echo h($total_price); ?>">
 
                     <div>
