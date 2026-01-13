@@ -30,6 +30,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel' && isset($_GET['id'])
 }
 
 // --- 予約一覧の取得 ---
+$start_date = filter_input(INPUT_GET, 'start_date');
+$end_date = filter_input(INPUT_GET, 'end_date');
+$keyword = filter_input(INPUT_GET, 'keyword');
+
 try {
     // ユーザー情報と部屋情報を結合して全予約を取得
     $sql = "SELECT
@@ -44,9 +48,27 @@ try {
             LEFT JOIN users AS u ON b.user_id = u.id
             JOIN booking_rooms AS br ON b.id = br.booking_id
             JOIN rooms AS r ON br.room_id = r.id
-            ORDER BY b.check_in_date DESC";
+            WHERE 1=1";
 
-    $stmt = $dbh->query($sql);
+    $params = [];
+
+    if ($start_date) {
+        $sql .= " AND b.check_in_date >= :start_date";
+        $params[':start_date'] = $start_date;
+    }
+    if ($end_date) {
+        $sql .= " AND b.check_in_date <= :end_date";
+        $params[':end_date'] = $end_date;
+    }
+    if ($keyword) {
+        $sql .= " AND (b.guest_name LIKE :keyword OR u.name LIKE :keyword)";
+        $params[':keyword'] = '%' . $keyword . '%';
+    }
+
+    $sql .= " ORDER BY b.check_in_date DESC";
+
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute($params);
     $all_bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
@@ -58,6 +80,31 @@ require_once 'admin_header.php';
 ?>
 
 <h2>予約管理</h2>
+
+<div class="actions" style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
+    <form method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+        <div>
+            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">チェックイン日 (開始):</label>
+            <input type="date" name="start_date" value="<?php echo h($start_date); ?>" style="padding: 5px;">
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">チェックイン日 (終了):</label>
+            <input type="date" name="end_date" value="<?php echo h($end_date); ?>" style="padding: 5px;">
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">名前 (キーワード):</label>
+            <input type="text" name="keyword" value="<?php echo h($keyword); ?>" placeholder="名前検索" style="padding: 5px;">
+        </div>
+        <div>
+             <button type="submit" class="btn-admin" style="padding: 6px 15px;">検索</button>
+             <a href="bookings.php" class="btn-admin" style="background: #95a5a6; padding: 6px 15px; text-decoration: none;">リセット</a>
+        </div>
+    </form>
+
+    <div>
+        <a href="add_booking.php" class="btn-admin" style="background-color: #27ae60; padding: 10px 20px; text-decoration: none;">+ 新規予約登録</a>
+    </div>
+</div>
 
 <?php if ($message): ?>
     <p style="color: green;"><?php echo $message; ?></p>

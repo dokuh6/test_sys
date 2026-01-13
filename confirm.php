@@ -209,7 +209,46 @@ $nights = $datetime1->diff($datetime2)->days;
             <a href="index.php" class="inline-block bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-md shadow transition-colors duration-200">
                 <?php echo h(t('btn_back_to_top')); ?>
             </a>
+
+            <?php if (isset($booking['status']) && $booking['status'] === 'confirmed'): ?>
+                <div class="mt-6">
+                    <button onclick="document.getElementById('cancel-modal').classList.remove('hidden')" class="text-red-500 hover:text-red-700 underline text-sm">
+                        <?php echo h(t('btn_cancel_booking') ?? '予約をキャンセルする'); ?>
+                    </button>
+                </div>
+            <?php endif; ?>
         </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+<div id="cancel-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+        <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white"><?php echo h(t('cancel_confirm_title') ?? '予約キャンセルの確認'); ?></h3>
+        <p class="mb-6 text-gray-600 dark:text-gray-300"><?php echo h(t('cancel_confirm_text') ?? '本当にこの予約をキャンセルしますか？この操作は取り消せません。'); ?></p>
+
+        <form action="cancel_booking.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo h(generate_csrf_token()); ?>">
+            <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
+            <?php if ($token): ?>
+                <input type="hidden" name="token" value="<?php echo h($token); ?>">
+            <?php endif; ?>
+            <?php if ($booking_number): ?>
+                <input type="hidden" name="booking_number" value="<?php echo h($booking_number); ?>">
+            <?php endif; ?>
+            <?php if ($email): ?>
+                <input type="hidden" name="email" value="<?php echo h($email); ?>">
+            <?php endif; ?>
+
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('cancel-modal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded">
+                    <?php echo h(t('btn_close') ?? '閉じる'); ?>
+                </button>
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    <?php echo h(t('btn_execute_cancel') ?? 'キャンセルする'); ?>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 

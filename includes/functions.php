@@ -63,15 +63,17 @@ function log_email_history($to, $subject, $body, $headers, $status, $error_messa
  * @param string $subject
  * @param string $body
  * @param PDO|null $dbh
+ * @param bool $is_html HTMLメールかどうか
  * @return bool
  */
-function send_email_smtp($to, $subject, $body, $dbh = null) {
+function send_email_smtp($to, $subject, $body, $dbh = null, $is_html = false) {
     $mail = new PHPMailer(true);
     $status = 'failure';
     $error_message = '';
-    // ログ用にヘッダー情報を記録（PHPMailerが生成するものとは完全に一致しないが、主要な情報として）
+
     $log_headers = "From: " . MAIL_FROM_NAME . " <" . MAIL_FROM_ADDRESS . ">" . "\r\n";
-    $log_headers .= "Content-Type: text/plain; charset=UTF-8";
+    $content_type = $is_html ? "text/html" : "text/plain";
+    $log_headers .= "Content-Type: {$content_type}; charset=UTF-8";
 
     try {
         // サーバー設定
@@ -89,7 +91,7 @@ function send_email_smtp($to, $subject, $body, $dbh = null) {
         $mail->addAddress($to);
 
         // コンテンツ
-        $mail->isHTML(false);
+        $mail->isHTML($is_html);
         $mail->Subject = $subject;
         $mail->Body    = $body;
 
@@ -142,29 +144,192 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         $to = $booking['guest_email'];
         $subject = '【ゲストハウス丸正】ご予約確定のお知らせ';
 
-        // メッセージ本文
-        $body = "{$booking['guest_name']} 様\n\n";
-        $body .= "この度は、ゲストハウス丸正にご予約いただき、誠にありがとうございます。\n";
-        $body .= "以下の内容でご予約が確定いたしましたので、ご確認ください。\n\n";
-        $body .= "-------------------------------------------------\n";
-        $body .= "ご予約内容\n";
-        $body .= "-------------------------------------------------\n";
-        $body .= "予約番号: " . (isset($booking['booking_number']) ? $booking['booking_number'] : $booking['id']) . "\n";
-        $body .= "お部屋: {$booking['room_name']} ({$booking['type_name']})\n";
-        $body .= "チェックイン日: {$booking['check_in_date']}\n";
-        $body .= "チェックアウト日: {$booking['check_out_date']}\n";
-        $body .= "ご利用人数: {$booking['num_guests']}名様\n";
-        $body .= "合計金額: ¥" . number_format($booking['total_price']) . "\n\n";
-        $body .= "-------------------------------------------------\n\n";
-        $body .= "スタッフ一同、お会いできることを心よりお待ちしております。\n\n";
-        $body .= "ゲストハウス丸正\n";
-        $body .= "HP: (ここに実際のURLを記載)\n";
+        $booking_number = isset($booking['booking_number']) ? $booking['booking_number'] : $booking['id'];
+        $formatted_price = number_format($booking['total_price']);
 
-        // SMTP送信関数を呼び出し
-        return send_email_smtp($to, $subject, $body, $dbh);
+        // HTML本文の構築
+        $body = "
+        <html>
+        <head>
+            <style>
+                body { font-family: sans-serif; color: #333; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; }
+                .header { background-color: #0f4c81; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header h1 { margin: 0; font-size: 24px; }
+                .content { padding: 20px; background-color: #ffffff; }
+                .booking-details { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                .booking-details th, .booking-details td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+                .booking-details th { background-color: #f2f2f2; width: 40%; }
+                .footer { margin-top: 20px; font-size: 12px; color: #777; text-align: center; }
+                .button { display: inline-block; padding: 10px 20px; background-color: #0f4c81; color: #ffffff; text-decoration: none; border-radius: 4px; margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>ゲストハウス丸正</h1>
+                    <p>ご予約ありがとうございます</p>
+                </div>
+                <div class='content'>
+                    <p>{$booking['guest_name']} 様</p>
+                    <p>この度は、ゲストハウス丸正にご予約いただき、誠にありがとうございます。<br>
+                    以下の内容でご予約が確定いたしました。</p>
+
+                    <table class='booking-details'>
+                        <tr>
+                            <th>予約番号</th>
+                            <td><strong>{$booking_number}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>お部屋</th>
+                            <td>{$booking['room_name']} ({$booking['type_name']})</td>
+                        </tr>
+                        <tr>
+                            <th>チェックイン</th>
+                            <td>{$booking['check_in_date']}</td>
+                        </tr>
+                        <tr>
+                            <th>チェックアウト</th>
+                            <td>{$booking['check_out_date']}</td>
+                        </tr>
+                        <tr>
+                            <th>ご利用人数</th>
+                            <td>{$booking['num_guests']}名様</td>
+                        </tr>
+                        <tr>
+                            <th>合計金額</th>
+                            <td><span style='color: #c0392b; font-weight: bold;'>¥{$formatted_price}</span></td>
+                        </tr>
+                    </table>
+
+                    <p>当日はお気をつけてお越しください。<br>
+                    スタッフ一同、お会いできることを心よりお待ちしております。</p>
+
+                    <div style='text-align: center;'>
+                        <a href='https://maps.google.com/?q=ゲストハウス丸正' class='button' style='color: #ffffff;'>地図を見る</a>
+                    </div>
+                </div>
+                <div class='footer'>
+                    <p>ゲストハウス丸正<br>
+                    〒000-0000 〇〇県〇〇市〇〇町1-2-3<br>
+                    TEL: 00-0000-0000</p>
+                    <p>※このメールは自動送信されています。</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+
+        // SMTP送信関数を呼び出し (HTML有効)
+        return send_email_smtp($to, $subject, $body, $dbh, true);
 
     } catch (Exception $e) {
         error_log('Email sending failed in send_booking_confirmation_email: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * 予約キャンセルメールを送信する
+ * @param int $booking_id 予約ID
+ * @param PDO $dbh データベース接続オブジェクト
+ * @return bool 送信成功でtrue、失敗でfalse
+ */
+function send_cancellation_email($booking_id, $dbh) {
+    try {
+        // 予約情報を取得
+        $sql = "SELECT
+                    b.id, b.guest_name, b.guest_email, b.check_in_date, b.check_out_date, b.num_guests, b.total_price,
+                    b.booking_number,
+                    r.name as room_name, rt.name as type_name
+                FROM bookings b
+                JOIN booking_rooms br ON b.id = br.booking_id
+                JOIN rooms r ON br.room_id = r.id
+                JOIN room_types rt ON r.room_type_id = rt.id
+                WHERE b.id = :booking_id";
+
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$booking) {
+            return false;
+        }
+
+        // メール設定
+        $to = $booking['guest_email'];
+        $subject = '【ゲストハウス丸正】ご予約キャンセルのお知らせ';
+
+        $booking_number = isset($booking['booking_number']) ? $booking['booking_number'] : $booking['id'];
+
+        // HTML本文の構築
+        $body = "
+        <html>
+        <head>
+            <style>
+                body { font-family: sans-serif; color: #333; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; }
+                .header { background-color: #7f8c8d; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header h1 { margin: 0; font-size: 24px; }
+                .content { padding: 20px; background-color: #ffffff; }
+                .booking-details { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                .booking-details th, .booking-details td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+                .booking-details th { background-color: #f2f2f2; width: 40%; }
+                .footer { margin-top: 20px; font-size: 12px; color: #777; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>ゲストハウス丸正</h1>
+                    <p>ご予約キャンセル</p>
+                </div>
+                <div class='content'>
+                    <p>{$booking['guest_name']} 様</p>
+                    <p>以下のご予約のキャンセルを承りました。</p>
+
+                    <table class='booking-details'>
+                        <tr>
+                            <th>予約番号</th>
+                            <td><strong>{$booking_number}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>お部屋</th>
+                            <td>{$booking['room_name']}</td>
+                        </tr>
+                        <tr>
+                            <th>チェックイン</th>
+                            <td>{$booking['check_in_date']}</td>
+                        </tr>
+                        <tr>
+                            <th>チェックアウト</th>
+                            <td>{$booking['check_out_date']}</td>
+                        </tr>
+                    </table>
+
+                    <p>またのご利用を心よりお待ちしております。</p>
+                </div>
+                <div class='footer'>
+                    <p>ゲストハウス丸正<br>
+                    TEL: 00-0000-0000</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+
+        // 管理者にも通知を送る
+        if (defined('ADMIN_EMAIL')) {
+             // 簡易的に管理者へも同じ内容（あるいは通知専用）を送る
+             send_email_smtp(ADMIN_EMAIL, "【管理者通知】予約キャンセル: {$booking_number}", "予約 {$booking_number} がキャンセルされました。", $dbh, false);
+        }
+
+        // ゲストへの送信
+        return send_email_smtp($to, $subject, $body, $dbh, true);
+
+    } catch (Exception $e) {
+        error_log('Email sending failed in send_cancellation_email: ' . $e->getMessage());
         return false;
     }
 }
