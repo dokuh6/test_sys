@@ -4,7 +4,9 @@ header('Content-Type: application/json');
 
 // セッション開始と認証チェック
 require_once '../../includes/db_connect.php';
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // 管理者権限チェック
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 1) {

@@ -31,12 +31,7 @@ function h($s) {
  */
 function log_email_history($to, $subject, $body, $headers, $status, $error_message = '', $dbh = null) {
     if (!$dbh) {
-        global $dbh;
-    }
-
-    if (!$dbh) {
-        // もし$dbhがない場合（稀なケース）、接続を試みるかログだけファイルに残すが、
-        // ここではグローバル接続があると仮定。
+        // DB接続がない場合はログに記録して終了
         error_log("DB Connection not found in log_email_history");
         return;
     }
