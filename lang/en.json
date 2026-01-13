@@ -1,7 +1,6 @@
 {
     "site_title": "Guesthouse Marusho",
     "nav_rooms": "Rooms",
-    "nav_availability": "Availability Calendar",
     "nav_availability_search": "Search Availability",
     "nav_login": "Login",
     "nav_register": "Register",
@@ -47,8 +46,6 @@
     "room": "Room",
     "no_image_available": "No Image Available",
 
-    "availability_calendar_title": "Availability Calendar",
-    "availability_calendar_desc": "Check room availability on the calendar. Red blocks indicate reserved dates.",
     "search_results_title": "Availability Search Results",
     "search_results_condition": "Search Criteria",
     "search_results_none": "We are sorry, but there were no available rooms matching your criteria.",

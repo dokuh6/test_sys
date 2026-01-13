@@ -63,7 +63,6 @@ if (!isset($root_path)) {
             </h1>
             <nav class="flex flex-wrap justify-center gap-6 md:gap-8 text-white/90 font-medium text-sm md:text-base">
                 <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>rooms.php"><?php echo h(t('nav_rooms')); ?></a>
-                <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>availability.php"><?php echo h(t('nav_availability')); ?></a>
                 <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>check_booking.php"><?php echo h(t('nav_check_booking')); ?></a>
                 <?php if (isset($_SESSION['user'])): ?>
                     <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>mypage.php"><?php echo h(t('nav_mypage')); ?></a>
