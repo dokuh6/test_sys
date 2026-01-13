@@ -1,5 +1,6 @@
 <?php
-require_once 'includes/header.php';
+// Central initialization
+require_once __DIR__ . '/includes/init.php';
 
 // --- POSTリクエスト処理 (フォームが送信された場合) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -12,9 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $total_price = filter_input(INPUT_POST, 'total_price', FILTER_VALIDATE_FLOAT);
     $guest_name = filter_input(INPUT_POST, 'guest_name');
     $guest_email = filter_input(INPUT_POST, 'guest_email', FILTER_VALIDATE_EMAIL);
-    // 電話番号のバリデーション (簡易的なチェック: 数字とハイフンのみ、10桁以上)
+    // 電話番号のバリデーション: 10-11桁, ハイフン許可 (e.g. 090-1234-5678, 03-1234-5678, 09012345678)
     $guest_tel = filter_input(INPUT_POST, 'guest_tel');
-    if ($guest_tel && !preg_match('/^[0-9\-]{10,}$/', $guest_tel)) {
+    if ($guest_tel && !preg_match('/^(0\d{1,4}[\s-]?\d{1,4}[\s-]?\d{3,4})$/', $guest_tel)) {
         $guest_tel = false;
     }
 
@@ -32,9 +33,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 2. 排他制御: 部屋レコードをロックして、同時処理を防ぐ
             // これにより、同時に同じ部屋に対して予約処理が走っても、片方が待機状態になる
-            $sql_lock = "SELECT id FROM rooms WHERE id = :room_id FOR UPDATE";
-            $stmt_lock = $dbh->prepare($sql_lock);
-            $stmt_lock->execute([':room_id' => $room_id]);
+            try {
+                $sql_lock = "SELECT id FROM rooms WHERE id = :room_id FOR UPDATE";
+                $stmt_lock = $dbh->prepare($sql_lock);
+                $stmt_lock->execute([':room_id' => $room_id]);
+            } catch (PDOException $e) {
+                // Lock wait timeout handling (MySQL 1205)
+                if ($e->getCode() == 'HY000' && strpos($e->getMessage(), '1205') !== false) {
+                    throw new Exception("ただいまアクセスが集中しており、処理を完了できませんでした。しばらく経ってから再度お試しください。");
+                }
+                throw $e;
+            }
 
             // 3. 二重予約のチェック
             $sql_check = "SELECT b.id FROM bookings b
@@ -85,9 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 5. 完了ページへのリダイレクト (ユーザー待機時間を減らすため、メール送信前にレスポンスを返す)
             // セッションに予約IDを保存して、confirm.phpでの閲覧権限とする（後方互換性のため残す）
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
             $_SESSION['last_booking_id'] = $booking_id;
             // セッションロックを解放
             session_write_close();
@@ -159,6 +165,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// ページ表示処理 (POSTでない、または処理後にHTMLを表示する場合)
+require_once 'includes/header.php';
 
 // --- GETリクエスト処理 (ページの初期表示) ---
 

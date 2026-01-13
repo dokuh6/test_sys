@@ -1,6 +1,12 @@
 <?php
-// Ensure language.php is loaded (handles session_start and DB)
-require_once __DIR__ . '/language.php';
+// Central initialization (handles session, DB, language)
+require_once __DIR__ . '/init.php';
+
+// Security Headers
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1; mode=block");
+header("X-Content-Type-Options: nosniff");
+header("Referrer-Policy: strict-origin-when-cross-origin");
 
 // Default root path if not set
 if (!isset($root_path)) {

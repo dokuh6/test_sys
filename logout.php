@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/includes/init.php';
 
 // セッション変数をすべて解除する
 $_SESSION = [];
@@ -17,7 +17,9 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // ログアウトメッセージを次のページに渡すためにセッションを再開する（任意）
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $_SESSION['success_message'] = "ログアウトしました。";
 header('Location: index.php');
 exit();

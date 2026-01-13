@@ -1,7 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/init.php';
 
 // ログインしているか、かつ管理者のロール(role=1)を持っているかを確認
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 1) {
@@ -12,8 +10,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 1) {
     exit();
 }
 
-// データベース接続と共通関数を読み込む
-// このファイルは他のadminファイルから呼ばれるので、パスの基点は呼び出し元になる
-// そのため、呼び出し元ファイルからの相対パスで指定する必要がある
-require_once __DIR__ . '/../includes/db_connect.php';
-require_once __DIR__ . '/../includes/functions.php';
+// init.phpでDB接続と共通関数は読み込まれているので不要
+// require_once __DIR__ . '/../includes/db_connect.php';
+// require_once __DIR__ . '/../includes/functions.php';
+?>
