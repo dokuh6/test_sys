@@ -1,7 +1,6 @@
 {
     "site_title": "ゲストハウス丸正",
     "nav_rooms": "お部屋",
-    "nav_availability": "空室カレンダー",
     "nav_availability_search": "空室検索",
     "nav_login": "ログイン",
     "nav_register": "会員登録",
@@ -47,8 +46,6 @@
     "room": "部屋",
     "no_image_available": "画像がありません",
 
-    "availability_calendar_title": "空室カレンダー",
-    "availability_calendar_desc": "カレンダーで空室状況を確認できます。赤色の部分は予約済みです。",
     "search_results_title": "空室検索結果",
     "search_results_condition": "検索条件",
     "search_results_none": "申し訳ございませんが、ご指定の条件に合う空室はございませんでした。",
