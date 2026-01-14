@@ -293,6 +293,64 @@ $csrf_token = generate_csrf_token();
     <?php endif; ?>
 
     <?php if ($room): ?>
+        <!-- Important Information Block -->
+        <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+                <span class="material-icons text-primary dark:text-blue-400">info</span>
+                ご利用案内
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <!-- Left Column -->
+                 <div class="space-y-6">
+                    <!-- Pricing -->
+                    <div>
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-2">宿泊料金について</h4>
+                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
+                            <li>大人料金: 4,500円（お一人）</li>
+                            <li>子供料金（中学生まで）: 2,500円（寝具持込み）</li>
+                            <li class="text-sm">※乳幼児（5歳まで）など布団無しで添い寝の場合は無料</li>
+                            <li class="text-sm">※お支払いは当日現金でお支払いをお願い致します。</li>
+                        </ul>
+                    </div>
+                     <!-- Check-in/out -->
+                    <div>
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-2">チェックイン・チェックアウトについて</h4>
+                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
+                            <li>チェックイン: 15時～（20時以降到着の方は、当日電話にてご連絡ください）</li>
+                            <li>チェックアウト: 10時</li>
+                            <li class="text-sm">※日中・夜間共、宿泊者がいない時は宿を留守にすることもあります。宿に来る前に必ず電話で連絡してください。</li>
+                        </ul>
+                    </div>
+                 </div>
+
+                 <!-- Right Column -->
+                 <div class="space-y-6">
+                    <!-- Booking -->
+                    <div>
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-2">宿泊予約について</h4>
+                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
+                            <li>当サイトまたはお電話でご予約をお願いします。（電話問合せ: 8時～20時）</li>
+                            <li>予約の際は宿泊日・人数（男女別）をお知らせください。</li>
+                            <li>当日予約・飛込みも可能ですが、極力事前にご予約下さい。</li>
+                            <li>団体・グループ等の貸切はお早めにご連絡ください。</li>
+                        </ul>
+                    </div>
+                    <!-- Cancellation -->
+                    <div>
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-2">キャンセルについて</h4>
+                        <p class="text-gray-600 dark:text-gray-300 mb-2">他のお客様のご迷惑となりますので、人数変更・キャンセルの場合は早めにご連絡ください。</p>
+                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
+                            <li>5日前: 30％</li>
+                            <li>2日前: 50％</li>
+                            <li>前日、当日、無断キャンセル: 100％</li>
+                            <li class="text-sm">※貸切予約および繁忙期（GW、お盆、年末年始）は、7日前より50％、5日前より70％、3日前より100％となります。</li>
+                            <li class="text-sm">（天災及びアクシデントによる場合は除きます）</li>
+                        </ul>
+                    </div>
+                 </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Booking Summary -->
             <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 h-fit">

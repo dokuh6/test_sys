@@ -204,6 +204,43 @@ function send_booking_confirmation_email($booking_id, $dbh) {
                     <div style='text-align: center;'>
                         <a href='https://maps.google.com/?q=ゲストハウス丸正' class='button' style='color: #ffffff;'>地図を見る</a>
                     </div>
+
+                    <div style='border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px;'>
+                         <h3 style='font-size: 16px; margin-bottom: 10px; color: #555;'>ご利用案内</h3>
+
+                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【宿泊料金について】</h4>
+                         <ul style='font-size: 13px; padding-left: 20px; color: #555;'>
+                            <li>大人料金: 4,500円（お一人）</li>
+                            <li>子供料金（中学生まで）: 2,500円（寝具持込み）</li>
+                            <li>※乳幼児（5歳まで）など布団無しで添い寝の場合は無料</li>
+                            <li>※お支払いは当日現金でお支払いをお願い致します。</li>
+                         </ul>
+
+                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【チェックイン・チェックアウトについて】</h4>
+                         <ul style='font-size: 13px; padding-left: 20px; color: #555;'>
+                            <li>チェックイン: 15時～（20時以降到着の方は、当日電話にてご連絡ください）</li>
+                            <li>チェックアウト: 10時</li>
+                            <li>※日中・夜間共、宿泊者がいない時は宿を留守にすることもあります。宿に来る前に必ず電話で連絡してください。</li>
+                         </ul>
+
+                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【宿泊予約について】</h4>
+                         <ul style='font-size: 13px; padding-left: 20px; color: #555;'>
+                            <li>当サイトまたはお電話でご予約をお願いします。（電話問合せ: 8時～20時）</li>
+                            <li>予約の際は宿泊日・人数（男女別）をお知らせください。</li>
+                            <li>当日予約・飛込みも可能ですが、極力事前にご予約下さい。</li>
+                            <li>団体・グループ等の貸切はお早めにご連絡ください。</li>
+                         </ul>
+
+                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【キャンセルについて】</h4>
+                         <p style='font-size: 13px; margin: 5px 0; color: #555;'>他のお客様のご迷惑となりますので、人数変更・キャンセルの場合は早めにご連絡ください。</p>
+                         <ul style='font-size: 13px; padding-left: 20px; color: #555;'>
+                            <li>5日前: 30％</li>
+                            <li>2日前: 50％</li>
+                            <li>前日、当日、無断キャンセル: 100％</li>
+                            <li>※貸切予約および繁忙期（GW、お盆、年末年始）は、7日前より50％、5日前より70％、3日前より100％となります。</li>
+                            <li>（天災及びアクシデントによる場合は除きます）</li>
+                         </ul>
+                    </div>
                 </div>
                 <div class='footer'>
                     <p>ゲストハウス丸正<br>
