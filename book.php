@@ -332,7 +332,7 @@ $csrf_token = generate_csrf_token();
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="check_in_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">チェックイン予定:</label>
-                            <select id="check_in_time" name="check_in_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                            <select id="check_in_time" name="check_in_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]">
                                 <option value="">選択してください</option>
                                 <?php for($i = 15; $i <= 22; $i++): ?>
                                     <?php $t = $i . ':00'; $sel = ($check_in_time == $t) ? 'selected' : ''; ?>
@@ -344,7 +344,7 @@ $csrf_token = generate_csrf_token();
                         </div>
                         <div>
                             <label for="check_out_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">チェックアウト予定:</label>
-                            <select id="check_out_time" name="check_out_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                            <select id="check_out_time" name="check_out_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]">
                                 <option value="">選択してください</option>
                                 <?php for($i = 6; $i <= 11; $i++): ?>
                                     <?php $t = $i . ':00'; $sel = ($check_out_time == $t) ? 'selected' : ''; ?>
@@ -358,23 +358,23 @@ $csrf_token = generate_csrf_token();
 
                     <div>
                         <label for="guest_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_name')); ?></label>
-                        <input type="text" id="guest_name" name="guest_name" value="<?php echo h($guest_name); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                        <input type="text" id="guest_name" name="guest_name" value="<?php echo h($guest_name); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]">
                     </div>
                     <div>
                         <label for="guest_email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_email')); ?></label>
-                        <input type="email" id="guest_email" name="guest_email" value="<?php echo h($guest_email); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                        <input type="email" id="guest_email" name="guest_email" value="<?php echo h($guest_email); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]">
                     </div>
                     <div>
                         <label for="guest_tel" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_tel')); ?></label>
-                        <input type="tel" id="guest_tel" name="guest_tel" value="<?php echo h($guest_tel); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                        <input type="tel" id="guest_tel" name="guest_tel" value="<?php echo h($guest_tel); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]">
                     </div>
 
                     <div>
                         <label for="notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">備考:</label>
-                        <textarea id="notes" name="notes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3"><?php echo h($notes); ?></textarea>
+                        <textarea id="notes" name="notes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]"><?php echo h($notes); ?></textarea>
                     </div>
 
-                    <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md shadow transition-colors duration-200 mt-6" id="submitBtn">
+                    <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md shadow transition-colors duration-200 mt-6 min-h-[44px]" id="submitBtn">
                         <?php echo h(t('btn_confirm_booking')); ?>
                     </button>
                 </form>

@@ -118,6 +118,7 @@ $csrf_token = generate_csrf_token();
 
 
 <h3>既存の部屋タイプ一覧</h3>
+<div class="table-responsive">
 <table>
     <thead>
         <tr>
@@ -147,6 +148,7 @@ $csrf_token = generate_csrf_token();
         <?php endforeach; ?>
     </tbody>
 </table>
+</div>
 
 <?php
 require_once 'admin_footer.php';

@@ -49,6 +49,7 @@ require_once 'admin_header.php';
     </form>
 </div>
 
+<div class="table-responsive">
 <table>
     <thead>
         <tr>
@@ -83,6 +84,7 @@ require_once 'admin_header.php';
         <?php endif; ?>
     </tbody>
 </table>
+</div>
 
 <?php
 require_once 'admin_footer.php';
