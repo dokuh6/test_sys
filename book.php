@@ -324,10 +324,39 @@ $csrf_token = generate_csrf_token();
                     <input type="hidden" name="check_out" value="<?php echo h($check_out); ?>">
                     <input type="hidden" name="num_guests" value="<?php echo h($num_guests); ?>">
                     <input type="hidden" name="num_children" value="<?php echo h($num_children); ?>">
-                    <input type="hidden" name="check_in_time" value="<?php echo h($check_in_time); ?>">
-                    <input type="hidden" name="check_out_time" value="<?php echo h($check_out_time); ?>">
-                    <input type="hidden" name="notes" value="<?php echo h($notes); ?>">
                     <input type="hidden" name="total_price" value="<?php echo h($total_price); ?>">
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="check_in_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">チェックイン予定:</label>
+                            <select id="check_in_time" name="check_in_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                                <option value="">選択してください</option>
+                                <?php for($i = 15; $i <= 22; $i++): ?>
+                                    <?php $t = $i . ':00'; $sel = ($check_in_time == $t) ? 'selected' : ''; ?>
+                                    <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
+                                    <?php $t = $i . ':30'; $sel = ($check_in_time == $t) ? 'selected' : ''; ?>
+                                    <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="check_out_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">チェックアウト予定:</label>
+                            <select id="check_out_time" name="check_out_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                                <option value="">選択してください</option>
+                                <?php for($i = 6; $i <= 11; $i++): ?>
+                                    <?php $t = $i . ':00'; $sel = ($check_out_time == $t) ? 'selected' : ''; ?>
+                                    <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
+                                    <?php $t = $i . ':30'; $sel = ($check_out_time == $t) ? 'selected' : ''; ?>
+                                    <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">備考:</label>
+                        <textarea id="notes" name="notes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3"><?php echo h($notes); ?></textarea>
+                    </div>
 
                     <div>
                         <label for="guest_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_name')); ?></label>

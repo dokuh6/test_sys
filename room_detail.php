@@ -156,33 +156,6 @@ if (!$room) {
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="check_in_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">チェックイン予定:</label>
-                            <select id="check_in_time" name="check_in_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
-                                <option value="">選択してください</option>
-                                <?php for($i = 15; $i <= 22; $i++): ?>
-                                    <option value="<?php echo $i; ?>:00"><?php echo $i; ?>:00</option>
-                                    <option value="<?php echo $i; ?>:30"><?php echo $i; ?>:30</option>
-                                <?php endfor; ?>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="check_out_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">チェックアウト予定:</label>
-                            <select id="check_out_time" name="check_out_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
-                                <option value="">選択してください</option>
-                                <?php for($i = 6; $i <= 11; $i++): ?>
-                                    <option value="<?php echo $i; ?>:00"><?php echo $i; ?>:00</option>
-                                    <option value="<?php echo $i; ?>:30"><?php echo $i; ?>:30</option>
-                                <?php endfor; ?>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">備考:</label>
-                        <textarea id="notes" name="notes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3"></textarea>
-                    </div>
 
                     <!-- Dynamic Price Display -->
                     <div id="price-calculation-result" class="hidden p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
