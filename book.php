@@ -354,11 +354,6 @@ $csrf_token = generate_csrf_token();
                     </div>
 
                     <div>
-                        <label for="notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">備考:</label>
-                        <textarea id="notes" name="notes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3"><?php echo h($notes); ?></textarea>
-                    </div>
-
-                    <div>
                         <label for="guest_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_name')); ?></label>
                         <input type="text" id="guest_name" name="guest_name" value="<?php echo h($guest_name); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
                     </div>
@@ -369,6 +364,11 @@ $csrf_token = generate_csrf_token();
                     <div>
                         <label for="guest_tel" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('form_tel')); ?></label>
                         <input type="tel" id="guest_tel" name="guest_tel" value="<?php echo h($guest_tel); ?>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3">
+                    </div>
+
+                    <div>
+                        <label for="notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">備考:</label>
+                        <textarea id="notes" name="notes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3"><?php echo h($notes); ?></textarea>
                     </div>
 
                     <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md shadow transition-colors duration-200 mt-6" id="submitBtn">
