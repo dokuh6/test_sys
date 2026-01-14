@@ -5,10 +5,9 @@ require_once 'includes/header.php';
 
 <div class="max-w-5xl mx-auto bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl overflow-hidden transition-colors duration-200">
     <div class="py-12 px-6 text-center">
-        <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 dark:text-white">ようこそ、ゲストハウス丸正へ</h2>
-        <div class="space-y-4 text-gray-600 dark:text-gray-300 leading-relaxed">
-            <p class="text-lg">心安らぐひとときをお過ごしください。</p>
-            <p>当ゲストハウスは、静かな環境と温かいおもてなしで、お客様の旅の疲れを癒します。</p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 dark:text-white">ゲストハウスマル正へようこそ</h2>
+        <div class="space-y-4 text-gray-600 dark:text-gray-300 leading-relaxed max-w-4xl mx-auto text-left md:text-center">
+            <p>当館は国道１５６号線沿い美濃市曽代に在しております。清流長良川を眼下に、近くには小倉公園、国指定重要文化財の美濃橋があり、シーズンには美濃橋河川敷には多数の方がバーベキュー、キャンプ等を楽しまれております。お客様の要望等が有れば、当家の主人の漁で郡上鮎の塩焼きを食べていただけます。</p>
         </div>
     </div>
     <div class="bg-gray-50 dark:bg-gray-800/50 mx-6 mb-12 rounded-lg p-8 border border-gray-100 dark:border-gray-700">
@@ -46,6 +45,68 @@ require_once 'includes/header.php';
                 </button>
             </div>
         </form>
+    </div>
+    <div class="px-8 pb-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Facility Info -->
+            <div>
+                <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
+                    <span class="material-icons text-primary dark:text-blue-400">info</span>
+                    マル正について
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-4 text-gray-600 dark:text-gray-300">
+                    <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                        1階<span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400">（共同スペース）</span>:
+                    </div>
+                    <div>
+                        キッチン、カウンター、テーブルがあります。自由にご利用ください。食事は付きませんが、オープンキッチンにしていますので料理を作るのも可能。もちろん持ち込みもOKです。貸し切りも可能ですので、お仲間同士で楽しむことも出来ます。
+                    </div>
+
+                    <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                        2階<span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400">（宿泊部屋）</span>:
+                    </div>
+                    <div>
+                        全6室（和室3部屋、洋室3部屋）。トイレ、バスは共同となります。
+                    </div>
+
+                    <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                        駐車場:
+                    </div>
+                    <div>
+                        無料駐車場完備（10台ほど）
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Info -->
+            <div>
+                <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
+                    <span class="material-icons text-primary dark:text-blue-400">payments</span>
+                    宿泊料金について
+                </h3>
+                <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 border border-gray-100 dark:border-gray-700">
+                    <ul class="space-y-4 text-gray-600 dark:text-gray-300">
+                        <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
+                            <span>大人料金 <span class="text-sm text-gray-500 dark:text-gray-400">（お一人）</span></span>
+                            <span class="font-bold text-lg text-gray-800 dark:text-white">4,500円</span>
+                        </li>
+                        <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
+                            <span>子供料金 <span class="text-sm text-gray-500 dark:text-gray-400">（中学生まで）</span></span>
+                            <div class="text-right">
+                                <span class="font-bold text-lg text-gray-800 dark:text-white">2,500円</span>
+                                <span class="text-xs block text-gray-500 dark:text-gray-400">（寝具持込み）</span>
+                            </div>
+                        </li>
+                        <li class="text-sm pt-2 text-gray-500 dark:text-gray-400">
+                            ※ 乳幼児（5歳まで）など布団無しで添い寝の場合は<span class="font-bold text-primary dark:text-blue-400">無料</span>
+                        </li>
+                        <li class="mt-4 pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700">
+                            <span class="font-bold text-gray-800 dark:text-white">お支払い:</span> 当日現金でお支払いをお願い致します。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="px-8 pb-16">
         <div class="border-t border-gray-200 dark:border-gray-700 pt-10">
