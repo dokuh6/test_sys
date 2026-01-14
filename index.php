@@ -54,20 +54,28 @@ require_once 'includes/header.php';
                     <span class="material-icons text-primary dark:text-blue-400">info</span>
                     マル正について
                 </h3>
-                <ul class="space-y-4 text-gray-600 dark:text-gray-300">
-                    <li class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
-                        <span class="font-bold text-gray-800 dark:text-gray-200 min-w-[6rem] whitespace-nowrap">1階<span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400">（共同スペース）</span>:</span>
-                        <span>キッチン、カウンター、テーブルがあります。自由にご利用ください。食事は付きませんが、オープンキッチンにしていますので料理を作るのも可能。もちろん持ち込みもOKです。貸し切りも可能ですので、お仲間同士で楽しむことも出来ます。</span>
-                    </li>
-                    <li class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
-                        <span class="font-bold text-gray-800 dark:text-gray-200 min-w-[6rem] whitespace-nowrap">2階<span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400">（宿泊部屋）</span>:</span>
-                        <span>全6室（和室3部屋、洋室3部屋）。トイレ、バスは共同となります。</span>
-                    </li>
-                    <li class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
-                        <span class="font-bold text-gray-800 dark:text-gray-200 min-w-[6rem] whitespace-nowrap">駐車場:</span>
-                        <span>無料駐車場完備（10台ほど）</span>
-                    </li>
-                </ul>
+                <div class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-4 text-gray-600 dark:text-gray-300">
+                    <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                        1階<span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400">（共同スペース）</span>:
+                    </div>
+                    <div>
+                        キッチン、カウンター、テーブルがあります。自由にご利用ください。食事は付きませんが、オープンキッチンにしていますので料理を作るのも可能。もちろん持ち込みもOKです。貸し切りも可能ですので、お仲間同士で楽しむことも出来ます。
+                    </div>
+
+                    <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                        2階<span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400">（宿泊部屋）</span>:
+                    </div>
+                    <div>
+                        全6室（和室3部屋、洋室3部屋）。トイレ、バスは共同となります。
+                    </div>
+
+                    <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                        駐車場:
+                    </div>
+                    <div>
+                        無料駐車場完備（10台ほど）
+                    </div>
+                </div>
             </div>
 
             <!-- Pricing Info -->
