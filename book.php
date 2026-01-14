@@ -97,7 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $interval = $datetime1->diff($datetime2);
             $nights_calc = $interval->days;
 
-            $total_price = $nights_calc * ($num_guests * PRICE_PER_ADULT + $num_children * PRICE_PER_CHILD);
+            // num_childrenがNULLの場合は0にする
+            $num_children_calc = $num_children ?? 0;
+            $total_price = $nights_calc * ($num_guests * PRICE_PER_ADULT + $num_children_calc * PRICE_PER_CHILD);
 
             // 5. bookingsテーブルへの登録
             $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
@@ -252,7 +254,7 @@ if ($room && $check_in && $check_out) {
         // 改ざん防止のため基本は再計算するか、POST値を信頼するか。
         // ここでは表示用として再計算を行う（予約処理ではPOST値を使ったが、整合性のため）
 
-        $calc_price = $nights * ($num_guests * PRICE_PER_ADULT + $num_children * PRICE_PER_CHILD);
+        $calc_price = $nights * ($num_guests * PRICE_PER_ADULT + ($num_children ?? 0) * PRICE_PER_CHILD);
 
         // もしPOSTされていて、total_priceが入っているなら、念のためそれを使う（割引等あった場合に対応できるようにするため）
         // しかし、セキュリティ的には再計算が正しい。
