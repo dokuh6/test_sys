@@ -6,6 +6,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Load configuration
+require_once __DIR__ . '/config.php';
+
 // Load DB connection
 require_once __DIR__ . '/db_connect.php';
 

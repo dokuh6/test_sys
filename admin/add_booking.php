@@ -1,6 +1,7 @@
 <?php
 require_once 'admin_check.php';
 require_once '../includes/functions.php';
+require_once '../includes/config.php';
 
 $message = '';
 $error = '';
@@ -35,6 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $guest_name = filter_input(INPUT_POST, 'guest_name');
     $guest_email = filter_input(INPUT_POST, 'guest_email', FILTER_VALIDATE_EMAIL);
     $num_guests = filter_input(INPUT_POST, 'num_guests', FILTER_VALIDATE_INT);
+    $num_children = filter_input(INPUT_POST, 'num_children', FILTER_VALIDATE_INT) ?? 0;
+    $check_in_time = filter_input(INPUT_POST, 'check_in_time');
+    $check_out_time = filter_input(INPUT_POST, 'check_out_time');
+    $notes = filter_input(INPUT_POST, 'notes');
     $total_price = filter_input(INPUT_POST, 'total_price', FILTER_VALIDATE_INT); // 管理者が手入力または計算結果を送信
 
     // 入力チェック
@@ -70,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 将来的には既存ユーザーを選択するUIを追加することも可能
             $booking_token = bin2hex(random_bytes(32));
 
-            $sql = "INSERT INTO bookings (booking_token, user_id, guest_name, guest_email, check_in_date, check_out_date, num_guests, total_price, status)
-                    VALUES (:booking_token, NULL, :guest_name, :guest_email, :check_in_date, :check_out_date, :num_guests, :total_price, 'confirmed')";
+            $sql = "INSERT INTO bookings (booking_token, user_id, guest_name, guest_email, check_in_date, check_out_date, check_in_time, check_out_time, num_guests, num_children, notes, total_price, status)
+                    VALUES (:booking_token, NULL, :guest_name, :guest_email, :check_in_date, :check_out_date, :check_in_time, :check_out_time, :num_guests, :num_children, :notes, :total_price, 'confirmed')";
             $stmt = $dbh->prepare($sql);
             $stmt->execute([
                 ':booking_token' => $booking_token,
@@ -79,7 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':guest_email' => $guest_email ? $guest_email : '', // email任意の場合は空文字
                 ':check_in_date' => $check_in,
                 ':check_out_date' => $check_out,
+                ':check_in_time' => $check_in_time,
+                ':check_out_time' => $check_out_time,
                 ':num_guests' => $num_guests,
+                ':num_children' => $num_children,
+                ':notes' => $notes,
                 ':total_price' => $total_price
             ]);
             $booking_id = $dbh->lastInsertId();
@@ -151,14 +160,47 @@ require_once 'admin_header.php';
 
     <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
         <div style="flex: 1;">
-            <label>宿泊人数:</label>
-            <input type="number" name="num_guests" value="1" min="1" required style="width: 100%; padding: 8px;">
+            <label>大人 (<?php echo number_format(PRICE_PER_ADULT); ?>円):</label>
+            <input type="number" name="num_guests" id="num_guests" value="1" min="1" required style="width: 100%; padding: 8px;">
         </div>
         <div style="flex: 1;">
-            <label>合計金額 (円):</label>
-            <input type="number" name="total_price" id="total_price" required style="width: 100%; padding: 8px;">
-            <small>※自動計算されますが、手動で変更可能です</small>
+            <label>子供 (<?php echo number_format(PRICE_PER_CHILD); ?>円):</label>
+            <input type="number" name="num_children" id="num_children" value="0" min="0" style="width: 100%; padding: 8px;">
         </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+        <div style="flex: 1;">
+            <label>到着予定:</label>
+            <select name="check_in_time" style="width: 100%; padding: 8px;">
+                <option value="">選択してください</option>
+                <?php for($i = 15; $i <= 22; $i++): ?>
+                    <option value="<?php echo $i; ?>:00"><?php echo $i; ?>:00</option>
+                    <option value="<?php echo $i; ?>:30"><?php echo $i; ?>:30</option>
+                <?php endfor; ?>
+            </select>
+        </div>
+        <div style="flex: 1;">
+            <label>出発予定:</label>
+            <select name="check_out_time" style="width: 100%; padding: 8px;">
+                <option value="">選択してください</option>
+                <?php for($i = 6; $i <= 11; $i++): ?>
+                    <option value="<?php echo $i; ?>:00"><?php echo $i; ?>:00</option>
+                    <option value="<?php echo $i; ?>:30"><?php echo $i; ?>:30</option>
+                <?php endfor; ?>
+            </select>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+        <label>備考:</label>
+        <textarea name="notes" rows="3" style="width: 100%; padding: 8px;"></textarea>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+        <label>合計金額 (円):</label>
+        <input type="number" name="total_price" id="total_price" required style="width: 100%; padding: 8px;">
+        <small>※自動計算されますが、手動で変更可能です</small>
     </div>
 
     <button type="submit" class="btn-admin" style="background-color: #27ae60; padding: 10px 20px; font-size: 1rem;">予約を作成する</button>
@@ -166,23 +208,34 @@ require_once 'admin_header.php';
 </form>
 
 <script>
+    // JS側でも定数を使いたいが、PHPから渡すのが手っ取り早い
+    const ADULT_PRICE = <?php echo PRICE_PER_ADULT; ?>;
+    const CHILD_PRICE = <?php echo PRICE_PER_CHILD; ?>;
+
     function calculatePrice() {
         const roomSelect = document.getElementById('room_select');
         const checkInInput = document.getElementById('check_in');
         const checkOutInput = document.getElementById('check_out');
+        const numGuestsInput = document.getElementById('num_guests');
+        const numChildrenInput = document.getElementById('num_children');
         const totalPriceInput = document.getElementById('total_price');
 
         const selectedOption = roomSelect.options[roomSelect.selectedIndex];
         if (!selectedOption || !selectedOption.value) return;
 
-        const pricePerNight = parseInt(selectedOption.dataset.price);
+        // const pricePerNight = parseInt(selectedOption.dataset.price); // Deprecated
         const checkIn = new Date(checkInInput.value);
         const checkOut = new Date(checkOutInput.value);
+        const adults = parseInt(numGuestsInput.value) || 0;
+        const children = parseInt(numChildrenInput.value) || 0;
 
         if (checkIn && checkOut && checkOut > checkIn) {
             const diffTime = Math.abs(checkOut - checkIn);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            totalPriceInput.value = pricePerNight * diffDays;
+
+            // 新しい計算ロジック
+            const total = diffDays * (adults * ADULT_PRICE + children * CHILD_PRICE);
+            totalPriceInput.value = total;
         }
     }
 
@@ -226,6 +279,10 @@ require_once 'admin_header.php';
     document.getElementById('room_select').addEventListener('change', () => { calculatePrice(); checkAvailability(); });
     document.getElementById('check_in').addEventListener('change', () => { calculatePrice(); checkAvailability(); });
     document.getElementById('check_out').addEventListener('change', () => { calculatePrice(); checkAvailability(); });
+    document.getElementById('num_guests').addEventListener('change', calculatePrice);
+    document.getElementById('num_guests').addEventListener('input', calculatePrice);
+    document.getElementById('num_children').addEventListener('change', calculatePrice);
+    document.getElementById('num_children').addEventListener('input', calculatePrice);
 
     // 初期表示時に計算
     calculatePrice();
