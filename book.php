@@ -191,6 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $check_in = filter_input(INPUT_GET, 'check_in');
     $check_out = filter_input(INPUT_GET, 'check_out');
     $num_guests = filter_input(INPUT_GET, 'num_guests', FILTER_VALIDATE_INT);
+    $num_children = filter_input(INPUT_GET, 'num_children', FILTER_VALIDATE_INT) ?? 0;
 
     if (!$room_id || !$check_in || !$check_out || !$num_guests) {
         $errors[] = "予約情報が正しくありません。もう一度最初からやり直してください。";
