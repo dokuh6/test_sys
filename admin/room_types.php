@@ -123,10 +123,10 @@ $csrf_token = generate_csrf_token();
     <thead>
         <tr>
             <th>ID</th>
+            <th>画像</th>
             <th>タイプ名 (日本語)</th>
             <th>タイプ名 (English)</th>
-            <th>説明 (日本語)</th>
-            <th>説明 (English)</th>
+            <th>公開</th>
             <th>収容人数</th>
             <th>操作</th>
         </tr>
@@ -135,10 +135,22 @@ $csrf_token = generate_csrf_token();
         <?php foreach ($room_types as $type): ?>
             <tr>
                 <td><?php echo h($type['id']); ?></td>
+                <td>
+                    <?php if (!empty($type['main_image'])): ?>
+                        <img src="../<?php echo h($type['main_image']); ?>" alt="Image" style="width: 50px; height: 40px; object-fit: cover;">
+                    <?php else: ?>
+                        <span style="color: #ccc;">No Image</span>
+                    <?php endif; ?>
+                </td>
                 <td><?php echo h($type['name']); ?></td>
                 <td><?php echo h($type['name_en']); ?></td>
-                <td><?php echo h($type['description']); ?></td>
-                <td><?php echo h($type['description_en']); ?></td>
+                <td>
+                    <?php if (!empty($type['is_visible'])): ?>
+                        <span style="color: green;">公開中</span>
+                    <?php else: ?>
+                        <span style="color: gray;">非公開</span>
+                    <?php endif; ?>
+                </td>
                 <td><?php echo h($type['capacity']); ?></td>
                 <td>
                     <a href="edit_room_type.php?id=<?php echo h($type['id']); ?>">編集</a> |
