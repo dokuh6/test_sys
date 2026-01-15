@@ -165,7 +165,7 @@ require_once 'includes/header.php';
                         <p class="text-sm text-gray-600 dark:text-gray-300 mb-6 flex-grow leading-relaxed">
                             <?php echo nl2br(h($type_desc)); ?>
                         </p>
-                        <a href="rooms.php" class="w-full py-2.5 px-4 rounded border border-primary text-primary hover:bg-primary hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-gray-900 font-semibold transition-all duration-200 flex items-center justify-center gap-1 group-hover:gap-2">
+                        <a href="rooms.php?room_type_id=<?php echo h($type['id']); ?>" class="w-full py-2.5 px-4 rounded border border-primary text-primary hover:bg-primary hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-gray-900 font-semibold transition-all duration-200 flex items-center justify-center gap-1 group-hover:gap-2">
                             詳細を見る
                             <span class="material-icons text-sm">arrow_forward</span>
                         </a>

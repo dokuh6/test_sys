@@ -29,8 +29,12 @@ CREATE TABLE `users` (
 CREATE TABLE `room_types` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT '部屋タイプ名',
+  `name_en` varchar(255) DEFAULT NULL COMMENT '部屋タイプ名 (English)',
   `description` text DEFAULT NULL COMMENT '説明',
+  `description_en` text DEFAULT NULL COMMENT '説明 (English)',
   `capacity` int(11) NOT NULL COMMENT '収容人数',
+  `main_image` varchar(255) DEFAULT NULL COMMENT '部屋タイプ代表画像パス',
+  `is_visible` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'トップページ表示フラグ (1:表示, 0:非表示)',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

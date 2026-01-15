@@ -3,6 +3,8 @@
 require_once 'includes/header.php';
 
 try {
+    $room_type_id = filter_input(INPUT_GET, 'room_type_id', FILTER_VALIDATE_INT);
+
     // 部屋タイプと結合し、各部屋のメイン画像も取得するSQL
     $sql = "SELECT
                 r.id,
@@ -16,10 +18,19 @@ try {
                 rt.description_en,
                 (SELECT image_path FROM room_images WHERE room_id = r.id AND is_main = 1 LIMIT 1) AS main_image
             FROM rooms AS r
-            JOIN room_types AS rt ON r.room_type_id = rt.id
-            ORDER BY r.price ASC";
+            JOIN room_types AS rt ON r.room_type_id = rt.id";
 
-    $stmt = $dbh->query($sql);
+    // 部屋タイプID指定がある場合
+    $params = [];
+    if ($room_type_id) {
+        $sql .= " WHERE r.room_type_id = :room_type_id";
+        $params[':room_type_id'] = $room_type_id;
+    }
+
+    $sql .= " ORDER BY r.price ASC";
+
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute($params);
     $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
@@ -57,7 +68,15 @@ try {
         </form>
     </section>
 
-    <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white border-l-4 border-primary pl-4"><?php echo h(t('rooms_list_title')); ?></h2>
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold text-gray-800 dark:text-white border-l-4 border-primary pl-4"><?php echo h(t('rooms_list_title')); ?></h2>
+        <?php if ($room_type_id): ?>
+            <a href="rooms.php" class="text-primary hover:underline flex items-center gap-1">
+                <span class="material-icons text-sm">undo</span>
+                すべての部屋を表示
+            </a>
+        <?php endif; ?>
+    </div>
 
     <?php if (!empty($rooms)): ?>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
