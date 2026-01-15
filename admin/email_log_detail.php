@@ -12,7 +12,7 @@ if ($id) {
 
 if (!$log) {
     echo '<div class="alert alert-danger">指定された履歴が見つかりません。</div>';
-    require_once 'includes/admin_footer.php';
+    require_once 'admin_footer.php';
     exit;
 }
 ?>
@@ -62,7 +62,19 @@ if (!$log) {
 
             <div class="mb-3">
                 <label class="form-label fw-bold">本文</label>
-                <div class="border p-3 bg-light" style="white-space: pre-wrap; font-family: monospace;"><?php echo h($log['body']); ?></div>
+
+                <div class="mb-2">
+                    <button type="button" class="btn btn-sm btn-secondary" id="btn-preview" onclick="toggleView('preview')">HTMLプレビュー</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-source" onclick="toggleView('source')">ソースコード</button>
+                </div>
+
+                <div id="email-preview-container" class="border p-2 bg-white" style="display:none;">
+                    <iframe id="email-preview-frame" style="width: 100%; height: 600px; border: 0;"></iframe>
+                </div>
+
+                <div id="email-source-container" class="border p-3 bg-light" style="white-space: pre-wrap; font-family: monospace; display:block;">
+                    <?php echo h($log['body']); ?>
+                </div>
             </div>
 
              <div class="mb-3">
@@ -80,4 +92,63 @@ if (!$log) {
     </div>
 </div>
 
-<?php require_once 'includes/admin_footer.php'; ?>
+<textarea id="raw-email-content" style="display:none;"><?php echo h($log['body']); ?></textarea>
+
+<script>
+    function toggleView(view) {
+        const previewBtn = document.getElementById('btn-preview');
+        const sourceBtn = document.getElementById('btn-source');
+        const previewContainer = document.getElementById('email-preview-container');
+        const sourceContainer = document.getElementById('email-source-container');
+
+        if (view === 'preview') {
+            previewContainer.style.display = 'block';
+            sourceContainer.style.display = 'none';
+
+            // Update button styles
+            previewBtn.classList.remove('btn-outline-secondary');
+            previewBtn.classList.add('btn-secondary');
+            sourceBtn.classList.remove('btn-secondary');
+            sourceBtn.classList.add('btn-outline-secondary');
+
+            // Inline style backup in case Bootstrap is missing
+            previewBtn.style.backgroundColor = '#6c757d';
+            previewBtn.style.color = '#fff';
+            sourceBtn.style.backgroundColor = 'transparent';
+            sourceBtn.style.color = '#6c757d';
+
+            loadPreview();
+        } else {
+            previewContainer.style.display = 'none';
+            sourceContainer.style.display = 'block';
+
+            sourceBtn.classList.remove('btn-outline-secondary');
+            sourceBtn.classList.add('btn-secondary');
+            previewBtn.classList.remove('btn-secondary');
+            previewBtn.classList.add('btn-outline-secondary');
+
+            // Inline style backup
+            sourceBtn.style.backgroundColor = '#6c757d';
+            sourceBtn.style.color = '#fff';
+            previewBtn.style.backgroundColor = 'transparent';
+            previewBtn.style.color = '#6c757d';
+        }
+    }
+
+    function loadPreview() {
+        const iframe = document.getElementById('email-preview-frame');
+        if (iframe.dataset.loaded) return;
+
+        const content = document.getElementById('raw-email-content').value;
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(content);
+        doc.close();
+        iframe.dataset.loaded = "true";
+    }
+
+    // Default to HTML Preview
+    toggleView('preview');
+</script>
+
+<?php require_once 'admin_footer.php'; ?>
