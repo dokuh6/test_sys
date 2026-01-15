@@ -15,24 +15,7 @@ try {
     $total_rooms = $dbh->query($sql_rooms_count)->fetchColumn();
 
     // 指定期間内の日ごとの予約数を取得
-    // bookingsテーブルとbooking_roomsを結合
-    // 期間内の日付ごとに予約されている部屋数をカウント
     // 効率のため、PHP側でループ処理する（日付ごとにクエリを投げると重いので、予約データを一括取得して処理）
-
-    $sql = "SELECT
-                b.check_in_date,
-                b.check_out_date,
-                COUNT(br.room_id) as booked_count
-            FROM bookings AS b
-            JOIN booking_rooms AS br ON b.id = br.booking_id
-            WHERE b.status = 'confirmed'
-              AND (
-                  (b.check_in_date < :end AND b.check_out_date > :start)
-              )
-            GROUP BY b.id";
-            // 注意: これは予約ごとのカウント。日付ごとの埋まり具合を知るには展開が必要。
-
-    // より単純なアプローチ:
     // 予約データを全て取得し、PHPでカレンダー配列を埋める
 
     $sql_bookings = "SELECT
