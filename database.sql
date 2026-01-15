@@ -60,6 +60,7 @@ CREATE TABLE `bookings` (
   `user_id` int(11) DEFAULT NULL COMMENT '顧客ID (ゲスト予約の場合はNULL)',
   `guest_name` varchar(255) DEFAULT NULL COMMENT 'ゲストの氏名',
   `guest_email` varchar(255) DEFAULT NULL COMMENT 'ゲストのメールアドレス',
+  `guest_phone` varchar(20) DEFAULT NULL COMMENT 'ゲスト電話番号',
   `check_in_date` date NOT NULL COMMENT 'チェックイン日',
   `check_out_date` date NOT NULL COMMENT 'チェックアウト日',
   `check_in_time` varchar(20) DEFAULT NULL COMMENT '到着予定時刻',

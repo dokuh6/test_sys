@@ -237,7 +237,24 @@ $nights = $datetime1->diff($datetime2)->days;
             </a>
 
             <?php if (isset($booking['status']) && $booking['status'] === 'confirmed'): ?>
-                <div class="mt-6">
+                <div class="mt-6 flex justify-center gap-6 items-center">
+                    <?php
+                    // Build edit link with params
+                    $edit_params = [];
+                    if ($token) {
+                        $edit_params[] = "token=" . urlencode($token);
+                    } elseif ($booking_number && $email) {
+                        $edit_params[] = "booking_number=" . urlencode($booking_number);
+                        $edit_params[] = "guest_email=" . urlencode($email);
+                    } else {
+                        $edit_params[] = "booking_id=" . urlencode($booking['id']);
+                    }
+                    $edit_url = "edit_booking.php?" . implode('&', $edit_params);
+                    ?>
+                    <a href="<?php echo h($edit_url); ?>" class="text-primary hover:text-primary-dark underline font-bold">
+                        予約内容を変更する
+                    </a>
+
                     <button onclick="document.getElementById('cancel-modal').classList.remove('hidden')" class="text-red-500 hover:text-red-700 underline text-sm">
                         <?php echo h(t('btn_cancel_booking') ?? '予約をキャンセルする'); ?>
                     </button>

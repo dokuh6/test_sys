@@ -108,13 +108,18 @@ try {
                             </td>
                             <td class="py-3 px-6">
                                 <?php if ($booking['status'] === 'confirmed'): ?>
-                                    <form action="cancel_booking.php" method="POST" class="inline">
-                                        <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
-                                        <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
-                                        <button type="submit" class="text-red-500 hover:text-red-700 hover:underline font-semibold" onclick="return confirm('本当にこの予約をキャンセルしますか？');">
-                                            <?php echo h(t('action_cancel')); ?>
-                                        </button>
-                                    </form>
+                                    <div class="flex flex-col gap-1">
+                                        <a href="edit_booking.php?booking_id=<?php echo h($booking['id']); ?>" class="text-primary hover:text-primary-dark hover:underline font-semibold text-sm">
+                                            変更
+                                        </a>
+                                        <form action="cancel_booking.php" method="POST" class="inline">
+                                            <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
+                                            <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
+                                            <button type="submit" class="text-red-500 hover:text-red-700 hover:underline font-semibold text-sm" onclick="return confirm('本当にこの予約をキャンセルしますか？');">
+                                                <?php echo h(t('action_cancel')); ?>
+                                            </button>
+                                        </form>
+                                    </div>
                                 <?php endif; ?>
                             </td>
                         </tr>

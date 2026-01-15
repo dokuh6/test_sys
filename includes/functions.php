@@ -368,6 +368,139 @@ function send_cancellation_email($booking_id, $dbh) {
 }
 
 /**
+ * 予約変更メールを送信する
+ * @param int $booking_id 予約ID
+ * @param PDO $dbh データベース接続オブジェクト
+ * @return bool 送信成功でtrue、失敗でfalse
+ */
+function send_booking_modification_email($booking_id, $dbh) {
+    try {
+        // 予約情報を取得
+        $sql = "SELECT
+                    b.id, b.guest_name, b.guest_email, b.guest_phone, b.check_in_date, b.check_out_date, b.check_in_time, b.check_out_time, b.num_guests, b.num_children, b.notes, b.total_price,
+                    b.booking_number,
+                    r.name as room_name, rt.name as type_name
+                FROM bookings b
+                JOIN booking_rooms br ON b.id = br.booking_id
+                JOIN rooms r ON br.room_id = r.id
+                JOIN room_types rt ON r.room_type_id = rt.id
+                WHERE b.id = :booking_id";
+
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$booking) {
+            return false;
+        }
+
+        $booking_number = isset($booking['booking_number']) ? $booking['booking_number'] : $booking['id'];
+        $formatted_price = number_format($booking['total_price']);
+
+        // --- ゲスト向けメール ---
+        $to_guest = $booking['guest_email'];
+        $subject_guest = '【ゲストハウス丸正】ご予約内容変更のお知らせ';
+
+        $body_guest = "
+        <html>
+        <head>
+            <style>
+                body { font-family: sans-serif; color: #333; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; }
+                .header { background-color: #e67e22; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header h1 { margin: 0; font-size: 24px; }
+                .content { padding: 20px; background-color: #ffffff; }
+                .booking-details { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                .booking-details th, .booking-details td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+                .booking-details th { background-color: #f2f2f2; width: 40%; }
+                .footer { margin-top: 20px; font-size: 12px; color: #777; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>ゲストハウス丸正</h1>
+                    <p>予約内容変更のお知らせ</p>
+                </div>
+                <div class='content'>
+                    <p>{$booking['guest_name']} 様</p>
+                    <p>いつもご利用ありがとうございます。<br>
+                    ご予約内容の変更を承りました。以下の内容をご確認ください。</p>
+
+                    <table class='booking-details'>
+                        <tr>
+                            <th>予約番号</th>
+                            <td><strong>{$booking_number}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>お部屋</th>
+                            <td>{$booking['room_name']} ({$booking['type_name']})</td>
+                        </tr>
+                        <tr>
+                            <th>チェックイン</th>
+                            <td>{$booking['check_in_date']} " . ($booking['check_in_time'] ? "({$booking['check_in_time']})" : "") . "</td>
+                        </tr>
+                        <tr>
+                            <th>チェックアウト</th>
+                            <td>{$booking['check_out_date']} " . ($booking['check_out_time'] ? "({$booking['check_out_time']})" : "") . "</td>
+                        </tr>
+                        <tr>
+                            <th>ご利用人数</th>
+                            <td>大人: {$booking['num_guests']}名, 子供: {$booking['num_children']}名</td>
+                        </tr>
+                        " . ($booking['notes'] ? "<tr><th>備考</th><td>" . nl2br(h($booking['notes'])) . "</td></tr>" : "") . "
+                        <tr>
+                            <th>合計金額</th>
+                            <td><span style='color: #c0392b; font-weight: bold;'>¥{$formatted_price}</span></td>
+                        </tr>
+                    </table>
+
+                    <p>ご不明な点がございましたら、お気軽にお問い合わせください。</p>
+                </div>
+                <div class='footer'>
+                    <p>ゲストハウス丸正<br>
+                    TEL: 00-0000-0000</p>
+                    <p>※このメールは自動送信されています。</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+
+        // ゲストへ送信
+        $guest_result = send_email_smtp($to_guest, $subject_guest, $body_guest, $dbh, true);
+
+        // --- 管理者向けメール ---
+        // 定数が未定義の場合は仮のアドレスまたはスキップ
+        $admin_email = defined('ADMIN_EMAIL') ? ADMIN_EMAIL : 'admin@example.com';
+
+        $subject_admin = "【管理者通知】予約変更: {$booking_number} ({$booking['guest_name']}様)";
+        $body_admin = "
+        以下の予約が変更されました。
+
+        予約番号: {$booking_number}
+        氏名: {$booking['guest_name']}
+        電話番号: {$booking['guest_phone']}
+        日程: {$booking['check_in_date']} ～ {$booking['check_out_date']}
+        人数: 大人 {$booking['num_guests']}名, 子供 {$booking['num_children']}名
+        合計金額: ¥{$formatted_price}
+        備考: {$booking['notes']}
+
+        管理画面で詳細をご確認ください。
+        ";
+
+        send_email_smtp($admin_email, $subject_admin, $body_admin, $dbh, false);
+
+        return $guest_result;
+
+    } catch (Exception $e) {
+        error_log('Email sending failed in send_booking_modification_email: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
  * CSRFトークンを生成し、セッションに保存する
  * @return string 生成されたトークン
  */
