@@ -117,7 +117,23 @@ if (!$room) {
                         <span class="material-icons text-primary dark:text-blue-400">calendar_month</span>
                         <?php echo h(t('availability_calendar_title')); ?>
                     </h3>
-                    <div id='calendar' class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 text-sm"></div>
+                    <div id='calendar' class="bg-white dark:bg-gray-800 p-2 md:p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 text-sm md:text-base"></div>
+                    <style>
+                        /* カレンダーのモバイル最適化 */
+                        @media (max-width: 640px) {
+                            .fc-toolbar {
+                                flex-direction: column;
+                                gap: 8px;
+                            }
+                            .fc-toolbar-title {
+                                font-size: 1.25rem !important;
+                            }
+                            .fc .fc-button {
+                                padding: 0.2rem 0.5rem;
+                                font-size: 0.875rem;
+                            }
+                        }
+                    </style>
                 </div>
 
                 <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8">
@@ -258,10 +274,19 @@ if (!$room) {
             },
             events: 'api/get_public_availability.php?room_id=<?php echo $room_id; ?>',
             height: 'auto',
+            contentHeight: 'auto',
+            aspectRatio: 1.35, // モバイルで見やすい比率
             businessHours: true,
             validRange: {
                 start: '<?php echo date("Y-m-d"); ?>'
             },
+            // モバイル用調整
+            views: {
+                dayGridMonth: {
+                    titleFormat: { year: 'numeric', month: 'short' } // スマホでタイトルが長くなりすぎないように
+                }
+            },
+            selectLongPressDelay: 0, // スマホでも長押し不要で選択可能にする
             select: function(info) {
                 var checkInInput = document.getElementById('check_in_date');
                 var checkOutInput = document.getElementById('check_out_date');
@@ -273,8 +298,32 @@ if (!$room) {
                 } else {
                      var date = new Date(info.start);
                      date.setDate(date.getDate() + 1);
-                     checkOutInput.value = date.toISOString().split('T')[0];
+                     var year = date.getFullYear();
+                     var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                     var day = date.getDate().toString().padStart(2, '0');
+                     checkOutInput.value = `${year}-${month}-${day}`;
                 }
+
+                checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                checkInInput.focus();
+
+                // Trigger change event to update price
+                checkInInput.dispatchEvent(new Event('change'));
+                checkOutInput.dispatchEvent(new Event('change'));
+            },
+            dateClick: function(info) {
+                var checkInInput = document.getElementById('check_in_date');
+                var checkOutInput = document.getElementById('check_out_date');
+
+                checkInInput.value = info.dateStr;
+
+                // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
+                var date = new Date(info.date);
+                date.setDate(date.getDate() + 1);
+                var year = date.getFullYear();
+                var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                var day = date.getDate().toString().padStart(2, '0');
+                checkOutInput.value = `${year}-${month}-${day}`;
 
                 checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 checkInInput.focus();

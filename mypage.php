@@ -1,6 +1,5 @@
 <?php
-require_once 'includes/header.php';
-$csrf_token = generate_csrf_token();
+require_once 'includes/init.php';
 
 // ログインチェック
 if (!isset($_SESSION['user'])) {
@@ -8,6 +7,9 @@ if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit();
 }
+
+require_once 'includes/header.php';
+$csrf_token = generate_csrf_token();
 
 $user_id = $_SESSION['user']['id'];
 

@@ -44,24 +44,26 @@ require_once 'admin_header.php';
             selectable: true,
             select: function(info) {
                 // 空きスロットクリック時の処理: 新規予約画面へ
-                // startStrはISO文字列。book.phpに渡すためにYYYY-MM-DD形式に調整が必要な場合があるが、
                 // info.startStrが "2023-10-01" のような日付文字列（時間なし）ならそのまま使える。
-                // Resource Timeline Viewの場合、resourceが選択されている。
+                var startDate = info.startStr.split('T')[0];
+                var endDate = info.endStr.split('T')[0];
+                var url = 'add_booking.php?check_in=' + startDate + '&check_out=' + endDate;
+
+                // Resource Timeline Viewの場合、resourceが選択されているのでroom_idも渡す
                 if (info.resource) {
                     var roomId = info.resource.id;
-                    var startDate = info.startStr.split('T')[0]; // 時間が含まれる場合を除去
-                    // 終了日はFullCalendarでは排他的だが、book.phpではチェックアウト日として扱うため、
-                    // 1泊なら翌日がendなのでそのまま渡してOK。
-                    var endDate = info.endStr.split('T')[0];
-
-                    // 宿泊人数はデフォルト1とする（後で変更可能）
-                    var url = 'add_booking.php?room_id=' + roomId +
-                              '&check_in=' + startDate +
-                              '&check_out=' + endDate;
-
-                    // 管理者用予約作成画面へ遷移
-                    window.location.href = url;
+                    url += '&room_id=' + roomId;
                 }
+
+                // 管理者用予約作成画面へ遷移
+                window.location.href = url;
+            },
+            // 日付枠クリック (DayGridMonthなどresourceがない場合用)
+            dateClick: function(info) {
+                // selectコールバックは範囲選択時に発火するが、単一日付クリックもselectとして扱われる設定(selectable: true)
+                // しかし、viewによっては動作が異なる場合があるため、明示的なdateClickも検討。
+                // ただしselectable: trueの場合、日付クリックはselectイベントとして処理されることが多い。
+                // ここではselectで統一処理するが、もし反応しない場合はここを追加する。
             },
             eventClick: function(info) {
                 // イベントクリック時の処理（リンク遷移はeventオブジェクトのurlプロパティで自動処理されるが、ここで制御も可能）
@@ -84,6 +86,24 @@ require_once 'admin_header.php';
     /* FullCalendarのスタイル調整 */
     .fc-event {
         cursor: pointer;
+        padding: 4px; /* タップ領域を広げる */
+    }
+    /* モバイル最適化 */
+    @media (max-width: 768px) {
+        .fc-toolbar {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fc-toolbar-title {
+            font-size: 1.2em;
+        }
+        .fc-resource-area {
+             /* 部屋名エリアの幅調整 */
+        }
+        /* セルの高さを確保してタップしやすく */
+        .fc-timeline-slot {
+            height: 44px;
+        }
     }
 </style>
 

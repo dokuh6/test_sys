@@ -15,6 +15,21 @@ require_once 'includes/header.php';
             <span class="material-icons text-primary dark:text-blue-400">search</span>
             <?php echo h(t('index_search_title')); ?>
         </h3>
+
+        <!-- Toggle Button for Calendar -->
+        <div class="text-center mb-6">
+            <button id="toggle-calendar-btn" class="text-primary dark:text-blue-400 hover:underline flex items-center justify-center gap-2 mx-auto bg-white dark:bg-gray-700 px-4 py-2 rounded shadow-sm">
+                <span class="material-icons">calendar_month</span>
+                カレンダーから日付を選択
+            </button>
+        </div>
+
+        <!-- Calendar Section (Hidden by default or Modal-like) -->
+        <div id="search-calendar-container" class="hidden mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-inner">
+             <div id="search-calendar"></div>
+             <p class="text-xs text-center text-gray-500 mt-2">※赤色の日は満室です。日付をタップするとチェックイン日に設定されます。</p>
+        </div>
+
         <form class="flex flex-col md:flex-row gap-6 justify-center items-end" action="search_results.php" method="GET">
             <div class="w-full md:w-auto flex-1">
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2" for="check_in_date"><?php echo h(t('form_check_in')); ?>:</label>
@@ -164,6 +179,85 @@ require_once 'includes/header.php';
         </div>
     </div>
 </div>
+
+<!-- FullCalendar Script for Search -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle Calendar Visibility
+    const toggleBtn = document.getElementById('toggle-calendar-btn');
+    const calendarContainer = document.getElementById('search-calendar-container');
+    const calendarEl = document.getElementById('search-calendar');
+    let calendar = null;
+
+    toggleBtn.addEventListener('click', function() {
+        calendarContainer.classList.toggle('hidden');
+        if (!calendarContainer.classList.contains('hidden') && !calendar) {
+            initCalendar();
+        }
+    });
+
+    function initCalendar() {
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: '<?php echo $current_lang ?? "ja"; ?>',
+            selectable: true,
+            selectOverlap: true, // 満室の日はイベントでカバーするが、選択自体はイベントと被ってもOK（ただしロジックで弾く）
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: 'today'
+            },
+            height: 'auto',
+            contentHeight: 'auto',
+            events: 'api/get_aggregated_availability.php',
+            validRange: {
+                start: '<?php echo date("Y-m-d"); ?>'
+            },
+            selectLongPressDelay: 0, // スマホでも長押し不要で選択可能にする
+            select: function(info) {
+                // 選択された日付をセット
+                document.getElementById('check_in_date').value = info.startStr;
+
+                if (info.endStr) {
+                    document.getElementById('check_out_date').value = info.endStr;
+                } else {
+                    // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
+                    let date = new Date(info.start);
+                    date.setDate(date.getDate() + 1);
+                    let year = date.getFullYear();
+                    let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    let day = date.getDate().toString().padStart(2, '0');
+                    document.getElementById('check_out_date').value = `${year}-${month}-${day}`;
+                }
+
+                // フォームへスクロール
+                document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            },
+            dateClick: function(info) {
+                // スマホでタップしただけの時も同様の処理を行う
+                document.getElementById('check_in_date').value = info.dateStr;
+
+                // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
+                let date = new Date(info.date);
+                date.setDate(date.getDate() + 1);
+                let year = date.getFullYear();
+                let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                let day = date.getDate().toString().padStart(2, '0');
+                document.getElementById('check_out_date').value = `${year}-${month}-${day}`;
+
+                // フォームへスクロール
+                document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            },
+            eventClick: function(info) {
+                 // 満室イベント(background)をクリックしてもselectは発火しない場合がある
+                 // しかしbackgroundイベントはクリックを透過するはず。
+            }
+        });
+        calendar.render();
+    }
+});
+</script>
 
 <?php
 require_once 'includes/footer.php';

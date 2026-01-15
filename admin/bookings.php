@@ -118,6 +118,7 @@ require_once 'admin_header.php';
     <p style="color: red;"><?php echo $error; ?></p>
 <?php endif; ?>
 
+<div class="table-responsive">
 <table>
     <thead>
         <tr>
@@ -179,6 +180,7 @@ require_once 'admin_header.php';
         <?php endif; ?>
     </tbody>
 </table>
+</div>
 <style>
 .status-confirmed { color: green; font-weight: bold; }
 .status-cancelled { color: red; text-decoration: line-through; }

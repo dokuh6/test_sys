@@ -62,12 +62,21 @@ if (!isset($root_path)) {
             <a class="hover:text-white transition-colors" href="?lang=en">English</a>
         </div>
     </div>
-    <header class="bg-primary shadow-lg">
-        <div class="max-w-6xl mx-auto py-6 px-4 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-6 tracking-wider">
-                <a href="<?php echo $root_path; ?>index.php" class="hover:text-white"><?php echo h(t('site_title')); ?></a>
-            </h1>
-            <nav class="flex flex-wrap justify-center gap-6 md:gap-8 text-white/90 font-medium text-sm md:text-base">
+    <header class="bg-primary shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto py-4 px-4 flex flex-col md:flex-row justify-between items-center relative">
+
+            <!-- Mobile Top Bar: Logo + Hamburger -->
+            <div class="w-full md:w-auto flex justify-between items-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wider">
+                    <a href="<?php echo $root_path; ?>index.php" class="hover:text-white"><?php echo h(t('site_title')); ?></a>
+                </h1>
+                <button id="mobile-menu-btn" class="md:hidden text-white focus:outline-none p-2">
+                    <span class="material-icons text-3xl">menu</span>
+                </button>
+            </div>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex gap-6 text-white/90 font-medium text-sm">
                 <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>rooms.php"><?php echo h(t('nav_rooms')); ?></a>
                 <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>check_booking.php"><?php echo h(t('nav_check_booking')); ?></a>
                 <?php if (isset($_SESSION['user'])): ?>
@@ -78,6 +87,32 @@ if (!isset($root_path)) {
                     <a class="hover:text-white hover:underline decoration-2 underline-offset-4 transition-all" href="<?php echo $root_path; ?>register.php"><?php echo h(t('nav_register')); ?></a>
                 <?php endif; ?>
             </nav>
+
+            <!-- Mobile Nav (Hidden by default) -->
+            <div id="mobile-menu" class="hidden w-full md:hidden mt-4 border-t border-primary-dark pt-4">
+                <nav class="flex flex-col gap-4 text-white font-medium text-center">
+                    <a class="block py-2 hover:bg-primary-dark rounded transition-colors" href="<?php echo $root_path; ?>rooms.php"><?php echo h(t('nav_rooms')); ?></a>
+                    <a class="block py-2 hover:bg-primary-dark rounded transition-colors" href="<?php echo $root_path; ?>check_booking.php"><?php echo h(t('nav_check_booking')); ?></a>
+                    <?php if (isset($_SESSION['user'])): ?>
+                        <a class="block py-2 hover:bg-primary-dark rounded transition-colors" href="<?php echo $root_path; ?>mypage.php"><?php echo h(t('nav_mypage')); ?></a>
+                        <a class="block py-2 hover:bg-primary-dark rounded transition-colors" href="<?php echo $root_path; ?>logout.php"><?php echo h(t('nav_logout')); ?></a>
+                    <?php else: ?>
+                        <a class="block py-2 hover:bg-primary-dark rounded transition-colors" href="<?php echo $root_path; ?>login.php"><?php echo h(t('nav_login')); ?></a>
+                        <a class="block py-2 hover:bg-primary-dark rounded transition-colors" href="<?php echo $root_path; ?>register.php"><?php echo h(t('nav_register')); ?></a>
+                    <?php endif; ?>
+                </nav>
+            </div>
         </div>
     </header>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            if(btn && menu) {
+                btn.addEventListener('click', function() {
+                    menu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
     <main class="flex-grow py-12 px-4">

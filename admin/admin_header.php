@@ -15,9 +15,9 @@
         .admin-sidebar ul { list-style: none; padding: 0; margin: 0; }
         .admin-sidebar li a { display: block; padding: 1rem; color: white; text-decoration: none; border-bottom: 1px solid #46627f; }
         .admin-sidebar li a:hover { background-color: #46627f; }
-        .admin-main { flex: 1; padding: 2rem; }
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; background-color: white; min-width: 600px; }
+        .admin-main { flex: 1; padding: 2rem; max-width: 100%; box-sizing: border-box; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 0; background-color: white; min-width: 600px; }
         th, td { border: 1px solid #ddd; padding: 0.8rem; text-align: left; }
         th { background-color: #eaf2f5; }
         .btn-admin { padding: 8px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; text-decoration: none; display: inline-block; }
@@ -25,27 +25,42 @@
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .admin-container { flex-direction: column; }
-            .admin-sidebar { width: 100%; min-height: auto; }
-            .admin-sidebar ul { display: flex; flex-wrap: wrap; }
-            .admin-sidebar li { flex: 1; text-align: center; }
-            .admin-header { flex-direction: column; text-align: center; gap: 10px; }
+            .admin-sidebar { width: 100%; min-height: auto; display: none; }
+            .admin-sidebar.active { display: block; }
+            .admin-sidebar ul { display: block; }
+            .admin-sidebar li { text-align: left; border-bottom: 1px solid #46627f; }
+
+            .admin-header { flex-direction: row; flex-wrap: wrap; gap: 10px; padding: 0.8rem; }
+            .admin-header .logo-group { display: flex; align-items: center; gap: 10px; flex-grow: 1; }
+            .admin-nav { width: 100%; text-align: right; border-top: 1px solid #46627f; padding-top: 10px; margin-top: 5px; display: none; }
+            .admin-nav.active { display: block; }
+
+            /* Toggle buttons */
+            #sidebar-toggle, #nav-toggle { display: block !important; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 5px; }
+
             .admin-main { padding: 1rem; }
         }
+
+        #sidebar-toggle, #nav-toggle { display: none; }
         .btn-cancel { background-color: #e74c3c; }
         .btn-cancel:hover { background-color: #c0392b; }
     </style>
 </head>
 <body>
     <header class="admin-header">
-        <h1><a href="index.php">管理画面</a></h1>
-        <div class="admin-nav">
+        <div class="logo-group">
+            <button id="sidebar-toggle">☰</button>
+            <h1><a href="index.php">管理画面</a></h1>
+        </div>
+        <button id="nav-toggle">⋮</button>
+        <div class="admin-nav" id="admin-nav">
             <span>ようこそ、<?php echo h($_SESSION['user']['name']); ?>様</span>
             <a href="../logout.php">ログアウト</a>
             <a href="../index.php" target="_blank">サイトを表示</a>
         </div>
     </header>
     <div class="admin-container">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar">
             <ul>
                 <li><a href="index.php">ダッシュボード</a></li>
                 <li><a href="bookings.php">予約管理</a></li>
@@ -57,3 +72,23 @@
             </ul>
         </aside>
         <main class="admin-main">
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var sidebarToggle = document.getElementById('sidebar-toggle');
+                    var sidebar = document.getElementById('admin-sidebar');
+                    var navToggle = document.getElementById('nav-toggle');
+                    var nav = document.getElementById('admin-nav');
+
+                    if(sidebarToggle && sidebar) {
+                        sidebarToggle.addEventListener('click', function() {
+                            sidebar.classList.toggle('active');
+                        });
+                    }
+
+                    if(navToggle && nav) {
+                        navToggle.addEventListener('click', function() {
+                            nav.classList.toggle('active');
+                        });
+                    }
+                });
+            </script>
