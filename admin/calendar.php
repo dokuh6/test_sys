@@ -37,6 +37,35 @@ require_once 'admin_header.php';
                 center: 'title',
                 right: 'resourceTimelineMonth,dayGridMonth'
             },
+            views: {
+                resourceTimelineMonth: {
+                    buttonText: '部屋別'
+                },
+                dayGridMonth: {
+                    buttonText: '月別'
+                }
+            },
+            datesSet: function(info) {
+                if (info.view.type === 'resourceTimelineMonth') {
+                    var now = new Date();
+                    now.setHours(0, 0, 0, 0); // 時間をリセットして日付比較
+
+                    // 表示範囲内に今日が含まれているか確認
+                    if (now >= info.start && now < info.end) {
+                        var year = now.getFullYear();
+                        var month = (now.getMonth() + 1).toString().padStart(2, '0');
+                        var day = now.getDate().toString().padStart(2, '0');
+                        var dateStr = year + '-' + month + '-' + day;
+
+                        // 今日のスロット要素を検索
+                        var slot = document.querySelector('.fc-timeline-slot[data-date="' + dateStr + '"]');
+                        if (slot) {
+                            // 左端にスクロール
+                            slot.scrollIntoView({ inline: 'start', block: 'nearest' });
+                        }
+                    }
+                }
+            },
             resourceAreaWidth: '15%',
             resourceAreaHeaderContent: '部屋',
             resources: <?php echo json_encode($rooms); ?>,
