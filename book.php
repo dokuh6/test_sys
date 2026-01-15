@@ -40,11 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 電話番号のバリデーション: 10-15桁, 数字・ハイフン・プラスのみ許可
     if ($guest_tel && !preg_match('/^[0-9+\-]{10,15}$/', $guest_tel)) {
         $guest_tel = false; // 無効な電話番号扱い
-        $errors[] = "電話番号の形式が正しくありません。";
+        $errors[] = t('book_error_phone');
     }
 
     if (!$room_id || !$check_in || !$check_out || !$num_guests || !$total_price || !$guest_name || !$guest_email) {
-        $errors[] = "入力情報が不完全です。";
+        $errors[] = t('book_error_incomplete');
     }
 
     // フォームに値を戻すために変数へ代入（filter_inputで取得済みだが、falseの場合は元データを維持したい場合は$_POSTを参照すべきだが、ここでは簡易化）
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_lock->execute([':room_id' => $room_id]);
             } catch (PDOException $e) {
                 if ($e->getCode() == 'HY000' && strpos($e->getMessage(), '1205') !== false) {
-                    throw new Exception("ただいまアクセスが集中しており、処理を完了できませんでした。しばらく経ってから再度お試しください。");
+                    throw new Exception(t('book_error_lock'));
                 }
                 throw $e;
             }
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             if ($stmt_check->fetch()) {
-                throw new Exception("申し訳ございませんが、タッチの差で他の方が予約されました。別の日程で再度お試しください。");
+                throw new Exception(t('book_error_taken'));
             }
 
             // 4. 価格の再計算（セキュリティ対策: クライアント側での改ざん防止）
@@ -154,13 +154,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             try {
                 $admin_email = defined('ADMIN_EMAIL') ? ADMIN_EMAIL : 'admin@example.com';
-                $admin_subject = '【新規予約】予約が入りました (' . $booking_number . ')';
-                $admin_body = "新しい予約が入りました。\n\n";
-                $admin_body .= "予約番号: " . $booking_number . "\n";
-                $admin_body .= "ゲスト名: " . $guest_name . "\n";
-                $admin_body .= "チェックイン: " . $check_in . "\n";
-                $admin_body .= "チェックアウト: " . $check_out . "\n";
-                $admin_body .= "合計金額: ¥" . number_format($total_price) . "\n";
+                $admin_subject = t('email_admin_subject_new', $booking_number);
+                $admin_body = t('email_admin_body_new') . "\n\n";
+                $admin_body .= t('booking_number') . ": " . $booking_number . "\n";
+                $admin_body .= t('form_name') . ": " . $guest_name . "\n";
+                $admin_body .= t('form_check_in') . ": " . $check_in . "\n";
+                $admin_body .= t('form_check_out') . ": " . $check_out . "\n";
+                $admin_body .= t('booking_info_total_price') . ": ¥" . number_format($total_price) . "\n";
 
                 $admin_headers = "From: noreply@example.com\r\n";
                 $admin_headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($dbh->inTransaction()) {
                 $dbh->rollBack();
             }
-            $errors[] = "予約処理中にエラーが発生しました: " . h($e->getMessage());
+            $errors[] = t('book_error_process', h($e->getMessage()));
         }
     }
 } else {
@@ -194,10 +194,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $num_children = filter_input(INPUT_GET, 'num_children', FILTER_VALIDATE_INT) ?? 0;
 
     if (!$room_id || !$check_in || !$check_out || !$num_guests) {
-        $errors[] = "予約情報が正しくありません。もう一度最初からやり直してください。";
+        $errors[] = t('book_error_invalid');
     } else {
         if (strtotime($check_in) >= strtotime($check_out)) {
-            $errors[] = "チェックアウト日はチェックイン日より後の日付でなければなりません。";
+            $errors[] = t('book_error_dates');
         }
     }
 
@@ -233,13 +233,13 @@ if ($room_id) {
         $room = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$room) {
-            $errors[] = "指定された部屋が見つかりません。";
+            $errors[] = t('book_error_room_not_found');
         } elseif ($num_guests > $room['capacity']) {
-            $errors[] = "この部屋の定員は{$room['capacity']}名です。人数が超過しています。";
+            $errors[] = t('book_error_capacity', $room['capacity']);
         }
 
     } catch (PDOException $e) {
-        $errors[] = "データベースエラー: " . h($e->getMessage());
+        $errors[] = t('error_db') . ": " . h($e->getMessage());
     }
 }
 
@@ -306,7 +306,7 @@ $csrf_token = generate_csrf_token();
                     <li><strong class="font-semibold"><?php echo h(t('booking_info_nights')); ?>:</strong> <?php echo h(t('booking_info_nights_count', $nights)); ?></li>
                     <li><strong class="font-semibold"><?php echo h(t('booking_info_guests')); ?>:</strong> <?php echo h($num_guests); ?>名 (子供: <?php echo h($num_children); ?>名)</li>
                     <?php if ($notes): ?>
-                        <li><strong class="font-semibold">備考:</strong> <?php echo nl2br(h($notes)); ?></li>
+                        <li><strong class="font-semibold"><?php echo h(t('book_notes_label')); ?></strong> <?php echo nl2br(h($notes)); ?></li>
                     <?php endif; ?>
                 </ul>
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-4 text-right">
@@ -331,9 +331,9 @@ $csrf_token = generate_csrf_token();
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="check_in_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">チェックイン予定:</label>
+                            <label for="check_in_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('book_check_in_time_label')); ?></label>
                             <select id="check_in_time" name="check_in_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]">
-                                <option value="">選択してください</option>
+                                <option value=""><?php echo h(t('book_select_placeholder')); ?></option>
                                 <?php for($i = 15; $i <= 22; $i++): ?>
                                     <?php $t = $i . ':00'; $sel = ($check_in_time == $t) ? 'selected' : ''; ?>
                                     <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
@@ -343,9 +343,9 @@ $csrf_token = generate_csrf_token();
                             </select>
                         </div>
                         <div>
-                            <label for="check_out_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">チェックアウト予定:</label>
+                            <label for="check_out_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('book_check_out_time_label')); ?></label>
                             <select id="check_out_time" name="check_out_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]">
-                                <option value="">選択してください</option>
+                                <option value=""><?php echo h(t('book_select_placeholder')); ?></option>
                                 <?php for($i = 6; $i <= 11; $i++): ?>
                                     <?php $t = $i . ':00'; $sel = ($check_out_time == $t) ? 'selected' : ''; ?>
                                     <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
@@ -370,7 +370,7 @@ $csrf_token = generate_csrf_token();
                     </div>
 
                     <div>
-                        <label for="notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">備考:</label>
+                        <label for="notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"><?php echo h(t('book_notes_label')); ?></label>
                         <textarea id="notes" name="notes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]"><?php echo h($notes); ?></textarea>
                     </div>
 
@@ -384,7 +384,7 @@ $csrf_token = generate_csrf_token();
             document.getElementById('bookingForm').addEventListener('submit', function() {
                 var btn = document.getElementById('submitBtn');
                 btn.disabled = true;
-                btn.innerHTML = '<?php echo h(t('processing_wait')); ?>...';
+                btn.innerHTML = '<?php echo h(t('book_processing')); ?>';
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
             });
         </script>
@@ -393,28 +393,28 @@ $csrf_token = generate_csrf_token();
         <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
             <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
                 <span class="material-icons text-primary dark:text-blue-400">info</span>
-                ご利用案内
+                <?php echo h(t('info_guide_title')); ?>
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <!-- Left Column -->
                  <div class="space-y-6">
                     <!-- Pricing -->
                     <div>
-                        <h4 class="font-bold text-gray-800 dark:text-white mb-2">宿泊料金について</h4>
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('info_pricing_title')); ?></h4>
                         <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
-                            <li>大人料金: 4,500円（お一人）</li>
-                            <li>子供料金（中学生まで）: 2,500円（寝具持込み）</li>
-                            <li class="text-sm">※乳幼児（5歳まで）など布団無しで添い寝の場合は無料</li>
-                            <li class="text-sm">※お支払いは当日現金でお支払いをお願い致します。</li>
+                            <li><?php echo h(t('info_pricing_adult')); ?></li>
+                            <li><?php echo h(t('info_pricing_child')); ?></li>
+                            <li class="text-sm"><?php echo h(t('info_pricing_infant')); ?></li>
+                            <li class="text-sm"><?php echo h(t('info_pricing_payment')); ?></li>
                         </ul>
                     </div>
                      <!-- Check-in/out -->
                     <div>
-                        <h4 class="font-bold text-gray-800 dark:text-white mb-2">チェックイン・チェックアウトについて</h4>
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('info_checkin_title')); ?></h4>
                         <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
-                            <li>チェックイン: 15時～（20時以降到着の方は、当日電話にてご連絡ください）</li>
-                            <li>チェックアウト: 10時</li>
-                            <li class="text-sm">※日中・夜間共、宿泊者がいない時は宿を留守にすることもあります。宿に来る前に必ず電話で連絡してください。</li>
+                            <li><?php echo h(t('info_checkin_in')); ?></li>
+                            <li><?php echo h(t('info_checkin_out')); ?></li>
+                            <li class="text-sm"><?php echo h(t('info_checkin_note')); ?></li>
                         </ul>
                     </div>
                  </div>
@@ -423,24 +423,24 @@ $csrf_token = generate_csrf_token();
                  <div class="space-y-6">
                     <!-- Booking -->
                     <div>
-                        <h4 class="font-bold text-gray-800 dark:text-white mb-2">宿泊予約について</h4>
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('info_booking_title')); ?></h4>
                         <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
-                            <li>当サイトまたはお電話でご予約をお願いします。（電話問合せ: 8時～20時）</li>
-                            <li>予約の際は宿泊日・人数（男女別）をお知らせください。</li>
-                            <li>当日予約・飛込みも可能ですが、極力事前にご予約下さい。</li>
-                            <li>団体・グループ等の貸切はお早めにご連絡ください。</li>
+                            <li><?php echo h(t('info_booking_1')); ?></li>
+                            <li><?php echo h(t('info_booking_2')); ?></li>
+                            <li><?php echo h(t('info_booking_3')); ?></li>
+                            <li><?php echo h(t('info_booking_4')); ?></li>
                         </ul>
                     </div>
                     <!-- Cancellation -->
                     <div>
-                        <h4 class="font-bold text-gray-800 dark:text-white mb-2">キャンセルについて</h4>
-                        <p class="text-gray-600 dark:text-gray-300 mb-2">他のお客様のご迷惑となりますので、人数変更・キャンセルの場合は早めにご連絡ください。</p>
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('info_cancel_title')); ?></h4>
+                        <p class="text-gray-600 dark:text-gray-300 mb-2"><?php echo h(t('info_cancel_desc')); ?></p>
                         <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
-                            <li>5日前: 30％</li>
-                            <li>2日前: 50％</li>
-                            <li>前日、当日、無断キャンセル: 100％</li>
-                            <li class="text-sm">※貸切予約および繁忙期（GW、お盆、年末年始）は、7日前より50％、5日前より70％、3日前より100％となります。</li>
-                            <li class="text-sm">（天災及びアクシデントによる場合は除きます）</li>
+                            <li><?php echo h(t('info_cancel_policy_1')); ?></li>
+                            <li><?php echo h(t('info_cancel_policy_2')); ?></li>
+                            <li><?php echo h(t('info_cancel_policy_3')); ?></li>
+                            <li class="text-sm"><?php echo h(t('info_cancel_policy_note')); ?></li>
+                            <li class="text-sm"><?php echo h(t('info_cancel_policy_except')); ?></li>
                         </ul>
                     </div>
                  </div>

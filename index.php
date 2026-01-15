@@ -5,9 +5,9 @@ require_once 'includes/header.php';
 
 <div class="max-w-5xl mx-auto bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl overflow-hidden transition-colors duration-200">
     <div class="py-12 px-6 text-center">
-        <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 dark:text-white">ゲストハウスマル正へようこそ</h2>
+        <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 dark:text-white"><?php echo h(t('index_welcome_title')); ?></h2>
         <div class="space-y-4 text-gray-600 dark:text-gray-300 leading-relaxed max-w-4xl mx-auto text-left md:text-center">
-            <p>当館は国道１５６号線沿い美濃市曽代に在しております。清流長良川を眼下に、近くには小倉公園、国指定重要文化財の美濃橋があり、シーズンには美濃橋河川敷には多数の方がバーベキュー、キャンプ等を楽しまれております。お客様の要望等が有れば、当家の主人の漁で郡上鮎の塩焼きを食べていただけます。</p>
+            <p><?php echo h(t('index_description')); ?></p>
         </div>
     </div>
     <div class="bg-gray-50 dark:bg-gray-800/50 mx-6 mb-12 rounded-lg p-8 border border-gray-100 dark:border-gray-700">
@@ -20,14 +20,14 @@ require_once 'includes/header.php';
         <div class="text-center mb-6">
             <button id="toggle-calendar-btn" class="text-primary dark:text-blue-400 hover:underline flex items-center justify-center gap-2 mx-auto bg-white dark:bg-gray-700 px-4 py-2 rounded shadow-sm">
                 <span class="material-icons">calendar_month</span>
-                カレンダーから日付を選択
+                <?php echo h(t('calendar_btn_toggle')); ?>
             </button>
         </div>
 
         <!-- Calendar Section (Hidden by default or Modal-like) -->
         <div id="search-calendar-container" class="hidden mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-inner">
              <div id="search-calendar"></div>
-             <p class="text-xs text-center text-gray-500 mt-2">※赤色の日は満室です。日付をタップするとチェックイン日に設定されます。</p>
+             <p class="text-xs text-center text-gray-500 mt-2"><?php echo h(t('calendar_note_red')); ?></p>
         </div>
 
         <form class="flex flex-col md:flex-row gap-6 justify-center items-end" action="search_results.php" method="GET">
@@ -67,28 +67,28 @@ require_once 'includes/header.php';
             <div>
                 <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
                     <span class="material-icons text-primary dark:text-blue-400">info</span>
-                    マル正について
+                    <?php echo h(t('index_about_title')); ?>
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-4 text-gray-600 dark:text-gray-300">
                     <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
-                        1階<span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400">（共同スペース）</span>:
+                        <?php echo h(t('facility_1f')); ?><span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400"><?php echo h(t('facility_1f_sub')); ?></span>:
                     </div>
                     <div>
-                        キッチン、カウンター、テーブルがあります。自由にご利用ください。食事は付きませんが、オープンキッチンにしていますので料理を作るのも可能。もちろん持ち込みもOKです。貸し切りも可能ですので、お仲間同士で楽しむことも出来ます。
+                        <?php echo h(t('facility_1f_desc')); ?>
                     </div>
 
                     <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
-                        2階<span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400">（宿泊部屋）</span>:
+                        <?php echo h(t('facility_2f')); ?><span class="text-sm font-normal block sm:inline sm:ml-1 text-gray-500 dark:text-gray-400"><?php echo h(t('facility_2f_sub')); ?></span>:
                     </div>
                     <div>
-                        全6室（和室3部屋、洋室3部屋）。トイレ、バスは共同となります。
+                        <?php echo h(t('facility_2f_desc')); ?>
                     </div>
 
                     <div class="font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
-                        駐車場:
+                        <?php echo h(t('facility_parking')); ?>:
                     </div>
                     <div>
-                        無料駐車場完備（10台ほど）
+                        <?php echo h(t('facility_parking_desc')); ?>
                     </div>
                 </div>
             </div>
@@ -97,26 +97,26 @@ require_once 'includes/header.php';
             <div>
                 <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
                     <span class="material-icons text-primary dark:text-blue-400">payments</span>
-                    宿泊料金について
+                    <?php echo h(t('index_pricing_title')); ?>
                 </h3>
                 <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 border border-gray-100 dark:border-gray-700">
                     <ul class="space-y-4 text-gray-600 dark:text-gray-300">
                         <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
-                            <span>大人料金 <span class="text-sm text-gray-500 dark:text-gray-400">（お一人）</span></span>
+                            <span><?php echo h(t('pricing_adult')); ?> <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_adult_sub')); ?></span></span>
                             <span class="font-bold text-lg text-gray-800 dark:text-white">4,500円</span>
                         </li>
                         <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
-                            <span>子供料金 <span class="text-sm text-gray-500 dark:text-gray-400">（中学生まで）</span></span>
+                            <span><?php echo h(t('pricing_child')); ?> <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_child_sub')); ?></span></span>
                             <div class="text-right">
                                 <span class="font-bold text-lg text-gray-800 dark:text-white">2,500円</span>
-                                <span class="text-xs block text-gray-500 dark:text-gray-400">（寝具持込み）</span>
+                                <span class="text-xs block text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_bedding_note')); ?></span>
                             </div>
                         </li>
                         <li class="text-sm pt-2 text-gray-500 dark:text-gray-400">
-                            ※ 乳幼児（5歳まで）など布団無しで添い寝の場合は<span class="font-bold text-primary dark:text-blue-400">無料</span>
+                            <?php echo h(t('pricing_infant_note')); ?><span class="font-bold text-primary dark:text-blue-400"><?php echo h(t('pricing_infant_free')); ?></span>
                         </li>
                         <li class="mt-4 pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700">
-                            <span class="font-bold text-gray-800 dark:text-white">お支払い:</span> 当日現金でお支払いをお願い致します。
+                            <span class="font-bold text-gray-800 dark:text-white"><?php echo h(t('pricing_payment_label')); ?></span> <?php echo h(t('pricing_payment_text')); ?>
                         </li>
                     </ul>
                 </div>
@@ -127,7 +127,7 @@ require_once 'includes/header.php';
         <div class="border-t border-gray-200 dark:border-gray-700 pt-10">
             <h3 class="text-xl font-bold mb-8 text-gray-800 dark:text-white flex items-center gap-2">
                 <span class="material-icons text-primary dark:text-blue-400">hotel</span>
-                お部屋のご紹介
+                <?php echo h(t('index_rooms_intro_title')); ?>
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <?php
@@ -143,7 +143,7 @@ require_once 'includes/header.php';
 
                 if (empty($display_room_types)) {
                     // データがない場合のフォールバック（または非表示）
-                    echo '<p class="text-gray-600 dark:text-gray-300 col-span-3 text-center">現在、表示できるお部屋情報は準備中です。</p>';
+                    echo '<p class="text-gray-600 dark:text-gray-300 col-span-3 text-center">' . h(t('index_rooms_empty')) . '</p>';
                 } else {
                     foreach ($display_room_types as $type):
                         // 言語対応
@@ -160,13 +160,13 @@ require_once 'includes/header.php';
                         <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-2"><?php echo h($type_name); ?></h4>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
                             <span class="material-icons text-sm align-middle mr-1">group</span>
-                            最大 <?php echo h($type['capacity']); ?> 名様
+                            <?php echo h(t('room_max_capacity', $type['capacity'])); ?>
                         </p>
                         <p class="text-sm text-gray-600 dark:text-gray-300 mb-6 flex-grow leading-relaxed">
                             <?php echo nl2br(h($type_desc)); ?>
                         </p>
                         <a href="rooms.php?room_type_id=<?php echo h($type['id']); ?>" class="w-full py-2.5 px-4 rounded border border-primary text-primary hover:bg-primary hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-gray-900 font-semibold transition-all duration-200 flex items-center justify-center gap-1 group-hover:gap-2">
-                            詳細を見る
+                            <?php echo h(t('room_btn_detail')); ?>
                             <span class="material-icons text-sm">arrow_forward</span>
                         </a>
                     </div>

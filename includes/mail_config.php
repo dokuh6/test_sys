@@ -12,4 +12,4 @@ define('SMTP_PASSWORD', 'your_app_password');
 
 // 送信元情報
 define('MAIL_FROM_ADDRESS', 'noreply@guesthouse-marusho.com');
-define('MAIL_FROM_NAME', 'ゲストハウス丸正');
+define('MAIL_FROM_NAME', 'ゲストハウスマル正');
