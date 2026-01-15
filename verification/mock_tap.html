@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+</head>
+<body>
+    <button id="toggle-calendar-btn">Toggle Calendar</button>
+    <div id="search-calendar-container" class="hidden">
+        <div id="search-calendar"></div>
+    </div>
+
+    <input type="date" id="check_in_date">
+    <input type="date" id="check_out_date">
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('toggle-calendar-btn');
+        const calendarContainer = document.getElementById('search-calendar-container');
+        const calendarEl = document.getElementById('search-calendar');
+        let calendar = null;
+
+        toggleBtn.addEventListener('click', function() {
+            calendarContainer.classList.remove('hidden');
+            if (!calendar) {
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    selectable: true,
+                    selectLongPressDelay: 0,
+                    select: function(info) {
+                        document.getElementById('check_in_date').value = info.startStr;
+                        let endDate = new Date(info.start);
+                        endDate.setDate(endDate.getDate() + 1);
+                        document.getElementById('check_out_date').value = endDate.toISOString().split('T')[0];
+                    },
+                    dateClick: function(info) {
+                        document.getElementById('check_in_date').value = info.dateStr;
+                        let endDate = new Date(info.date);
+                        endDate.setDate(endDate.getDate() + 1);
+                        document.getElementById('check_out_date').value = endDate.toISOString().split('T')[0];
+                    }
+                });
+                calendar.render();
+            }
+        });
+    });
+    </script>
+</body>
+</html>

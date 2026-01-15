@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
             validRange: {
                 start: '<?php echo date("Y-m-d"); ?>'
             },
+            selectLongPressDelay: 0, // スマホでも長押し不要で選択可能にする
             select: function(info) {
                 // 選択された日付をセット
                 document.getElementById('check_in_date').value = info.startStr;
@@ -223,8 +224,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 endDate.setDate(endDate.getDate() + 1);
                 document.getElementById('check_out_date').value = endDate.toISOString().split('T')[0];
 
-                // カレンダーを閉じるか、そのままスクロールするか
-                // calendarContainer.classList.add('hidden'); // お好みで
+                // フォームへスクロール
+                document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            },
+            dateClick: function(info) {
+                // スマホでタップしただけの時も同様の処理を行う
+                // selectLongPressDelay: 0 でもよいが、明示的なタップハンドラもあると確実
+                document.getElementById('check_in_date').value = info.dateStr;
+
+                // デフォルト1泊
+                let endDate = new Date(info.date);
+                endDate.setDate(endDate.getDate() + 1);
+                document.getElementById('check_out_date').value = endDate.toISOString().split('T')[0];
 
                 // フォームへスクロール
                 document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });

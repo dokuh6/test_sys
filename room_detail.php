@@ -286,6 +286,7 @@ if (!$room) {
                     titleFormat: { year: 'numeric', month: 'short' } // スマホでタイトルが長くなりすぎないように
                 }
             },
+            selectLongPressDelay: 0, // スマホでも長押し不要で選択可能にする
             select: function(info) {
                 var checkInInput = document.getElementById('check_in_date');
                 var checkOutInput = document.getElementById('check_out_date');
@@ -299,6 +300,24 @@ if (!$room) {
                      date.setDate(date.getDate() + 1);
                      checkOutInput.value = date.toISOString().split('T')[0];
                 }
+
+                checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                checkInInput.focus();
+
+                // Trigger change event to update price
+                checkInInput.dispatchEvent(new Event('change'));
+                checkOutInput.dispatchEvent(new Event('change'));
+            },
+            dateClick: function(info) {
+                var checkInInput = document.getElementById('check_in_date');
+                var checkOutInput = document.getElementById('check_out_date');
+
+                checkInInput.value = info.dateStr;
+
+                // デフォルト1泊
+                var date = new Date(info.date);
+                date.setDate(date.getDate() + 1);
+                checkOutInput.value = date.toISOString().split('T')[0];
 
                 checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 checkInInput.focus();
