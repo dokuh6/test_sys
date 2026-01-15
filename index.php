@@ -130,14 +130,40 @@ require_once 'includes/header.php';
                 お部屋のご紹介
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <?php
+                // 部屋タイプをDBから取得
+                try {
+                    $stmt = $dbh->query("SELECT * FROM room_types WHERE is_visible = 1 ORDER BY id ASC");
+                    $display_room_types = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                } catch (PDOException $e) {
+                    // エラー時は空配列
+                    $display_room_types = [];
+                    // 開発環境であればエラー表示など
+                }
+
+                if (empty($display_room_types)) {
+                    // データがない場合のフォールバック（または非表示）
+                    echo '<p class="text-gray-600 dark:text-gray-300 col-span-3 text-center">現在、表示できるお部屋情報は準備中です。</p>';
+                } else {
+                    foreach ($display_room_types as $type):
+                        // 言語対応
+                        $type_name = (!empty($type['name_en']) && isset($_SESSION['lang']) && $_SESSION['lang'] === 'en') ? $type['name_en'] : $type['name'];
+                        $type_desc = (!empty($type['description_en']) && isset($_SESSION['lang']) && $_SESSION['lang'] === 'en') ? $type['description_en'] : $type['description'];
+                        // 画像がない場合のデフォルト画像（プレースホルダー）
+                        $img_src = !empty($type['main_image']) ? h($type['main_image']) : 'https://via.placeholder.com/600x400?text=No+Image';
+                ?>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col group">
                     <div class="relative overflow-hidden h-48">
-                        <img alt="Single Room" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4wOyNOj9ML7n2yLokhV_2z2PV6TC2xZbu38efiYtu5jwVY8QyRarf0NNx9gf3CYv_vzytWdnKZ5mDE0hAfJGbWK8PkLAsDwYXzK5Mu90ehP8PuxxJKCS5gFmKmImVec_nmucJmCh4qYTD4C9e-G7c95pEjfwuP78G4QMI8dB1NEi4ha0iAUhINlAxmeuRA0ZhVPtgUWtY0outu2gz--QDIRp1_nvNUyGYWg6RBc0fzga2xbAPF2uCV2-4rQEry2YYko8yrY1AafzZ"/>
+                        <img alt="<?php echo h($type_name); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" src="<?php echo $img_src; ?>"/>
                     </div>
                     <div class="p-6 flex flex-col flex-grow">
-                        <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-2">スタンダードシングル</h4>
+                        <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-2"><?php echo h($type_name); ?></h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                            <span class="material-icons text-sm align-middle mr-1">group</span>
+                            最大 <?php echo h($type['capacity']); ?> 名様
+                        </p>
                         <p class="text-sm text-gray-600 dark:text-gray-300 mb-6 flex-grow leading-relaxed">
-                            シンプルで機能的なお部屋です。ビジネスや一人旅に最適です。
+                            <?php echo nl2br(h($type_desc)); ?>
                         </p>
                         <a href="rooms.php" class="w-full py-2.5 px-4 rounded border border-primary text-primary hover:bg-primary hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-gray-900 font-semibold transition-all duration-200 flex items-center justify-center gap-1 group-hover:gap-2">
                             詳細を見る
@@ -145,36 +171,7 @@ require_once 'includes/header.php';
                         </a>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col group">
-                    <div class="relative overflow-hidden h-48">
-                        <img alt="Twin Room" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj_JOAx5GOmb0GfLcB6Sz4ure5HOfhptCSP9kEhtJVfqo_N5MkZovuO0ptoz-Tb4_5Mt-M-wtJeNPcuD1ZA_mu-APqiMF8UTQ9-5N_8KBrzKGxvFLoX3CUNMxi0oIzZYUCAil4DPUn1kcz3uwNjw0kNhFSTCQZUaDiyKLE6ynHev1j7r2j89Qn7TKtHA97NJ14lPizRobxIcIpYjA8sFdpbRlFM9lCYwGPoThGaW5Atw9dUPIeU6V58poTTme7RkWN3bVpZOYYrUJh"/>
-                    </div>
-                    <div class="p-6 flex flex-col flex-grow">
-                        <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-2">デラックスツイン</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-6 flex-grow leading-relaxed">
-                            ゆったりとくつろげる広めのお部屋です。カップルやご友人とのご旅行におすすめです。
-                        </p>
-                        <a href="rooms.php" class="w-full py-2.5 px-4 rounded border border-primary text-primary hover:bg-primary hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-gray-900 font-semibold transition-all duration-200 flex items-center justify-center gap-1 group-hover:gap-2">
-                            詳細を見る
-                            <span class="material-icons text-sm">arrow_forward</span>
-                        </a>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col group">
-                    <div class="relative overflow-hidden h-48">
-                        <img alt="Japanese Style Room" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALAc0hXw_1oar6Z8XsKh32Xn0pfsK3WkhRuh-yy4bp_AvaR56ZU6DXFxZ1jLAW1V4UiPqwzJgbtWDANYVVyJ77QSyYq0GXhy5cblgF1jG2gAZ-v2deEE78LO7lNKziEEKkmDsAisK1hAMb77QhHj3Fl_Qs024YCZtTyWSHtWG45nSMCCPWc9eYWcvkrjJR3qGRPEXD5N5Bvtcyzt30Z72hjNMbEA55n6m10yQAnIQvYLMWQpQD90Co4eb2oOE5YWZBMCTpluSv2ZoV"/>
-                    </div>
-                    <div class="p-6 flex flex-col flex-grow">
-                        <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-2">和室（6畳）</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-6 flex-grow leading-relaxed">
-                            木のぬくもりを感じる伝統的な畳のお部屋です。ご家族連れにも人気です。
-                        </p>
-                        <a href="rooms.php" class="w-full py-2.5 px-4 rounded border border-primary text-primary hover:bg-primary hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-gray-900 font-semibold transition-all duration-200 flex items-center justify-center gap-1 group-hover:gap-2">
-                            詳細を見る
-                            <span class="material-icons text-sm">arrow_forward</span>
-                        </a>
-                    </div>
-                </div>
+                <?php endforeach; } ?>
             </div>
         </div>
     </div>
