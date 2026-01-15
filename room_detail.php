@@ -298,7 +298,10 @@ if (!$room) {
                 } else {
                      var date = new Date(info.start);
                      date.setDate(date.getDate() + 1);
-                     checkOutInput.value = date.toISOString().split('T')[0];
+                     var year = date.getFullYear();
+                     var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                     var day = date.getDate().toString().padStart(2, '0');
+                     checkOutInput.value = `${year}-${month}-${day}`;
                 }
 
                 checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -314,10 +317,13 @@ if (!$room) {
 
                 checkInInput.value = info.dateStr;
 
-                // デフォルト1泊
+                // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
                 var date = new Date(info.date);
                 date.setDate(date.getDate() + 1);
-                checkOutInput.value = date.toISOString().split('T')[0];
+                var year = date.getFullYear();
+                var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                var day = date.getDate().toString().padStart(2, '0');
+                checkOutInput.value = `${year}-${month}-${day}`;
 
                 checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 checkInInput.focus();

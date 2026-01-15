@@ -219,23 +219,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 選択された日付をセット
                 document.getElementById('check_in_date').value = info.startStr;
 
-                // デフォルト1泊
-                let endDate = new Date(info.start);
-                endDate.setDate(endDate.getDate() + 1);
-                document.getElementById('check_out_date').value = endDate.toISOString().split('T')[0];
+                if (info.endStr) {
+                    document.getElementById('check_out_date').value = info.endStr;
+                } else {
+                    // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
+                    let date = new Date(info.start);
+                    date.setDate(date.getDate() + 1);
+                    let year = date.getFullYear();
+                    let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    let day = date.getDate().toString().padStart(2, '0');
+                    document.getElementById('check_out_date').value = `${year}-${month}-${day}`;
+                }
 
                 // フォームへスクロール
                 document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
             },
             dateClick: function(info) {
                 // スマホでタップしただけの時も同様の処理を行う
-                // selectLongPressDelay: 0 でもよいが、明示的なタップハンドラもあると確実
                 document.getElementById('check_in_date').value = info.dateStr;
 
-                // デフォルト1泊
-                let endDate = new Date(info.date);
-                endDate.setDate(endDate.getDate() + 1);
-                document.getElementById('check_out_date').value = endDate.toISOString().split('T')[0];
+                // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
+                let date = new Date(info.date);
+                date.setDate(date.getDate() + 1);
+                let year = date.getFullYear();
+                let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                let day = date.getDate().toString().padStart(2, '0');
+                document.getElementById('check_out_date').value = `${year}-${month}-${day}`;
 
                 // フォームへスクロール
                 document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
