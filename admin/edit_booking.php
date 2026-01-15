@@ -86,6 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':status' => $status,
                     ':id' => $id
                 ]);
+            // メール送信
+            require_once '../includes/functions.php';
+            send_booking_modification_email($id, $dbh);
+
                 $_SESSION['message'] = "予約ID: " . h($id) . " の情報を更新しました。";
                 header('Location: bookings.php');
                 exit();

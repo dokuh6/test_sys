@@ -183,6 +183,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_edit && empty($errors)) {
                         ':id' => $booking['id']
                     ]);
 
+                    // メール送信
+                    send_booking_modification_email($booking['id'], $dbh);
+
                     // Redirect back to confirm with success
                     // Build query string based on access method
                     $params = [];
