@@ -137,7 +137,7 @@ $csrf_token = generate_csrf_token();
                 <td><?php echo h($type['id']); ?></td>
                 <td>
                     <?php if (!empty($type['main_image'])): ?>
-                        <img src="../<?php echo h($type['main_image']); ?>" alt="Image" style="width: 50px; height: 40px; object-fit: cover;">
+                        <img src="../assets/<?php echo h($type['main_image']); ?>" alt="Image" style="width: 50px; height: 40px; object-fit: cover;">
                     <?php else: ?>
                         <span style="color: #ccc;">No Image</span>
                     <?php endif; ?>

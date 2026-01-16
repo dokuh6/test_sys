@@ -161,7 +161,7 @@ require_once 'includes/header.php';
                         $type_name = (!empty($type['name_en']) && isset($_SESSION['lang']) && $_SESSION['lang'] === 'en') ? $type['name_en'] : $type['name'];
                         $type_desc = (!empty($type['description_en']) && isset($_SESSION['lang']) && $_SESSION['lang'] === 'en') ? $type['description_en'] : $type['description'];
                         // 画像がない場合のデフォルト画像（プレースホルダー）
-                        $img_src = !empty($type['main_image']) ? h($type['main_image']) : 'https://via.placeholder.com/600x400?text=No+Image';
+                        $img_src = !empty($type['main_image']) ? 'assets/' . h($type['main_image']) : 'https://via.placeholder.com/600x400?text=No+Image';
                 ?>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col group">
                     <div class="relative overflow-hidden h-48">

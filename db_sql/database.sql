@@ -46,7 +46,10 @@ CREATE TABLE `rooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `room_type_id` int(11) NOT NULL COMMENT '部屋タイプID',
   `name` varchar(255) NOT NULL COMMENT '部屋名・番号 (例: 101号室)',
-  `price` decimal(10,2) NOT NULL COMMENT '一泊あたりの料金',
+  `name_en` varchar(255) DEFAULT NULL COMMENT '部屋名・番号 (English)',
+  `description` text DEFAULT NULL COMMENT '部屋の説明 (日本語)',
+  `description_en` text DEFAULT NULL COMMENT '部屋の説明 (English)',
+  `price` decimal(10,2) NOT NULL COMMENT '一泊あたりの料金 (Legacy)',
   `price_adult` decimal(10,2) NOT NULL DEFAULT 4500.00 COMMENT '大人料金',
   `price_child` decimal(10,2) NOT NULL DEFAULT 2500.00 COMMENT '子供料金',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
@@ -102,33 +105,21 @@ CREATE TABLE `booking_rooms` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- 初期データの挿入（サンプル）
+-- テーブル構造: `room_images`
+-- 部屋の画像情報
 --
--- 部屋タイプ
-INSERT INTO `room_types` (`id`, `name`, `description`, `capacity`) VALUES
-(1, 'シングルルーム', 'お一人様向けのコンパクトで機能的なお部屋です。', 1),
-(2, 'ツインルーム', 'ご友人やカップルでのご利用に最適なお部屋です。', 2),
-(3, 'デラックスツイン', '広々とした空間で、ゆったりとおくつろぎいただけます。', 2),
-(4, '和室', '日本の伝統的なお部屋で、落ち着いた時間をお過ごしください。', 4);
+CREATE TABLE `room_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `room_id` int(11) NOT NULL COMMENT '部屋ID',
+  `image_path` varchar(255) NOT NULL COMMENT '画像ファイルへのパス',
+  `is_main` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'メイン画像かどうかのフラグ (1: メイン, 0: サブ)',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `room_id` (`room_id`),
+  CONSTRAINT `room_images_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 部屋
-INSERT INTO `rooms` (`id`, `room_type_id`, `name`, `price`, `price_adult`, `price_child`) VALUES
-(1, 1, '101号室', '8000.00', '8000.00', '4000.00'),
-(2, 1, '102号室', '8000.00', '8000.00', '4000.00'),
-(3, 2, '201号室', '12000.00', '12000.00', '6000.00'),
-(4, 2, '202号室', '12000.00', '12000.00', '6000.00'),
-(5, 3, '301号室', '15000.00', '15000.00', '7500.00'),
-(6, 4, '302号室 (和室)', '16000.00', '16000.00', '8000.00');
-
--- 管理者アカウント
-INSERT INTO `users` (`name`, `email`, `password`, `role`, `notes`) VALUES
-('管理者', 'admin@example.com', '$2y$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 1, '初期管理者');
--- 注意: 上記パスワードはダミーです。実際の開発時には必ず強力なパスワードに置き換えてください。
--- 'password'をハッシュ化したものを設定してください。例: password_hash('password', PASSWORD_DEFAULT)
-
--- 既存のシステムへのカラム追加（必要に応じて実行）
--- ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(20) DEFAULT NULL COMMENT '電話番号' AFTER `email`;
--- ALTER TABLE `users` ADD COLUMN `notes` TEXT DEFAULT NULL COMMENT '特記事項' AFTER `role`;
+--
 -- テーブル構造: `email_logs`
 -- 送信メール履歴
 --
@@ -144,3 +135,28 @@ CREATE TABLE `email_logs` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--
+-- 初期データの挿入（サンプル）
+--
+-- 部屋タイプ
+INSERT INTO `room_types` (`id`, `name`, `name_en`, `description`, `description_en`, `capacity`, `is_visible`) VALUES
+(1, 'シングルルーム', 'Single Room', 'お一人様向けのコンパクトで機能的なお部屋です。', 'A compact and functional room for one person.', 1, 1),
+(2, 'ツインルーム', 'Twin Room', 'ご友人やカップルでのご利用に最適なお部屋です。', 'An ideal room for friends or couples.', 2, 1),
+(3, 'デラックスツイン', 'Deluxe Twin', '広々とした空間で、ゆったりとおくつろぎいただけます。', 'A spacious room where you can relax comfortably.', 2, 1),
+(4, '和室', 'Japanese-style Room', '日本の伝統的なお部屋で、落ち着いた時間をお過ごしください。', 'Spend a quiet time in a traditional Japanese room.', 4, 1);
+
+-- 部屋
+INSERT INTO `rooms` (`id`, `room_type_id`, `name`, `name_en`, `price`, `price_adult`, `price_child`) VALUES
+(1, 1, '101号室', 'Room 101', '8000.00', '8000.00', '4000.00'),
+(2, 1, '102号室', 'Room 102', '8000.00', '8000.00', '4000.00'),
+(3, 2, '201号室', 'Room 201', '12000.00', '12000.00', '6000.00'),
+(4, 2, '202号室', 'Room 202', '12000.00', '12000.00', '6000.00'),
+(5, 3, '301号室', 'Room 301', '15000.00', '15000.00', '7500.00'),
+(6, 4, '302号室 (和室)', 'Room 302 (Japanese)', '16000.00', '16000.00', '8000.00');
+
+-- 管理者アカウント
+INSERT INTO `users` (`name`, `email`, `password`, `role`, `notes`) VALUES
+('管理者', 'admin@example.com', '$2y$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 1, '初期管理者');
+-- 注意: 上記パスワードはダミーです。実際の開発時には必ず強力なパスワードに置き換えてください。

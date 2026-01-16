@@ -84,7 +84,7 @@ try {
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col group">
                     <div class="relative overflow-hidden h-56 bg-gray-200">
                         <?php if (!empty($room['main_image'])): ?>
-                            <img src="<?php echo h($room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+                            <img src="assets/<?php echo h($room['main_image']); ?>" alt="<?php echo h($current_lang === 'en' && !empty($room['name_en']) ? $room['name_en'] : $room['name']); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
                         <?php else: ?>
                             <div class="flex items-center justify-center h-full text-gray-400">
                                 <span class="flex flex-col items-center">

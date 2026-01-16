@@ -42,13 +42,16 @@ function handle_image_upload($file, $room_id) {
     $path_info = pathinfo($file['name']);
     $extension = $path_info['extension'];
     $filename = 'room_' . $room_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
-    $upload_dir = '../uploads/rooms/';
+    $upload_dir = '../assets/images/rooms/';
+    if (!file_exists($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
     $upload_path = $upload_dir . $filename;
 
     // ファイルを移動
     if (move_uploaded_file($file['tmp_name'], $upload_path)) {
         // `../` を除いたパスを返す
-        return 'uploads/rooms/' . $filename;
+        return 'images/rooms/' . $filename;
     }
 
     return null;
@@ -266,7 +269,7 @@ $csrf_token = generate_csrf_token();
                 <div class="current-images">
                     <?php if ($main_image): ?>
                         <div class="current-image-item">
-                            <img src="../<?php echo h($main_image['image_path']); ?>" alt="Main Image">
+                            <img src="../assets/<?php echo h($main_image['image_path']); ?>" alt="Main Image">
                             <small>メイン</small>
                         </div>
                     <?php else: ?>
@@ -287,7 +290,7 @@ $csrf_token = generate_csrf_token();
                     <?php if (!empty($sub_images)): ?>
                         <?php foreach ($sub_images as $img): ?>
                         <div class="current-image-item">
-                            <img src="../<?php echo h($img['image_path']); ?>" alt="Sub Image">
+                            <img src="../assets/<?php echo h($img['image_path']); ?>" alt="Sub Image">
                              <div style="text-align:center; margin-top:5px;">
                                  <label style="font-size:0.8em; color:red; cursor:pointer;">
                                      <input type="checkbox" name="delete_images[]" value="<?php echo h($img['id']); ?>"> 削除

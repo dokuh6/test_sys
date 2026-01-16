@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 画像アップロード処理
     $image_path = null;
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = '../images/room_types/';
+        $upload_dir = '../assets/images/room_types/';
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
@@ -138,7 +138,7 @@ $csrf_token = generate_csrf_token();
             <div style="flex: 1;">
                 <?php if (!empty($room_type['main_image'])): ?>
                     <div style="margin-bottom: 5px;">
-                        <img src="../<?php echo h($room_type['main_image']); ?>" alt="現在登録されている画像" style="max-width: 200px; max-height: 150px; object-fit: cover;">
+                        <img src="../assets/<?php echo h($room_type['main_image']); ?>" alt="現在登録されている画像" style="max-width: 200px; max-height: 150px; object-fit: cover;">
                         <br>
                         <small>現在登録されている画像</small>
                     </div>

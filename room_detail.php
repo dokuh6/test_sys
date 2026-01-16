@@ -74,7 +74,7 @@ if (!$room) {
         <div class="lg:col-span-2 space-y-4">
             <div class="relative overflow-hidden rounded-lg shadow-md h-96 bg-gray-200">
                 <?php if ($main_image): ?>
-                    <img src="<?php echo h($main_image); ?>" alt="<?php echo h($room['name']); ?>" class="w-full h-full object-cover">
+                    <img src="assets/<?php echo h($main_image); ?>" alt="<?php echo h($room['name']); ?>" class="w-full h-full object-cover">
                 <?php else: ?>
                     <div class="flex items-center justify-center h-full text-gray-400">
                         <span class="flex flex-col items-center">
@@ -88,7 +88,7 @@ if (!$room) {
                 <div class="grid grid-cols-4 gap-4">
                     <?php foreach ($sub_images as $sub_image): ?>
                         <div class="relative overflow-hidden rounded-lg shadow-sm h-24 bg-gray-200">
-                            <img src="<?php echo h($sub_image); ?>" alt="Sub image for <?php echo h($room['name']); ?>" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                            <img src="assets/<?php echo h($sub_image); ?>" alt="Sub image for <?php echo h($room['name']); ?>" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                         </div>
                     <?php endforeach; ?>
                 </div>
