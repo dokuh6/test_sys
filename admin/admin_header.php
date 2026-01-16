@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理画面 - ゲストハウスマル正</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/0f4c81/ffffff?text=M">
     <style>
         body { font-family: sans-serif; margin: 0; background-color: #f4f7f6; }
         .admin-header { background-color: #2c3e50; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
@@ -74,6 +78,7 @@
         <main class="admin-main">
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
+                    // Mobile UI Toggles
                     var sidebarToggle = document.getElementById('sidebar-toggle');
                     var sidebar = document.getElementById('admin-sidebar');
                     var navToggle = document.getElementById('nav-toggle');
@@ -90,5 +95,46 @@
                             nav.classList.toggle('active');
                         });
                     }
+
+                    // Notification Logic
+                    if ("Notification" in window) {
+                        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                            Notification.requestPermission();
+                        }
+                    }
+
+                    let lastBookingId = null;
+
+                    function checkNewBookings() {
+                        fetch('api/check_new_booking.php')
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.latest_id) {
+                                    if (lastBookingId === null) {
+                                        lastBookingId = data.latest_id; // Initial load
+                                    } else if (data.latest_id > lastBookingId) {
+                                        // New booking found
+                                        lastBookingId = data.latest_id;
+                                        if (Notification.permission === "granted") {
+                                            new Notification("新規予約が入りました", {
+                                                body: data.guest_name + "様より新しい予約があります。",
+                                                icon: "https://placehold.co/192x192/0f4c81/ffffff?text=M"
+                                            });
+                                        } else {
+                                            // Fallback: visual alert
+                                            alert("新規予約が入りました！\n" + data.guest_name + "様");
+                                        }
+                                        // Optionally refresh the list if we are on bookings.php
+                                        // location.reload();
+                                    }
+                                }
+                            })
+                            .catch(err => console.error(err));
+                    }
+
+                    // Poll every 60 seconds
+                    setInterval(checkNewBookings, 60000);
+                    // Initial check
+                    checkNewBookings();
                 });
             </script>

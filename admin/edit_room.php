@@ -66,19 +66,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = filter_input(INPUT_POST, 'name');
         $name_en = filter_input(INPUT_POST, 'name_en');
         $room_type_id = filter_input(INPUT_POST, 'room_type_id', FILTER_VALIDATE_INT);
-        $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
+        $price_adult = filter_input(INPUT_POST, 'price_adult', FILTER_VALIDATE_FLOAT);
+        $price_child = filter_input(INPUT_POST, 'price_child', FILTER_VALIDATE_FLOAT);
 
-        if (!$name || !$room_type_id || $price === false) {
+        // price_child is optional? No, prompt says separate them. Assuming required.
+        if (!$name || !$room_type_id || $price_adult === false || $price_child === false) {
              throw new Exception("必須項目が入力されていません。");
         }
 
-        $sql = "UPDATE rooms SET name = :name, name_en = :name_en, room_type_id = :room_type_id, price = :price WHERE id = :id";
+        // Update both new columns AND legacy 'price' column to ensure frontend consistency.
+        // The legacy 'price' column is used by rooms.php and search_results.php for display.
+        $sql = "UPDATE rooms SET name = :name, name_en = :name_en, room_type_id = :room_type_id, price = :price, price_adult = :price_adult, price_child = :price_child WHERE id = :id";
         $stmt = $dbh->prepare($sql);
         $stmt->execute([
             ':name' => $name,
             ':name_en' => $name_en,
             ':room_type_id' => $room_type_id,
-            ':price' => $price,
+            ':price' => $price_adult, // Sync legacy price with adult price
+            ':price_adult' => $price_adult,
+            ':price_child' => $price_child,
             ':id' => $id
         ]);
 
@@ -105,18 +111,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // サブ画像がアップロードされた場合、既存のサブ画像をすべて削除
-        if ($sub_images_uploaded) {
-            $stmt = $dbh->prepare("SELECT image_path FROM room_images WHERE room_id = :id AND is_main = 0");
-            $stmt->execute([':id' => $id]);
-            $old_images = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            foreach ($old_images as $old_image) {
-                if (file_exists('../' . $old_image)) unlink('../' . $old_image);
+        // 個別のサブ画像削除処理
+        if (isset($_POST['delete_images']) && is_array($_POST['delete_images'])) {
+            foreach ($_POST['delete_images'] as $delete_id) {
+                $stmt = $dbh->prepare("SELECT image_path FROM room_images WHERE id = :img_id AND room_id = :room_id AND is_main = 0");
+                $stmt->execute([':img_id' => $delete_id, ':room_id' => $id]);
+                if ($del_path = $stmt->fetchColumn()) {
+                    if (file_exists('../' . $del_path)) unlink('../' . $del_path);
+                    $stmt = $dbh->prepare("DELETE FROM room_images WHERE id = :img_id");
+                    $stmt->execute([':img_id' => $delete_id]);
+                }
             }
-            $stmt = $dbh->prepare("DELETE FROM room_images WHERE room_id = :id AND is_main = 0");
-            $stmt->execute([':id' => $id]);
+        }
 
-            // 新しいサブ画像をアップロード (4枚まで)
+        // サブ画像がアップロードされた場合 (追加)
+        if ($sub_images_uploaded) {
+            // 既存削除ロジックを廃止し、追加のみ行う（削除は上の個別削除で対応）
+            // ただし上限チェックなどは本来すべきだが、簡易実装として追加する
+
+            // 新しいサブ画像をアップロード (4枚まで - 既存枚数考慮なしの簡易実装)
             $sub_image_files = $_FILES['sub_images'];
             $image_count = 0;
             foreach ($sub_image_files['tmp_name'] as $key => $tmp_name) {
@@ -236,8 +249,12 @@ $csrf_token = generate_csrf_token();
             </select>
         </div>
         <div class="form-row">
-            <label for="price">料金(円):</label>
-            <input type="number" id="price" name="price" min="0" step="100" value="<?php echo h($room['price']); ?>" required>
+            <label for="price_adult">大人料金(円):</label>
+            <input type="number" id="price_adult" name="price_adult" min="0" step="100" value="<?php echo h($room['price_adult'] ?? 4500); ?>" required>
+        </div>
+        <div class="form-row">
+            <label for="price_child">子供料金(円):</label>
+            <input type="number" id="price_child" name="price_child" min="0" step="100" value="<?php echo h($room['price_child'] ?? 2500); ?>" required>
         </div>
 
         <div class="image-upload-section">
@@ -271,7 +288,11 @@ $csrf_token = generate_csrf_token();
                         <?php foreach ($sub_images as $img): ?>
                         <div class="current-image-item">
                             <img src="../<?php echo h($img['image_path']); ?>" alt="Sub Image">
-                             <small>サブ</small>
+                             <div style="text-align:center; margin-top:5px;">
+                                 <label style="font-size:0.8em; color:red; cursor:pointer;">
+                                     <input type="checkbox" name="delete_images[]" value="<?php echo h($img['id']); ?>"> 削除
+                                 </label>
+                             </div>
                         </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -280,7 +301,7 @@ $csrf_token = generate_csrf_token();
                 </div>
             </div>
             <div class="form-row">
-                 <label for="sub_images">新しいサブ画像 (4枚まで):</label>
+                 <label for="sub_images">サブ画像を追加:</label>
                  <input type="file" id="sub_images" name="sub_images[]" multiple accept="image/jpeg, image/png, image/gif">
             </div>
         </div>

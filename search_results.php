@@ -5,6 +5,7 @@ require_once 'includes/header.php';
 $check_in_date = filter_input(INPUT_GET, 'check_in_date');
 $check_out_date = filter_input(INPUT_GET, 'check_out_date');
 $num_guests = filter_input(INPUT_GET, 'num_guests', FILTER_VALIDATE_INT);
+$num_children = filter_input(INPUT_GET, 'num_children', FILTER_VALIDATE_INT) ?? 0;
 
 $errors = [];
 if (empty($check_in_date) || empty($check_out_date) || empty($num_guests)) {
@@ -91,7 +92,8 @@ if (empty($errors)) {
             <strong><?php echo h(t('search_results_condition')); ?>:</strong>
             <?php echo h(t('form_check_in')); ?>: <?php echo h($check_in_date); ?> |
             <?php echo h(t('form_check_out')); ?>: <?php echo h($check_out_date); ?> |
-            <?php echo h(t('form_num_guests')); ?>: <?php echo h(t('room_capacity_people', $num_guests)); ?>
+            <?php echo h(t('form_num_guests')); ?>: <?php echo h(t('room_capacity_people', $num_guests)); ?> |
+            <?php echo h(t('form_children') ?? 'Children'); ?>: <?php echo h($num_children); ?>名
         </p>
     </div>
 
@@ -137,7 +139,7 @@ if (empty($errors)) {
                                 <strong><?php echo h(t('room_capacity')); ?>:</strong> <?php echo h(t('room_capacity_people', $room['capacity'])); ?>
                             </li>
                         </ul>
-                        <a href="book.php?id=<?php echo h($room['id']); ?>&check_in=<?php echo h($check_in_date); ?>&check_out=<?php echo h($check_out_date); ?>&num_guests=<?php echo h($num_guests);?>" class="w-full py-2.5 px-4 rounded bg-primary text-white hover:bg-primary-dark font-semibold transition-all duration-200 flex items-center justify-center gap-2">
+                        <a href="book.php?id=<?php echo h($room['id']); ?>&check_in=<?php echo h($check_in_date); ?>&check_out=<?php echo h($check_out_date); ?>&num_guests=<?php echo h($num_guests);?>&num_children=<?php echo h($num_children); ?>" class="w-full py-2.5 px-4 rounded bg-primary text-white hover:bg-primary-dark font-semibold transition-all duration-200 flex items-center justify-center gap-2">
                             <?php echo h(t('btn_book_this_room')); ?>
                             <span class="material-icons text-sm">arrow_forward</span>
                         </a>
