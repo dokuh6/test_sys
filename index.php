@@ -114,12 +114,12 @@ require_once 'includes/header.php';
                     <ul class="space-y-4 text-gray-600 dark:text-gray-300">
                         <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
                             <span><?php echo h(t('pricing_adult')); ?> <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_adult_sub')); ?></span></span>
-                            <span class="font-bold text-lg text-gray-800 dark:text-white">4,500円</span>
+                            <span class="font-bold text-lg text-gray-800 dark:text-white">¥<?php echo number_format(PRICE_PER_ADULT); ?></span>
                         </li>
                         <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
                             <span><?php echo h(t('pricing_child')); ?> <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_child_sub')); ?></span></span>
                             <div class="text-right">
-                                <span class="font-bold text-lg text-gray-800 dark:text-white">2,500円</span>
+                                <span class="font-bold text-lg text-gray-800 dark:text-white">¥<?php echo number_format(PRICE_PER_CHILD); ?></span>
                                 <span class="text-xs block text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_bedding_note')); ?></span>
                             </div>
                         </li>

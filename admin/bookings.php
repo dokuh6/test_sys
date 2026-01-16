@@ -134,42 +134,42 @@ try {
 require_once 'admin_header.php';
 ?>
 
-<h2>予約管理</h2>
+<h2><?php echo h(t('admin_bookings_title')); ?></h2>
 
 <!-- Dashboard Widgets -->
 <div style="display: flex; gap: 20px; margin-bottom: 20px;">
     <div style="flex: 1; background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 5px solid #2196f3;">
-        <h4 style="margin: 0 0 5px 0; font-size: 0.9em; color: #1565c0;">本日のチェックイン待ち</h4>
-        <span style="font-size: 1.8em; font-weight: bold; color: #0d47a1;"><?php echo h($dashboard['checkin_today']); ?>件</span>
+        <h4 style="margin: 0 0 5px 0; font-size: 0.9em; color: #1565c0;"><?php echo h(t('admin_dashboard_checkin_today')); ?></h4>
+        <span style="font-size: 1.8em; font-weight: bold; color: #0d47a1;"><?php echo h($dashboard['checkin_today']); ?></span>
     </div>
     <div style="flex: 1; background: #ffebee; padding: 15px; border-radius: 8px; border-left: 5px solid #f44336;">
-        <h4 style="margin: 0 0 5px 0; font-size: 0.9em; color: #c62828;">未払い (確定予約)</h4>
-        <span style="font-size: 1.8em; font-weight: bold; color: #b71c1c;"><?php echo h($dashboard['unpaid_confirmed']); ?>件</span>
+        <h4 style="margin: 0 0 5px 0; font-size: 0.9em; color: #c62828;"><?php echo h(t('admin_dashboard_unpaid_confirmed')); ?></h4>
+        <span style="font-size: 1.8em; font-weight: bold; color: #b71c1c;"><?php echo h($dashboard['unpaid_confirmed']); ?></span>
     </div>
 </div>
 
 <div class="actions" style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
     <form method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
         <div>
-            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">チェックイン日 (開始):</label>
+            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;"><?php echo h(t('admin_search_checkin_start')); ?>:</label>
             <input type="date" name="start_date" value="<?php echo h($start_date); ?>" style="padding: 5px;">
         </div>
         <div>
-            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">チェックイン日 (終了):</label>
+            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;"><?php echo h(t('admin_search_checkin_end')); ?>:</label>
             <input type="date" name="end_date" value="<?php echo h($end_date); ?>" style="padding: 5px;">
         </div>
         <div>
-            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">名前 (キーワード):</label>
-            <input type="text" name="keyword" value="<?php echo h($keyword); ?>" placeholder="名前検索" style="padding: 5px;">
+            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;"><?php echo h(t('admin_search_keyword')); ?>:</label>
+            <input type="text" name="keyword" value="<?php echo h($keyword); ?>" placeholder="<?php echo h(t('admin_search_keyword_placeholder')); ?>" style="padding: 5px;">
         </div>
         <div>
-             <button type="submit" class="btn-admin" style="padding: 6px 15px;">検索</button>
-             <a href="bookings.php" class="btn-admin" style="background: #95a5a6; padding: 6px 15px; text-decoration: none;">リセット</a>
+             <button type="submit" class="btn-admin" style="padding: 6px 15px;"><?php echo h(t('btn_search')); ?></button>
+             <a href="bookings.php" class="btn-admin" style="background: #95a5a6; padding: 6px 15px; text-decoration: none;"><?php echo h(t('btn_search_again')); // Using Search Again as Reset close enough ?></a>
         </div>
     </form>
 
     <div>
-        <a href="add_booking.php" class="btn-admin" style="background-color: #27ae60; padding: 10px 20px; text-decoration: none;">+ 新規予約登録</a>
+        <a href="add_booking.php" class="btn-admin" style="background-color: #27ae60; padding: 10px 20px; text-decoration: none;"><?php echo h(t('admin_new_booking_btn')); ?></a>
     </div>
 </div>
 
@@ -184,22 +184,22 @@ require_once 'admin_header.php';
 <table>
     <thead>
         <tr>
-            <th>予約ID</th>
-            <th>顧客名</th>
-            <th>部屋名</th>
-            <th>チェックイン</th>
-            <th>チェックアウト</th>
+            <th><?php echo h(t('booking_number')); ?></th>
+            <th><?php echo h(t('form_name')); ?></th>
+            <th><?php echo h(t('booking_info_room')); ?></th>
+            <th><?php echo h(t('booking_info_check_in')); ?></th>
+            <th><?php echo h(t('booking_info_check_out')); ?></th>
             <th>人数</th>
-            <th>料金</th>
-            <th>状況</th>
+            <th><?php echo h(t('booking_info_total_price')); ?></th>
+            <th><?php echo h(t('history_status')); ?></th>
             <th>支払/入室</th>
-            <th>操作</th>
+            <th><?php echo h(t('admin_operation')); ?></th>
         </tr>
     </thead>
     <tbody>
         <?php if (empty($all_bookings)): ?>
             <tr>
-                <td colspan="10" style="text-align: center;">予約はまだありません。</td>
+                <td colspan="10" style="text-align: center;"><?php echo h(t('admin_bookings_none')); ?></td>
             </tr>
         <?php else: ?>
             <?php foreach ($all_bookings as $booking): ?>
@@ -214,7 +214,7 @@ require_once 'admin_header.php';
                     <td>
                         <?php echo h($booking['customer_name']); ?>
                         <?php if ($booking['notes']): ?>
-                            <br><span style="font-size:0.8em; color:gray;">(備考あり)</span>
+                            <br><span style="font-size:0.8em; color:gray;"><?php echo h(t('admin_note_exists')); ?></span>
                         <?php endif; ?>
                     </td>
                     <td><?php echo h($booking['room_name']); ?></td>
@@ -227,26 +227,26 @@ require_once 'admin_header.php';
                         <?php if($booking['check_out_time']) echo '<br><small>' . h($booking['check_out_time']) . '</small>'; ?>
                     </td>
                     <td>
-                        大人:<?php echo h($booking['num_guests']); ?><br>
-                        子供:<?php echo h($booking['num_children']); ?>
+                        <?php echo h(t('form_num_guests')); ?>:<?php echo h($booking['num_guests']); ?><br>
+                        <?php echo h(t('form_children')); ?>:<?php echo h($booking['num_children']); ?>
                     </td>
                     <td>¥<?php echo h(number_format($booking['total_price'])); ?></td>
                     <td>
                         <span class="status-<?php echo h($booking['status']); ?>">
-                            <?php echo h($booking['status'] === 'confirmed' ? '確定' : 'キャンセル済'); ?>
+                            <?php echo h($booking['status'] === 'confirmed' ? t('status_confirmed') : t('status_cancelled')); ?>
                         </span>
                         <br>
                         <small>
                         <?php if($booking['payment_status'] === 'paid'): ?>
-                            <span style="color:green;">支払済</span>
+                            <span style="color:green;"><?php echo h(t('admin_status_paid')); ?></span>
                         <?php else: ?>
-                            <span style="color:red;">未払い</span>
+                            <span style="color:red;"><?php echo h(t('admin_status_unpaid')); ?></span>
                         <?php endif; ?>
                         /
                         <?php if($booking['checkin_status'] === 'checked_in'): ?>
-                            <span style="color:green;">入室済</span>
+                            <span style="color:green;"><?php echo h(t('admin_status_checked_in')); ?></span>
                         <?php else: ?>
-                            <span>待ち</span>
+                            <span><?php echo h(t('admin_status_waiting')); ?></span>
                         <?php endif; ?>
                         </small>
                     </td>
@@ -255,9 +255,9 @@ require_once 'admin_header.php';
                             <input type="hidden" name="booking_id" value="<?php echo $booking['id']; ?>">
                             <input type="hidden" name="action" value="update_payment">
                             <?php if ($booking['payment_status'] !== 'paid'): ?>
-                                <button type="submit" name="payment_status" value="paid" class="btn-tiny btn-paid">￥受領</button>
+                                <button type="submit" name="payment_status" value="paid" class="btn-tiny btn-paid"><?php echo h(t('admin_btn_received')); ?></button>
                             <?php else: ?>
-                                <button type="submit" name="payment_status" value="unpaid" class="btn-tiny btn-undo">￥未払</button>
+                                <button type="submit" name="payment_status" value="unpaid" class="btn-tiny btn-undo"><?php echo h(t('admin_btn_unpaid')); ?></button>
                             <?php endif; ?>
                         </form>
                         <br>
@@ -265,17 +265,17 @@ require_once 'admin_header.php';
                             <input type="hidden" name="booking_id" value="<?php echo $booking['id']; ?>">
                             <input type="hidden" name="action" value="update_checkin">
                             <?php if ($booking['checkin_status'] !== 'checked_in'): ?>
-                                <button type="submit" name="checkin_status" value="checked_in" class="btn-tiny btn-checkin">IN済</button>
+                                <button type="submit" name="checkin_status" value="checked_in" class="btn-tiny btn-checkin"><?php echo h(t('admin_btn_checkin')); ?></button>
                             <?php else: ?>
-                                <button type="submit" name="checkin_status" value="waiting" class="btn-tiny btn-undo">IN取消</button>
+                                <button type="submit" name="checkin_status" value="waiting" class="btn-tiny btn-undo"><?php echo h(t('admin_btn_undo_checkin')); ?></button>
                             <?php endif; ?>
                         </form>
                     </td>
                     <td>
-                        <a href="edit_booking.php?id=<?php echo h($booking['id']); ?>" class="btn-admin" style="background-color:#3498db; font-size: 0.8em; padding: 4px 8px;">編集</a>
+                        <a href="edit_booking.php?id=<?php echo h($booking['id']); ?>" class="btn-admin" style="background-color:#3498db; font-size: 0.8em; padding: 4px 8px;"><?php echo h(t('admin_edit')); ?></a>
                         <?php if ($booking['status'] === 'confirmed'): ?>
-                            <a href="bookings.php?action=cancel&id=<?php echo h($booking['id']); ?>" class="btn-admin btn-cancel" onclick="return confirm('本当にこの予約をキャンセルしますか？');" style="font-size: 0.8em; padding: 4px 8px;">
-                                キャンセル
+                            <a href="bookings.php?action=cancel&id=<?php echo h($booking['id']); ?>" class="btn-admin btn-cancel" onclick="return confirm('<?php echo h(t('admin_delete_confirm')); ?>');" style="font-size: 0.8em; padding: 4px 8px;">
+                                <?php echo h(t('admin_cancel')); ?>
                             </a>
                         <?php endif; ?>
                     </td>

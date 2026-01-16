@@ -218,11 +218,11 @@ if (!$room) {
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="num_guests" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_num_guests') ?? '大人'); ?> (<?php echo number_format(PRICE_PER_ADULT); ?>円):</label>
+                            <label for="num_guests" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_num_guests') ?? '大人'); ?> (¥<?php echo number_format($room['price_adult']); ?>):</label>
                             <input type="number" id="num_guests" name="num_guests" min="1" max="<?php echo h($room['capacity']); ?>" value="1" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
                         </div>
                         <div>
-                            <label for="num_children" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_children')); ?> (<?php echo number_format(PRICE_PER_CHILD); ?>円):</label>
+                            <label for="num_children" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_children')); ?> (¥<?php echo number_format($room['price_child']); ?>):</label>
                             <input type="number" id="num_children" name="num_children" min="0" max="<?php echo h($room['capacity']); ?>" value="0" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
                             <p class="text-xs text-gray-500 mt-1"><?php echo h(t('children_age_note')); ?></p>
                         </div>

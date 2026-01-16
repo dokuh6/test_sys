@@ -82,53 +82,53 @@ $csrf_token = generate_csrf_token();
 .form-row input, .form-row textarea { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
 </style>
 
-<h2>部屋タイプ管理</h2>
+<h2><?php echo h(t('admin_room_types')); ?></h2>
 
-<?php if ($message): ?><p style="color: green;"><?php echo $message; ?></p><?php endif; ?>
-<?php if ($error): ?><p style="color: red;"><?php echo $error; ?></p><?php endif; ?>
+<?php if ($message): ?><p style="color: green;"><?php echo h($message); ?></p><?php endif; ?>
+<?php if ($error): ?><p style="color: red;"><?php echo h($error); ?></p><?php endif; ?>
 
 <div class="add-form">
-    <h3>新しい部屋タイプを追加</h3>
+    <h3><?php echo h(t('admin_room_types_add')); ?></h3>
     <form action="room_types.php" method="POST">
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
         <input type="hidden" name="action" value="add">
         <div class="form-row">
-            <label for="name">タイプ名 (日本語):</label>
+            <label for="name"><?php echo h(t('admin_room_type_name_jp')); ?>:</label>
             <input type="text" id="name" name="name" required>
         </div>
         <div class="form-row">
-            <label for="name_en">タイプ名 (English):</label>
+            <label for="name_en"><?php echo h(t('admin_room_type_name_en')); ?>:</label>
             <input type="text" id="name_en" name="name_en">
         </div>
         <div class="form-row">
-            <label for="capacity">収容人数:</label>
+            <label for="capacity"><?php echo h(t('admin_capacity')); ?>:</label>
             <input type="number" id="capacity" name="capacity" min="1" required>
         </div>
         <div class="form-row">
-            <label for="description">説明 (日本語):</label>
+            <label for="description"><?php echo h(t('admin_desc_jp')); ?>:</label>
             <textarea id="description" name="description" rows="3"></textarea>
         </div>
         <div class="form-row">
-            <label for="description_en">説明 (English):</label>
+            <label for="description_en"><?php echo h(t('admin_desc_en')); ?>:</label>
             <textarea id="description_en" name="description_en" rows="3"></textarea>
         </div>
-        <button type="submit" class="btn-admin" style="background-color: #3498db;">追加</button>
+        <button type="submit" class="btn-admin" style="background-color: #3498db;"><?php echo h(t('admin_add')); ?></button>
     </form>
 </div>
 
 
-<h3>既存の部屋タイプ一覧</h3>
+<h3><?php echo h(t('admin_room_types_list')); ?></h3>
 <div class="table-responsive">
 <table>
     <thead>
         <tr>
             <th>ID</th>
             <th>画像</th>
-            <th>タイプ名 (日本語)</th>
-            <th>タイプ名 (English)</th>
-            <th>公開</th>
-            <th>収容人数</th>
-            <th>操作</th>
+            <th><?php echo h(t('admin_room_type_name_jp')); ?></th>
+            <th><?php echo h(t('admin_room_type_name_en')); ?></th>
+            <th><?php echo h(t('admin_visible')); ?></th>
+            <th><?php echo h(t('admin_capacity')); ?></th>
+            <th><?php echo h(t('admin_operation')); ?></th>
         </tr>
     </thead>
     <tbody>
@@ -139,22 +139,22 @@ $csrf_token = generate_csrf_token();
                     <?php if (!empty($type['main_image'])): ?>
                         <img src="../assets/<?php echo h($type['main_image']); ?>" alt="Image" style="width: 50px; height: 40px; object-fit: cover;">
                     <?php else: ?>
-                        <span style="color: #ccc;">No Image</span>
+                        <span style="color: #ccc;"><?php echo h(t('admin_no_image')); ?></span>
                     <?php endif; ?>
                 </td>
                 <td><?php echo h($type['name']); ?></td>
                 <td><?php echo h($type['name_en']); ?></td>
                 <td>
                     <?php if (!empty($type['is_visible'])): ?>
-                        <span style="color: green;">公開中</span>
+                        <span style="color: green;"><?php echo h(t('admin_public_on')); ?></span>
                     <?php else: ?>
-                        <span style="color: gray;">非公開</span>
+                        <span style="color: gray;"><?php echo h(t('admin_public_off')); ?></span>
                     <?php endif; ?>
                 </td>
                 <td><?php echo h($type['capacity']); ?></td>
                 <td>
-                    <a href="edit_room_type.php?id=<?php echo h($type['id']); ?>">編集</a> |
-                    <a href="room_types.php?action=delete&id=<?php echo h($type['id']); ?>" onclick="return confirm('本当にこの部屋タイプを削除しますか？関連する部屋も削除される可能性があります。');">削除</a>
+                    <a href="edit_room_type.php?id=<?php echo h($type['id']); ?>"><?php echo h(t('admin_edit')); ?></a> |
+                    <a href="room_types.php?action=delete&id=<?php echo h($type['id']); ?>" onclick="return confirm('<?php echo h(t('admin_delete_fail_constraint')); ?>');"><?php echo h(t('admin_delete')); ?></a>
                 </td>
             </tr>
         <?php endforeach; ?>
