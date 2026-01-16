@@ -74,15 +74,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              throw new Exception("必須項目が入力されていません。");
         }
 
-        // price column update is kept for compatibility if needed, but we focus on adult/child columns
-        // We will update 'price' to be same as 'price_adult' for legacy reasons if the column still exists
-        // However, standard practice here is to update the new columns.
-        $sql = "UPDATE rooms SET name = :name, name_en = :name_en, room_type_id = :room_type_id, price_adult = :price_adult, price_child = :price_child WHERE id = :id";
+        // Update both new columns AND legacy 'price' column to ensure frontend consistency.
+        // The legacy 'price' column is used by rooms.php and search_results.php for display.
+        $sql = "UPDATE rooms SET name = :name, name_en = :name_en, room_type_id = :room_type_id, price = :price, price_adult = :price_adult, price_child = :price_child WHERE id = :id";
         $stmt = $dbh->prepare($sql);
         $stmt->execute([
             ':name' => $name,
             ':name_en' => $name_en,
             ':room_type_id' => $room_type_id,
+            ':price' => $price_adult, // Sync legacy price with adult price
             ':price_adult' => $price_adult,
             ':price_child' => $price_child,
             ':id' => $id

@@ -11,7 +11,7 @@ if (isset($_SESSION['message'])) {
 
 // --- ステータス更新処理 (POSTリクエスト) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    // 簡易的なCSRF対策 (本来はトークンを使用すべき)
+    validate_csrf_token(); // CSRFチェック
     $booking_id = filter_input(INPUT_POST, 'booking_id', FILTER_VALIDATE_INT);
 
     if ($booking_id) {
@@ -308,3 +308,21 @@ require_once 'admin_header.php';
 <?php
 require_once 'admin_footer.php';
 ?>
+<?php
+// 生成したトークンをJS等で使うわけではないが、フォーム埋め込み用に生成
+$csrf_token = generate_csrf_token();
+?>
+<!-- フォーム内のトークン埋め込み用スクリプト (既存の各フォームに埋め込む) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var token = "<?php echo h($csrf_token); ?>";
+    var forms = document.querySelectorAll('form[method="POST"]');
+    forms.forEach(function(form) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'csrf_token';
+        input.value = token;
+        form.appendChild(input);
+    });
+});
+</script>
