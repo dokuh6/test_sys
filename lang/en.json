@@ -196,5 +196,8 @@
     "email_admin_subject_cancel": "[Admin] Booking Cancellation: %s",
     "email_admin_subject_modify": "[Admin] Booking Modification: %s (%s)",
     "email_admin_body_modify": "The following booking has been modified.",
-    "email_admin_check_panel": "Please check the admin panel for details."
+    "email_admin_check_panel": "Please check the admin panel for details.",
+    "form_children": "Children",
+    "children_age_note": "* Junior high school and under",
+    "label_total": "Total"
 }

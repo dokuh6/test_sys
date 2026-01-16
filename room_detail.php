@@ -139,52 +139,52 @@ if (!$room) {
                 <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8">
                     <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
                         <span class="material-icons text-primary dark:text-blue-400">info</span>
-                        ご利用案内
+                        <?php echo h(t('info_guide_title')); ?>
                     </h3>
 
                     <div class="space-y-6">
                         <!-- Pricing -->
                         <div>
-                            <h4 class="font-bold text-gray-800 dark:text-white mb-2">宿泊料金について</h4>
+                            <h4 class="font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('info_pricing_title')); ?></h4>
                             <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
-                                <li>大人料金: 4,500円（お一人）</li>
-                                <li>子供料金（中学生まで）: 2,500円（寝具持込み）</li>
-                                <li class="text-sm">※乳幼児（5歳まで）など布団無しで添い寝の場合は無料</li>
-                                <li class="text-sm">※お支払いは当日現金でお支払いをお願い致します。</li>
+                                <li><?php echo h(t('info_pricing_adult')); ?></li>
+                                <li><?php echo h(t('info_pricing_child')); ?></li>
+                                <li class="text-sm"><?php echo h(t('info_pricing_infant')); ?></li>
+                                <li class="text-sm"><?php echo h(t('info_pricing_payment')); ?></li>
                             </ul>
                         </div>
 
                         <!-- Check-in/out -->
                         <div>
-                            <h4 class="font-bold text-gray-800 dark:text-white mb-2">チェックイン・チェックアウトについて</h4>
+                            <h4 class="font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('info_checkin_title')); ?></h4>
                             <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
-                                <li>チェックイン: 15時～（20時以降到着の方は、当日電話にてご連絡ください）</li>
-                                <li>チェックアウト: 10時</li>
-                                <li class="text-sm">※日中・夜間共、宿泊者がいない時は宿を留守にすることもあります。宿に来る前に必ず電話で連絡してください。</li>
+                                <li><?php echo h(t('info_checkin_in')); ?></li>
+                                <li><?php echo h(t('info_checkin_out')); ?></li>
+                                <li class="text-sm"><?php echo h(t('info_checkin_note')); ?></li>
                             </ul>
                         </div>
 
                         <!-- Booking -->
                         <div>
-                            <h4 class="font-bold text-gray-800 dark:text-white mb-2">宿泊予約について</h4>
+                            <h4 class="font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('info_booking_title')); ?></h4>
                             <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
-                                <li>当サイトまたはお電話でご予約をお願いします。（電話問合せ: 8時～20時）</li>
-                                <li>予約の際は宿泊日・人数（男女別）をお知らせください。</li>
-                                <li>当日予約・飛込みも可能ですが、極力事前にご予約下さい。</li>
-                                <li>団体・グループ等の貸切はお早めにご連絡ください。</li>
+                                <li><?php echo h(t('info_booking_1')); ?></li>
+                                <li><?php echo h(t('info_booking_2')); ?></li>
+                                <li><?php echo h(t('info_booking_3')); ?></li>
+                                <li><?php echo h(t('info_booking_4')); ?></li>
                             </ul>
                         </div>
 
                         <!-- Cancellation -->
                         <div>
-                            <h4 class="font-bold text-gray-800 dark:text-white mb-2">キャンセルについて</h4>
-                            <p class="text-gray-600 dark:text-gray-300 mb-2">他のお客様のご迷惑となりますので、人数変更・キャンセルの場合は早めにご連絡ください。</p>
+                            <h4 class="font-bold text-gray-800 dark:text-white mb-2"><?php echo h(t('info_cancel_title')); ?></h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-2"><?php echo h(t('info_cancel_desc')); ?></p>
                             <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 pl-2">
-                                <li>5日前: 30％</li>
-                                <li>2日前: 50％</li>
-                                <li>前日、当日、無断キャンセル: 100％</li>
-                                <li class="text-sm">※貸切予約および繁忙期（GW、お盆、年末年始）は、7日前より50％、5日前より70％、3日前より100％となります。</li>
-                                <li class="text-sm">（天災及びアクシデントによる場合は除きます）</li>
+                                <li><?php echo h(t('info_cancel_policy_1')); ?></li>
+                                <li><?php echo h(t('info_cancel_policy_2')); ?></li>
+                                <li><?php echo h(t('info_cancel_policy_3')); ?></li>
+                                <li class="text-sm"><?php echo h(t('info_cancel_policy_note')); ?></li>
+                                <li class="text-sm"><?php echo h(t('info_cancel_policy_except')); ?></li>
                             </ul>
                         </div>
                     </div>
@@ -220,9 +220,9 @@ if (!$room) {
                             <input type="number" id="num_guests" name="num_guests" min="1" max="<?php echo h($room['capacity']); ?>" value="1" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
                         </div>
                         <div>
-                            <label for="num_children" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">子供 (<?php echo number_format(PRICE_PER_CHILD); ?>円):</label>
+                            <label for="num_children" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_children')); ?> (<?php echo number_format(PRICE_PER_CHILD); ?>円):</label>
                             <input type="number" id="num_children" name="num_children" min="0" max="<?php echo h($room['capacity']); ?>" value="0" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
-                            <p class="text-xs text-gray-500 mt-1">※中学生まで</p>
+                            <p class="text-xs text-gray-500 mt-1"><?php echo h(t('children_age_note')); ?></p>
                         </div>
                     </div>
 
@@ -234,7 +234,7 @@ if (!$room) {
                             <span class="text-xs text-gray-400">× ¥<?php echo h(number_format($room['price'])); ?></span>
                         </div>
                         <div class="flex justify-between items-end border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
-                            <span class="font-bold text-gray-700 dark:text-gray-200">Total</span>
+                            <span class="font-bold text-gray-700 dark:text-gray-200"><?php echo h(t('label_total')); ?></span>
                             <span class="text-2xl font-bold text-primary dark:text-blue-400">¥<span id="total-price">0</span></span>
                         </div>
                     </div>

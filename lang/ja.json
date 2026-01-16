@@ -196,5 +196,8 @@
     "email_admin_subject_cancel": "【管理者通知】予約キャンセル: %s",
     "email_admin_subject_modify": "【管理者通知】予約変更: %s (%s様)",
     "email_admin_body_modify": "以下の予約が変更されました。",
-    "email_admin_check_panel": "管理画面で詳細をご確認ください。"
+    "email_admin_check_panel": "管理画面で詳細をご確認ください。",
+    "form_children": "子供",
+    "children_age_note": "※中学生まで",
+    "label_total": "合計"
 }
