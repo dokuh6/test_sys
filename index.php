@@ -53,6 +53,17 @@ require_once 'includes/header.php';
                     <option value="5">5名以上</option>
                 </select>
             </div>
+            <div class="w-full md:w-40">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2" for="num_children"><?php echo h(t('form_children') ?? '人数(子供)'); ?>:</label>
+                <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2.5 px-3" id="num_children" name="num_children">
+                    <option value="0">0名</option>
+                    <option value="1">1名</option>
+                    <option value="2">2名</option>
+                    <option value="3">3名</option>
+                    <option value="4">4名</option>
+                    <option value="5">5名</option>
+                </select>
+            </div>
             <div class="w-full md:w-auto">
                 <button class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-8 rounded-md shadow transition-colors duration-200 flex items-center justify-center gap-2" type="submit">
                     <span class="material-icons text-sm">search</span>

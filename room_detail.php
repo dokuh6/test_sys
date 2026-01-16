@@ -16,6 +16,8 @@ try {
                 r.name,
                 r.name_en,
                 r.price,
+                r.price_adult,
+                r.price_child,
                 rt.name AS type_name,
                 rt.name_en AS type_name_en,
                 rt.capacity,
@@ -336,9 +338,9 @@ if (!$room) {
         calendar.render();
 
         // Dynamic Price Calculation Script
-        // const pricePerNight = <?php echo (int)$room['price']; ?>; // Deprecated
-        const ADULT_PRICE = <?php echo PRICE_PER_ADULT; ?>;
-        const CHILD_PRICE = <?php echo PRICE_PER_CHILD; ?>;
+        // Use room specific prices, with fallback to constants just in case (though DB should have them)
+        const ADULT_PRICE = <?php echo isset($room['price_adult']) ? (int)$room['price_adult'] : PRICE_PER_ADULT; ?>;
+        const CHILD_PRICE = <?php echo isset($room['price_child']) ? (int)$room['price_child'] : PRICE_PER_CHILD; ?>;
 
         const checkInInput = document.getElementById('check_in_date');
         const checkOutInput = document.getElementById('check_out_date');

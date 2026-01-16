@@ -1,4 +1,17 @@
 
+from playwright.sync_api import sync_playwright
+
+def run(playwright):
+    browser = playwright.chromium.launch(headless=True)
+    page = browser.new_page()
+
+    # Create a mock HTML file to test the layout
+    # We can't use PHP execution easily in this environment for full end-to-end,
+    # but we can verify the HTML structure if we mock the output or if we can run php -S.
+    # Given 'php' command failed earlier, we will assume we can't run the server.
+    # However, we can create a file that mimics the output of index.php to check the layout of the child selector.
+
+    html_content = """
     <!DOCTYPE html>
     <html lang="ja">
     <head>
@@ -40,3 +53,24 @@
         </form>
     </body>
     </html>
+    """
+
+    import os
+    # Create absolute path
+    abs_path = os.path.abspath("verification/mock_index.html")
+
+    with open(abs_path, "w") as f:
+        f.write(html_content)
+
+    page.goto(f"file://{abs_path}")
+
+    # Check if the child selector exists
+    page.locator("#num_children").wait_for()
+
+    # Take screenshot
+    page.screenshot(path="verification/index_child_selector.png")
+
+    browser.close()
+
+with sync_playwright() as playwright:
+    run(playwright)

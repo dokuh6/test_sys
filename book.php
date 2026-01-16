@@ -88,9 +88,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // 4. 価格の再計算（セキュリティ対策: クライアント側での改ざん防止）
-            // 旧ロジック: $room_price = $stmt_price->fetchColumn(); $total_price = $nights_calc * $room_price;
-            // 新ロジック: (大人 * 大人料金 + 子供 * 子供料金) * 泊数
-            // rooms.price は使用しない
+            // 部屋ごとの個別料金を取得
+            $sql_room_price = "SELECT price_adult, price_child FROM rooms WHERE id = :room_id";
+            $stmt_room_price = $dbh->prepare($sql_room_price);
+            $stmt_room_price->execute([':room_id' => $room_id]);
+            $room_prices = $stmt_room_price->fetch(PDO::FETCH_ASSOC);
+
+            if (!$room_prices) {
+                 // フォールバック（通常ありえない）
+                 $p_adult = defined('PRICE_PER_ADULT') ? PRICE_PER_ADULT : 4500;
+                 $p_child = defined('PRICE_PER_CHILD') ? PRICE_PER_CHILD : 2500;
+            } else {
+                 $p_adult = $room_prices['price_adult'];
+                 $p_child = $room_prices['price_child'];
+            }
 
             $datetime1 = new DateTime($check_in);
             $datetime2 = new DateTime($check_out);
@@ -99,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // num_childrenがNULLの場合は0にする
             $num_children_calc = $num_children ?? 0;
-            $total_price = $nights_calc * ($num_guests * PRICE_PER_ADULT + $num_children_calc * PRICE_PER_CHILD);
+            $total_price = $nights_calc * ($num_guests * $p_adult + $num_children_calc * $p_child);
 
             // 5. bookingsテーブルへの登録
             $user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
@@ -226,11 +237,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ただし、room_idが不明な場合は表示できない
 if ($room_id) {
     try {
-        $sql = "SELECT r.id, r.name, r.price, rt.capacity FROM rooms r JOIN room_types rt ON r.room_type_id = rt.id WHERE r.id = :id";
+        // price_adult, price_child を取得
+        $sql = "SELECT r.id, r.name, r.price, r.price_adult, r.price_child, rt.capacity FROM rooms r JOIN room_types rt ON r.room_type_id = rt.id WHERE r.id = :id";
         $stmt = $dbh->prepare($sql);
         $stmt->bindParam(':id', $room_id, PDO::PARAM_INT);
         $stmt->execute();
         $room = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // 未設定の場合のフォールバック
+        if ($room && (!isset($room['price_adult']) || $room['price_adult'] === null)) {
+             $room['price_adult'] = defined('PRICE_PER_ADULT') ? PRICE_PER_ADULT : 4500;
+        }
+        if ($room && (!isset($room['price_child']) || $room['price_child'] === null)) {
+             $room['price_child'] = defined('PRICE_PER_CHILD') ? PRICE_PER_CHILD : 2500;
+        }
 
         if (!$room) {
             $errors[] = t('book_error_room_not_found');
@@ -255,7 +275,9 @@ if ($room && $check_in && $check_out) {
         // 改ざん防止のため基本は再計算するか、POST値を信頼するか。
         // ここでは表示用として再計算を行う（予約処理ではPOST値を使ったが、整合性のため）
 
-        $calc_price = $nights * ($num_guests * PRICE_PER_ADULT + ($num_children ?? 0) * PRICE_PER_CHILD);
+        $p_adult = $room['price_adult'];
+        $p_child = $room['price_child'];
+        $calc_price = $nights * ($num_guests * $p_adult + ($num_children ?? 0) * $p_child);
 
         // もしPOSTされていて、total_priceが入っているなら、念のためそれを使う（割引等あった場合に対応できるようにするため）
         // しかし、セキュリティ的には再計算が正しい。
