@@ -114,12 +114,12 @@ require_once 'includes/header.php';
                     <ul class="space-y-4 text-gray-600 dark:text-gray-300">
                         <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
                             <span><?php echo h(t('pricing_adult')); ?> <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_adult_sub')); ?></span></span>
-                            <span class="font-bold text-lg text-gray-800 dark:text-white">4,500円</span>
+                            <span class="font-bold text-lg text-gray-800 dark:text-white">¥<?php echo number_format(PRICE_PER_ADULT); ?></span>
                         </li>
                         <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
                             <span><?php echo h(t('pricing_child')); ?> <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_child_sub')); ?></span></span>
                             <div class="text-right">
-                                <span class="font-bold text-lg text-gray-800 dark:text-white">2,500円</span>
+                                <span class="font-bold text-lg text-gray-800 dark:text-white">¥<?php echo number_format(PRICE_PER_CHILD); ?></span>
                                 <span class="text-xs block text-gray-500 dark:text-gray-400"><?php echo h(t('pricing_bedding_note')); ?></span>
                             </div>
                         </li>
@@ -161,7 +161,7 @@ require_once 'includes/header.php';
                         $type_name = (!empty($type['name_en']) && isset($_SESSION['lang']) && $_SESSION['lang'] === 'en') ? $type['name_en'] : $type['name'];
                         $type_desc = (!empty($type['description_en']) && isset($_SESSION['lang']) && $_SESSION['lang'] === 'en') ? $type['description_en'] : $type['description'];
                         // 画像がない場合のデフォルト画像（プレースホルダー）
-                        $img_src = !empty($type['main_image']) ? h($type['main_image']) : 'https://via.placeholder.com/600x400?text=No+Image';
+                        $img_src = !empty($type['main_image']) ? 'assets/' . h($type['main_image']) : 'https://via.placeholder.com/600x400?text=No+Image';
                 ?>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col group">
                     <div class="relative overflow-hidden h-48">

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="<?php echo h($current_lang ?? 'ja'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理画面 - ゲストハウスマル正</title>
+    <title><?php echo h(t('admin_dashboard_title')); ?> - <?php echo h(t('site_title')); ?></title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -54,25 +54,25 @@
     <header class="admin-header">
         <div class="logo-group">
             <button id="sidebar-toggle">☰</button>
-            <h1><a href="index.php">管理画面</a></h1>
+            <h1><a href="index.php"><?php echo h(t('admin_dashboard_title')); ?></a></h1>
         </div>
         <button id="nav-toggle">⋮</button>
         <div class="admin-nav" id="admin-nav">
-            <span>ようこそ、<?php echo h($_SESSION['user']['name']); ?>様</span>
-            <a href="../logout.php">ログアウト</a>
-            <a href="../index.php" target="_blank">サイトを表示</a>
+            <span><?php echo h(t('admin_welcome', $_SESSION['user']['name'])); ?></span>
+            <a href="../logout.php"><?php echo h(t('nav_logout')); ?></a>
+            <a href="../index.php" target="_blank"><?php echo h(t('admin_site_view')); ?></a>
         </div>
     </header>
     <div class="admin-container">
         <aside class="admin-sidebar" id="admin-sidebar">
             <ul>
-                <li><a href="index.php">ダッシュボード</a></li>
-                <li><a href="bookings.php">予約管理</a></li>
-                <li><a href="rooms.php">部屋管理</a></li>
-                <li><a href="room_types.php">部屋タイプ管理</a></li>
-                <li><a href="users.php">顧客管理</a></li>
-                <li><a href="calendar.php">空室カレンダー</a></li>
-                <li><a href="email_logs.php">メール送信履歴</a></li>
+                <li><a href="index.php"><?php echo h(t('admin_dashboard')); ?></a></li>
+                <li><a href="bookings.php"><?php echo h(t('admin_bookings')); ?></a></li>
+                <li><a href="rooms.php"><?php echo h(t('admin_rooms')); ?></a></li>
+                <li><a href="room_types.php"><?php echo h(t('admin_room_types')); ?></a></li>
+                <li><a href="users.php"><?php echo h(t('admin_users')); ?></a></li>
+                <li><a href="calendar.php"><?php echo h(t('admin_calendar')); ?></a></li>
+                <li><a href="email_logs.php"><?php echo h(t('admin_email_logs')); ?></a></li>
             </ul>
         </aside>
         <main class="admin-main">
@@ -116,13 +116,13 @@
                                         // New booking found
                                         lastBookingId = data.latest_id;
                                         if (Notification.permission === "granted") {
-                                            new Notification("新規予約が入りました", {
-                                                body: data.guest_name + "様より新しい予約があります。",
+                                            new Notification("<?php echo h(t('admin_new_booking')); ?>", {
+                                                body: "<?php echo h(t('admin_new_booking_body', '')); ?>" + data.guest_name,
                                                 icon: "https://placehold.co/192x192/0f4c81/ffffff?text=M"
                                             });
                                         } else {
                                             // Fallback: visual alert
-                                            alert("新規予約が入りました！\n" + data.guest_name + "様");
+                                            alert("<?php echo h(t('admin_new_booking')); ?>\n" + data.guest_name);
                                         }
                                         // Optionally refresh the list if we are on bookings.php
                                         // location.reload();

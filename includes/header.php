@@ -22,6 +22,7 @@ if (!isset($root_path)) {
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <link href="<?php echo $root_path; ?>assets/css/style.css" rel="stylesheet"/>
     <script>
       tailwind.config = {
         darkMode: "class",

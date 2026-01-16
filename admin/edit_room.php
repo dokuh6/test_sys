@@ -42,13 +42,16 @@ function handle_image_upload($file, $room_id) {
     $path_info = pathinfo($file['name']);
     $extension = $path_info['extension'];
     $filename = 'room_' . $room_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
-    $upload_dir = '../uploads/rooms/';
+    $upload_dir = '../assets/images/rooms/';
+    if (!file_exists($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
     $upload_path = $upload_dir . $filename;
 
     // ファイルを移動
     if (move_uploaded_file($file['tmp_name'], $upload_path)) {
         // `../` を除いたパスを返す
-        return 'uploads/rooms/' . $filename;
+        return 'images/rooms/' . $filename;
     }
 
     return null;
@@ -155,14 +158,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // コミット
         $dbh->commit();
-        $_SESSION['message'] = "部屋ID: " . h($id) . " の情報を更新しました。";
+        $_SESSION['message'] = t('admin_update_success');
         header('Location: rooms.php');
         exit();
 
     } catch (Exception $e) {
         // ロールバック
         $dbh->rollBack();
-        $error = "更新に失敗しました: " . h($e->getMessage());
+        $error = t('admin_update_fail', h($e->getMessage()));
     }
 }
 
@@ -201,7 +204,7 @@ try {
     }
 
 } catch (PDOException $e) {
-    die("情報の取得に失敗しました: " . h($e->getMessage()));
+    die("Error: " . h($e->getMessage()));
 }
 
 require_once 'admin_header.php';
@@ -220,7 +223,7 @@ $csrf_token = generate_csrf_token();
 .current-image-item small { display: block; text-align: center; color: #666; }
 </style>
 
-<h2>部屋の編集</h2>
+<h2><?php echo h(t('admin_edit_room')); ?></h2>
 
 <?php if ($error): ?><p style="color: red;"><?php echo $error; ?></p><?php endif; ?>
 
@@ -228,19 +231,19 @@ $csrf_token = generate_csrf_token();
     <form action="edit_room.php?id=<?php echo h($id); ?>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
 
-        <h3>基本情報</h3>
+        <h3><?php echo h(t('admin_basic_info')); ?></h3>
         <div class="form-row">
-            <label for="name">部屋名/番号 (日本語):</label>
+            <label for="name"><?php echo h(t('admin_room_name_jp')); ?>:</label>
             <input type="text" id="name" name="name" value="<?php echo h($room['name']); ?>" required>
         </div>
         <div class="form-row">
-            <label for="name_en">部屋名/番号 (English):</label>
+            <label for="name_en"><?php echo h(t('admin_room_name_en')); ?>:</label>
             <input type="text" id="name_en" name="name_en" value="<?php echo h($room['name_en'] ?? ''); ?>">
         </div>
         <div class="form-row">
-            <label for="room_type_id">部屋タイプ:</label>
+            <label for="room_type_id"><?php echo h(t('admin_room_type')); ?>:</label>
             <select id="room_type_id" name="room_type_id" required>
-                <option value="">選択してください</option>
+                <option value=""><?php echo h(t('book_select_placeholder')); ?></option>
                 <?php foreach ($room_types_for_form as $type): ?>
                     <option value="<?php echo h($type['id']); ?>" <?php echo ($type['id'] == $room['room_type_id']) ? 'selected' : ''; ?>>
                         <?php echo h($type['name']); ?>
@@ -249,66 +252,66 @@ $csrf_token = generate_csrf_token();
             </select>
         </div>
         <div class="form-row">
-            <label for="price_adult">大人料金(円):</label>
+            <label for="price_adult"><?php echo h(t('admin_price_adult')); ?>:</label>
             <input type="number" id="price_adult" name="price_adult" min="0" step="100" value="<?php echo h($room['price_adult'] ?? 4500); ?>" required>
         </div>
         <div class="form-row">
-            <label for="price_child">子供料金(円):</label>
+            <label for="price_child"><?php echo h(t('admin_price_child')); ?>:</label>
             <input type="number" id="price_child" name="price_child" min="0" step="100" value="<?php echo h($room['price_child'] ?? 2500); ?>" required>
         </div>
 
         <div class="image-upload-section">
-            <h3>部屋の画像</h3>
-            <p>新しい画像をアップロードすると、既存の画像は置き換えられます。</p>
+            <h3><?php echo h(t('admin_room_images')); ?></h3>
+            <p><?php echo h(t('admin_image_upload')); ?></p>
 
             <div class="form-row">
-                <label>現在のメイン画像:</label>
+                <label><?php echo h(t('admin_image_main')); ?>:</label>
                 <div class="current-images">
                     <?php if ($main_image): ?>
                         <div class="current-image-item">
-                            <img src="../<?php echo h($main_image['image_path']); ?>" alt="Main Image">
-                            <small>メイン</small>
+                            <img src="../assets/<?php echo h($main_image['image_path']); ?>" alt="Main Image">
+                            <small>Main</small>
                         </div>
                     <?php else: ?>
-                        <p>画像がありません。</p>
+                        <p><?php echo h(t('admin_no_image')); ?></p>
                     <?php endif; ?>
                 </div>
             </div>
              <div class="form-row">
-                <label for="main_image">新しいメイン画像:</label>
+                <label for="main_image"><?php echo h(t('admin_image_upload_main')); ?>:</label>
                 <input type="file" id="main_image" name="main_image" accept="image/jpeg, image/png, image/gif">
             </div>
 
             <hr style="margin: 20px 0;">
 
             <div class="form-row">
-                <label>現在のサブ画像:</label>
+                <label><?php echo h(t('admin_image_sub')); ?>:</label>
                 <div class="current-images">
                     <?php if (!empty($sub_images)): ?>
                         <?php foreach ($sub_images as $img): ?>
                         <div class="current-image-item">
-                            <img src="../<?php echo h($img['image_path']); ?>" alt="Sub Image">
+                            <img src="../assets/<?php echo h($img['image_path']); ?>" alt="Sub Image">
                              <div style="text-align:center; margin-top:5px;">
                                  <label style="font-size:0.8em; color:red; cursor:pointer;">
-                                     <input type="checkbox" name="delete_images[]" value="<?php echo h($img['id']); ?>"> 削除
+                                     <input type="checkbox" name="delete_images[]" value="<?php echo h($img['id']); ?>"> <?php echo h(t('admin_delete')); ?>
                                  </label>
                              </div>
                         </div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <p>画像がありません。</p>
+                        <p><?php echo h(t('admin_no_image')); ?></p>
                     <?php endif; ?>
                 </div>
             </div>
             <div class="form-row">
-                 <label for="sub_images">サブ画像を追加:</label>
+                 <label for="sub_images"><?php echo h(t('admin_image_upload_sub')); ?>:</label>
                  <input type="file" id="sub_images" name="sub_images[]" multiple accept="image/jpeg, image/png, image/gif">
             </div>
         </div>
 
         <br>
-        <button type="submit" class="btn-admin" style="background-color: #2980b9;">更新する</button>
-        <a href="rooms.php" style="margin-left: 10px;">キャンセル</a>
+        <button type="submit" class="btn-admin" style="background-color: #2980b9;"><?php echo h(t('admin_update')); ?></button>
+        <a href="rooms.php" style="margin-left: 10px;"><?php echo h(t('admin_cancel')); ?></a>
     </form>
 </div>
 

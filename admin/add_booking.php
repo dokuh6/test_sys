@@ -44,9 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 入力チェック
     if (!$room_id || !$check_in || !$check_out || !$guest_name || !$num_guests || !$total_price) {
-        $error = "必須項目が入力されていません。";
+        $error = t('admin_input_error');
     } elseif (strtotime($check_in) >= strtotime($check_out)) {
-        $error = "チェックアウト日はチェックイン日より後の日付にしてください。";
+        $error = t('error_checkout_after_checkin');
     } else {
         try {
             $dbh->beginTransaction();
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             if ($stmt_check->fetch()) {
-                throw new Exception("指定された期間は既に予約が入っています。");
+                throw new Exception(t('book_error_taken'));
             }
 
             // 予約作成
@@ -101,13 +101,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dbh->commit();
 
             // 完了後にカレンダーへリダイレクト
-            $_SESSION['message'] = "予約を作成しました (ID: $booking_id)";
+            $_SESSION['message'] = t('admin_add_success');
             header('Location: calendar.php');
             exit();
 
         } catch (Exception $e) {
             $dbh->rollBack();
-            $error = "予約作成エラー: " . h($e->getMessage());
+            $error = t('admin_add_fail') . ": " . h($e->getMessage());
         }
     }
 }
@@ -116,7 +116,7 @@ $csrf_token = generate_csrf_token();
 require_once 'admin_header.php';
 ?>
 
-<h2>新規予約作成</h2>
+<h2><?php echo h(t('admin_add_booking')); ?></h2>
 
 <?php if ($error): ?>
     <p style="color: red;"><?php echo $error; ?></p>
@@ -126,12 +126,12 @@ require_once 'admin_header.php';
     <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
 
     <div style="margin-bottom: 1rem;">
-        <label>部屋:</label>
+        <label><?php echo h(t('booking_info_room')); ?>:</label>
         <select name="room_id" id="room_select" required style="width: 100%; padding: 8px;">
-            <option value="">選択してください</option>
+            <option value=""><?php echo h(t('book_select_placeholder')); ?></option>
             <?php foreach ($rooms as $room): ?>
                 <option value="<?php echo h($room['id']); ?>" data-price="<?php echo h($room['price']); ?>" <?php echo $room_id == $room['id'] ? 'selected' : ''; ?>>
-                    <?php echo h($room['name']); ?> (¥<?php echo number_format($room['price']); ?>/泊)
+                    <?php echo h($room['name']); ?> (¥<?php echo number_format($room['price']); ?>/<?php echo h(t('room_price_per_night', '')); ?>)
                 </option>
             <?php endforeach; ?>
         </select>
@@ -139,41 +139,41 @@ require_once 'admin_header.php';
 
     <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
         <div style="flex: 1;">
-            <label>チェックイン:</label>
+            <label><?php echo h(t('booking_info_check_in')); ?>:</label>
             <input type="date" name="check_in" id="check_in" value="<?php echo h($check_in); ?>" required style="width: 100%; padding: 8px;">
         </div>
         <div style="flex: 1;">
-            <label>チェックアウト:</label>
+            <label><?php echo h(t('booking_info_check_out')); ?>:</label>
             <input type="date" name="check_out" id="check_out" value="<?php echo h($check_out); ?>" required style="width: 100%; padding: 8px;">
         </div>
     </div>
 
     <div style="margin-bottom: 1rem;">
-        <label>ゲスト氏名:</label>
+        <label><?php echo h(t('form_name')); ?>:</label>
         <input type="text" name="guest_name" required style="width: 100%; padding: 8px;">
     </div>
 
     <div style="margin-bottom: 1rem;">
-        <label>ゲストEmail (任意):</label>
+        <label><?php echo h(t('form_email')); ?> (Optional):</label>
         <input type="email" name="guest_email" style="width: 100%; padding: 8px;">
     </div>
 
     <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
         <div style="flex: 1;">
-            <label>大人 (<?php echo number_format(PRICE_PER_ADULT); ?>円):</label>
+            <label><?php echo h(t('form_num_guests')); ?> (<?php echo number_format(PRICE_PER_ADULT); ?>円):</label>
             <input type="number" name="num_guests" id="num_guests" value="1" min="1" required style="width: 100%; padding: 8px;">
         </div>
         <div style="flex: 1;">
-            <label>子供 (<?php echo number_format(PRICE_PER_CHILD); ?>円):</label>
+            <label><?php echo h(t('form_children')); ?> (<?php echo number_format(PRICE_PER_CHILD); ?>円):</label>
             <input type="number" name="num_children" id="num_children" value="0" min="0" style="width: 100%; padding: 8px;">
         </div>
     </div>
 
     <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
         <div style="flex: 1;">
-            <label>到着予定:</label>
+            <label><?php echo h(t('book_check_in_time_label')); ?>:</label>
             <select name="check_in_time" style="width: 100%; padding: 8px;">
-                <option value="">選択してください</option>
+                <option value=""><?php echo h(t('book_select_placeholder')); ?></option>
                 <?php for($i = 15; $i <= 22; $i++): ?>
                     <option value="<?php echo $i; ?>:00"><?php echo $i; ?>:00</option>
                     <option value="<?php echo $i; ?>:30"><?php echo $i; ?>:30</option>
@@ -181,9 +181,9 @@ require_once 'admin_header.php';
             </select>
         </div>
         <div style="flex: 1;">
-            <label>出発予定:</label>
+            <label><?php echo h(t('book_check_out_time_label')); ?>:</label>
             <select name="check_out_time" style="width: 100%; padding: 8px;">
-                <option value="">選択してください</option>
+                <option value=""><?php echo h(t('book_select_placeholder')); ?></option>
                 <?php for($i = 6; $i <= 11; $i++): ?>
                     <option value="<?php echo $i; ?>:00"><?php echo $i; ?>:00</option>
                     <option value="<?php echo $i; ?>:30"><?php echo $i; ?>:30</option>
@@ -193,18 +193,18 @@ require_once 'admin_header.php';
     </div>
 
     <div style="margin-bottom: 1rem;">
-        <label>備考:</label>
+        <label><?php echo h(t('book_notes_label')); ?>:</label>
         <textarea name="notes" rows="3" style="width: 100%; padding: 8px;"></textarea>
     </div>
 
     <div style="margin-bottom: 1rem;">
-        <label>合計金額 (円):</label>
+        <label><?php echo h(t('admin_total_price')); ?>:</label>
         <input type="number" name="total_price" id="total_price" required style="width: 100%; padding: 8px;">
         <small>※自動計算されますが、手動で変更可能です</small>
     </div>
 
-    <button type="submit" class="btn-admin" style="background-color: #27ae60; padding: 10px 20px; font-size: 1rem;">予約を作成する</button>
-    <a href="calendar.php" class="btn-admin" style="background-color: #95a5a6; margin-left: 10px;">キャンセル</a>
+    <button type="submit" class="btn-admin" style="background-color: #27ae60; padding: 10px 20px; font-size: 1rem;"><?php echo h(t('admin_add')); ?></button>
+    <a href="calendar.php" class="btn-admin" style="background-color: #95a5a6; margin-left: 10px;"><?php echo h(t('admin_cancel')); ?></a>
 </form>
 
 <script>

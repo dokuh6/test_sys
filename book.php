@@ -333,7 +333,7 @@ $csrf_token = generate_csrf_token();
                     <?php endif; ?>
                 </ul>
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-4 text-right">
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1"><?php echo h(t('booking_info_total_price')); ?></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1"><?php echo h(t('label_total')); ?></p>
                     <p class="text-3xl font-bold text-red-500">¥<?php echo h(number_format($total_price)); ?></p>
                 </div>
             </div>

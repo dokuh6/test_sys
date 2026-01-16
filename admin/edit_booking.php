@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($guest_name && $check_in_date && $check_out_date && $num_guests && $status && $total_price) {
         if (strtotime($check_in_date) >= strtotime($check_out_date)) {
-            $error = "チェックアウト日はチェックイン日より後の日付にしてください。";
+            $error = t('error_checkout_after_checkin');
         } else {
             try {
                 // 重複チェック (自分自身 $id は除外)
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]);
 
                     if ($stmt_check->fetch()) {
-                        throw new Exception("指定された期間は既に他の予約が入っています。");
+                        throw new Exception(t('book_error_taken'));
                     }
                 }
 
@@ -90,18 +90,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             require_once '../includes/functions.php';
             send_booking_modification_email($id, $dbh);
 
-                $_SESSION['message'] = "予約ID: " . h($id) . " の情報を更新しました。";
+                $_SESSION['message'] = t('admin_update_success');
                 header('Location: bookings.php');
                 exit();
             } catch (PDOException $e) {
                 // guest_phoneカラムがない場合のエラーハンドリングなどを考慮
-                $error = "更新に失敗しました: " . h($e->getMessage());
+                $error = t('admin_update_fail', h($e->getMessage()));
             } catch (Exception $e) {
                 $error = $e->getMessage();
             }
         }
     } else {
-        $error = "必須項目 (氏名, 日程, 人数, 合計金額, ステータス) を入力してください。";
+        $error = t('admin_input_error');
     }
 }
 
@@ -122,7 +122,7 @@ try {
         exit();
     }
 } catch (PDOException $e) {
-    die("情報の取得に失敗しました: " . h($e->getMessage()));
+    die("Error: " . h($e->getMessage()));
 }
 
 $csrf_token = generate_csrf_token();
@@ -138,7 +138,7 @@ require_once 'admin_header.php';
 .btn-calc:hover { background-color: #e67e22; }
 </style>
 
-<h2>予約の編集 (予約ID: <?php echo h($id); ?>)</h2>
+<h2><?php echo h(t('admin_bookings_title')); ?> (ID: <?php echo h($id); ?>)</h2>
 
 <?php if (isset($error)): ?><p style="color: red;"><?php echo h($error); ?></p><?php endif; ?>
 
@@ -147,15 +147,15 @@ require_once 'admin_header.php';
         <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
 
         <div class="form-row">
-            <label for="guest_name">顧客名:</label>
+            <label for="guest_name"><?php echo h(t('form_name')); ?>:</label>
             <input type="text" id="guest_name" name="guest_name" value="<?php echo h($booking['guest_name'] ?: ($booking['user_name'] ?? '')); ?>" required>
         </div>
         <div class="form-row">
-            <label for="guest_email">メールアドレス:</label>
+            <label for="guest_email"><?php echo h(t('form_email')); ?>:</label>
             <input type="email" id="guest_email" name="guest_email" value="<?php echo h($booking['guest_email'] ?: ($booking['user_email'] ?? '')); ?>">
         </div>
         <div class="form-row">
-            <label for="guest_phone">電話番号:</label>
+            <label for="guest_phone"><?php echo h(t('form_tel')); ?>:</label>
             <!-- guest_phoneがあればそれを、なければusers.phoneを表示 -->
             <input type="tel" id="guest_phone" name="guest_phone" value="<?php echo h($booking['guest_phone'] ?? ($booking['user_phone'] ?? '')); ?>">
         </div>
@@ -163,39 +163,39 @@ require_once 'admin_header.php';
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
 
         <div class="form-row">
-            <label for="check_in_date">チェックイン日:</label>
+            <label for="check_in_date"><?php echo h(t('booking_info_check_in')); ?>:</label>
             <input type="date" id="check_in_date" name="check_in_date" value="<?php echo h($booking['check_in_date']); ?>" required>
         </div>
         <div class="form-row">
-            <label for="check_out_date">チェックアウト日:</label>
+            <label for="check_out_date"><?php echo h(t('booking_info_check_out')); ?>:</label>
             <input type="date" id="check_out_date" name="check_out_date" value="<?php echo h($booking['check_out_date']); ?>" required>
         </div>
         <div class="form-row">
-            <label for="num_guests">人数 (大人):</label>
+            <label for="num_guests"><?php echo h(t('form_num_guests')); ?> (<?php echo h(t('pricing_adult')); ?>):</label>
             <input type="number" id="num_guests" name="num_guests" min="1" value="<?php echo h($booking['num_guests']); ?>" required>
-            <small>単価: ¥<?php echo number_format(PRICE_PER_ADULT); ?></small>
+            <small><?php echo h(t('admin_unit_price')); ?>: ¥<?php echo number_format(PRICE_PER_ADULT); ?></small>
         </div>
         <div class="form-row">
-            <label for="num_children">人数 (子供):</label>
+            <label for="num_children"><?php echo h(t('form_children')); ?> (<?php echo h(t('pricing_child')); ?>):</label>
             <input type="number" id="num_children" name="num_children" min="0" value="<?php echo h($booking['num_children']); ?>">
-            <small>単価: ¥<?php echo number_format(PRICE_PER_CHILD); ?></small>
+            <small><?php echo h(t('admin_unit_price')); ?>: ¥<?php echo number_format(PRICE_PER_CHILD); ?></small>
         </div>
 
         <div class="form-row">
-            <label for="total_price">合計金額 (円):</label>
+            <label for="total_price"><?php echo h(t('admin_total_price')); ?>:</label>
             <input type="number" id="total_price" name="total_price" value="<?php echo h((int)$booking['total_price']); ?>" required>
-            <button type="button" class="btn-calc" onclick="calculatePrice()">再計算する</button>
+            <button type="button" class="btn-calc" onclick="calculatePrice()">Recalculate</button>
         </div>
         <p style="font-size: 0.9em; color: #666; margin-left: 160px; margin-top: -10px; margin-bottom: 20px;">
-            ※人数や日程を変更した場合、「再計算する」ボタンを押すと金額が更新されます。
+            <?php echo h(t('admin_hint_recalc')); ?>
         </p>
 
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
 
         <div class="form-row">
-            <label for="check_in_time">到着予定:</label>
+            <label for="check_in_time"><?php echo h(t('book_check_in_time_label')); ?>:</label>
             <select id="check_in_time" name="check_in_time">
-                <option value="">選択してください</option>
+                <option value=""><?php echo h(t('book_select_placeholder')); ?></option>
                 <?php for($i = 15; $i <= 22; $i++): ?>
                     <?php $t = $i . ':00'; $sel = ($booking['check_in_time'] == $t) ? 'selected' : ''; ?>
                     <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
@@ -208,9 +208,9 @@ require_once 'admin_header.php';
             </select>
         </div>
         <div class="form-row">
-            <label for="check_out_time">出発予定:</label>
+            <label for="check_out_time"><?php echo h(t('book_check_out_time_label')); ?>:</label>
             <select id="check_out_time" name="check_out_time">
-                <option value="">選択してください</option>
+                <option value=""><?php echo h(t('book_select_placeholder')); ?></option>
                 <?php for($i = 6; $i <= 11; $i++): ?>
                     <?php $t = $i . ':00'; $sel = ($booking['check_out_time'] == $t) ? 'selected' : ''; ?>
                     <option value="<?php echo $t; ?>" <?php echo $sel; ?>><?php echo $t; ?></option>
@@ -223,20 +223,20 @@ require_once 'admin_header.php';
             </select>
         </div>
         <div class="form-row">
-            <label for="notes">備考:</label>
+            <label for="notes"><?php echo h(t('book_notes_label')); ?>:</label>
             <textarea id="notes" name="notes" rows="4"><?php echo h($booking['notes']); ?></textarea>
         </div>
         <div class="form-row">
-            <label for="status">ステータス:</label>
+            <label for="status"><?php echo h(t('history_status')); ?>:</label>
             <select id="status" name="status">
-                <option value="confirmed" <?php echo ($booking['status'] === 'confirmed') ? 'selected' : ''; ?>>確定</option>
-                <option value="cancelled" <?php echo ($booking['status'] === 'cancelled') ? 'selected' : ''; ?>>キャンセル済</option>
+                <option value="confirmed" <?php echo ($booking['status'] === 'confirmed') ? 'selected' : ''; ?>><?php echo h(t('status_confirmed')); ?></option>
+                <option value="cancelled" <?php echo ($booking['status'] === 'cancelled') ? 'selected' : ''; ?>><?php echo h(t('status_cancelled')); ?></option>
             </select>
         </div>
 
         <div style="margin-top: 20px;">
-            <button type="submit" class="btn-admin" style="background-color: #2980b9;">更新する</button>
-            <a href="bookings.php" style="margin-left: 10px;">キャンセル</a>
+            <button type="submit" class="btn-admin" style="background-color: #2980b9;"><?php echo h(t('admin_update')); ?></button>
+            <a href="bookings.php" style="margin-left: 10px;"><?php echo h(t('admin_cancel')); ?></a>
         </div>
     </form>
 </div>
@@ -264,9 +264,9 @@ require_once 'admin_header.php';
 
             const total = diffDays * (adults * ADULT_PRICE + children * CHILD_PRICE);
             totalPriceInput.value = total;
-            alert('合計金額を再計算しました: ¥' + total.toLocaleString());
+            alert('<?php echo h(t('admin_recalc_msg')); ?>' + total.toLocaleString());
         } else {
-            alert('チェックイン日とチェックアウト日を正しく入力してください。');
+            alert('<?php echo h(t('book_error_dates')); ?>');
         }
     }
 </script>

@@ -74,7 +74,7 @@ if (!$room) {
         <div class="lg:col-span-2 space-y-4">
             <div class="relative overflow-hidden rounded-lg shadow-md h-96 bg-gray-200">
                 <?php if ($main_image): ?>
-                    <img src="<?php echo h($main_image); ?>" alt="<?php echo h($room['name']); ?>" class="w-full h-full object-cover">
+                    <img src="assets/<?php echo h($main_image); ?>" alt="<?php echo h($room['name']); ?>" class="w-full h-full object-cover">
                 <?php else: ?>
                     <div class="flex items-center justify-center h-full text-gray-400">
                         <span class="flex flex-col items-center">
@@ -88,7 +88,7 @@ if (!$room) {
                 <div class="grid grid-cols-4 gap-4">
                     <?php foreach ($sub_images as $sub_image): ?>
                         <div class="relative overflow-hidden rounded-lg shadow-sm h-24 bg-gray-200">
-                            <img src="<?php echo h($sub_image); ?>" alt="Sub image for <?php echo h($room['name']); ?>" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                            <img src="assets/<?php echo h($sub_image); ?>" alt="Sub image for <?php echo h($room['name']); ?>" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -218,11 +218,11 @@ if (!$room) {
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="num_guests" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_num_guests') ?? '大人'); ?> (<?php echo number_format(PRICE_PER_ADULT); ?>円):</label>
+                            <label for="num_guests" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_num_guests') ?? '大人'); ?> (¥<?php echo number_format($room['price_adult']); ?>):</label>
                             <input type="number" id="num_guests" name="num_guests" min="1" max="<?php echo h($room['capacity']); ?>" value="1" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
                         </div>
                         <div>
-                            <label for="num_children" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_children')); ?> (<?php echo number_format(PRICE_PER_CHILD); ?>円):</label>
+                            <label for="num_children" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('form_children')); ?> (¥<?php echo number_format($room['price_child']); ?>):</label>
                             <input type="number" id="num_children" name="num_children" min="0" max="<?php echo h($room['capacity']); ?>" value="0" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
                             <p class="text-xs text-gray-500 mt-1"><?php echo h(t('children_age_note')); ?></p>
                         </div>

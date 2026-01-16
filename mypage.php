@@ -115,7 +115,7 @@ try {
                                         <form action="cancel_booking.php" method="POST" class="inline">
                                             <input type="hidden" name="booking_id" value="<?php echo h($booking['id']); ?>">
                                             <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
-                                            <button type="submit" class="text-red-500 hover:text-red-700 hover:underline font-semibold text-sm" onclick="return confirm('本当にこの予約をキャンセルしますか？');">
+                                            <button type="submit" class="text-red-500 hover:text-red-700 hover:underline font-semibold text-sm" onclick="return confirm('<?php echo h(t('cancel_confirm_text')); ?>');">
                                                 <?php echo h(t('action_cancel')); ?>
                                             </button>
                                         </form>
