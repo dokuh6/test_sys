@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validate_csrf_token();
     $guest_name = filter_input(INPUT_POST, 'guest_name');
     $guest_email = filter_input(INPUT_POST, 'guest_email', FILTER_VALIDATE_EMAIL);
-    $guest_phone = filter_input(INPUT_POST, 'guest_phone'); // 新規追加
+    $guest_phone = filter_input(INPUT_POST, 'guest_phone'); // Phone number input
     $check_in_date = filter_input(INPUT_POST, 'check_in_date');
     $check_out_date = filter_input(INPUT_POST, 'check_out_date');
     $num_guests = filter_input(INPUT_POST, 'num_guests', FILTER_VALIDATE_INT);
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([
                     ':guest_name' => $guest_name,
                     ':guest_email' => $guest_email ? $guest_email : '',
-                    ':guest_phone' => $guest_phone ? $guest_phone : '',
+                    ':guest_phone' => $guest_phone ? $guest_phone : '', // Bind phone
                     ':check_in_date' => $check_in_date,
                     ':check_out_date' => $check_out_date,
                     ':num_guests' => $num_guests,
@@ -140,7 +140,7 @@ require_once 'admin_header.php';
 
 <h2>予約の編集 (予約ID: <?php echo h($id); ?>)</h2>
 
-<?php if (isset($error)): ?><p style="color: red;"><?php echo $error; ?></p><?php endif; ?>
+<?php if (isset($error)): ?><p style="color: red;"><?php echo h($error); ?></p><?php endif; ?>
 
 <div class="edit-form">
     <form action="edit_booking.php?id=<?php echo h($id); ?>" method="POST">

@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $booking_token = bin2hex(random_bytes(32));
             $booking_number = date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
 
-            $sql_bookings = "INSERT INTO bookings (booking_token, booking_number, user_id, guest_name, guest_email, check_in_date, check_out_date, check_in_time, check_out_time, num_guests, num_children, notes, total_price, status) VALUES (:booking_token, :booking_number, :user_id, :guest_name, :guest_email, :check_in_date, :check_out_date, :check_in_time, :check_out_time, :num_guests, :num_children, :notes, :total_price, 'confirmed')";
+            $sql_bookings = "INSERT INTO bookings (booking_token, booking_number, user_id, guest_name, guest_email, guest_phone, check_in_date, check_out_date, check_in_time, check_out_time, num_guests, num_children, notes, total_price, status) VALUES (:booking_token, :booking_number, :user_id, :guest_name, :guest_email, :guest_phone, :check_in_date, :check_out_date, :check_in_time, :check_out_time, :num_guests, :num_children, :notes, :total_price, 'confirmed')";
             $stmt_bookings = $dbh->prepare($sql_bookings);
             $stmt_bookings->execute([
                 ':booking_token' => $booking_token,
@@ -125,6 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':user_id' => $user_id,
                 ':guest_name' => $guest_name,
                 ':guest_email' => $guest_email,
+                ':guest_phone' => $guest_tel,
                 ':check_in_date' => $check_in,
                 ':check_out_date' => $check_out,
                 ':check_in_time' => $check_in_time,

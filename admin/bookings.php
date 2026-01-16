@@ -174,10 +174,10 @@ require_once 'admin_header.php';
 </div>
 
 <?php if ($message): ?>
-    <p style="color: green;"><?php echo $message; ?></p>
+    <p style="color: green;"><?php echo h($message); ?></p>
 <?php endif; ?>
 <?php if ($error): ?>
-    <p style="color: red;"><?php echo $error; ?></p>
+    <p style="color: red;"><?php echo h($error); ?></p>
 <?php endif; ?>
 
 <div class="table-responsive">
