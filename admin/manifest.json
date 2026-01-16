@@ -1,7 +1,8 @@
 {
   "name": "Marusho Admin",
   "short_name": "Marusho",
-  "start_url": "admin/bookings.php",
+  "start_url": "bookings.php",
+  "scope": "/admin/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0f4c81",
