@@ -137,7 +137,7 @@ function send_booking_confirmation_email($booking_id, $dbh) {
 
         // メール設定
         $to = $booking['guest_email'];
-        $subject = '【ゲストハウス丸正】ご予約確定のお知らせ';
+        $subject = t('email_subject_confirmed');
 
         $booking_number = isset($booking['booking_number']) ? $booking['booking_number'] : $booking['id'];
         $formatted_price = number_format($booking['total_price']);
@@ -162,91 +162,91 @@ function send_booking_confirmation_email($booking_id, $dbh) {
         <body>
             <div class='container'>
                 <div class='header'>
-                    <h1>ゲストハウス丸正</h1>
-                    <p>ご予約ありがとうございます</p>
+                    <h1>" . t('site_title') . "</h1>
+                    <p>" . t('email_header_confirmed') . "</p>
                 </div>
                 <div class='content'>
-                    <p>{$booking['guest_name']} 様</p>
-                    <p>この度は、ゲストハウス丸正にご予約いただき、誠にありがとうございます。<br>
-                    以下の内容でご予約が確定いたしました。</p>
+                    <p>" . t('email_greeting', h($booking['guest_name'])) . "</p>
+                    <p>" . t('email_body_confirmed_1') . "<br>
+                    " . t('email_body_confirmed_2') . "</p>
 
                     <table class='booking-details'>
                         <tr>
-                            <th>予約番号</th>
+                            <th>" . t('booking_number') . "</th>
                             <td><strong>{$booking_number}</strong></td>
                         </tr>
                         <tr>
-                            <th>お部屋</th>
+                            <th>" . t('booking_info_room') . "</th>
                             <td>{$booking['room_name']} ({$booking['type_name']})</td>
                         </tr>
                         <tr>
-                            <th>チェックイン</th>
+                            <th>" . t('booking_info_check_in') . "</th>
                             <td>{$booking['check_in_date']} " . ($booking['check_in_time'] ? "({$booking['check_in_time']})" : "") . "</td>
                         </tr>
                         <tr>
-                            <th>チェックアウト</th>
+                            <th>" . t('booking_info_check_out') . "</th>
                             <td>{$booking['check_out_date']} " . ($booking['check_out_time'] ? "({$booking['check_out_time']})" : "") . "</td>
                         </tr>
                         <tr>
-                            <th>ご利用人数</th>
-                            <td>大人: {$booking['num_guests']}名, 子供: {$booking['num_children']}名</td>
+                            <th>" . t('booking_info_guests') . "</th>
+                            <td>{$booking['num_guests']}名 (子供: {$booking['num_children']}名)</td>
                         </tr>
-                        " . ($booking['notes'] ? "<tr><th>備考</th><td>" . nl2br(h($booking['notes'])) . "</td></tr>" : "") . "
+                        " . ($booking['notes'] ? "<tr><th>" . t('book_notes_label') . "</th><td>" . nl2br(h($booking['notes'])) . "</td></tr>" : "") . "
                         <tr>
-                            <th>合計金額</th>
+                            <th>" . t('booking_info_total_price') . "</th>
                             <td><span style='color: #c0392b; font-weight: bold;'>¥{$formatted_price}</span></td>
                         </tr>
                     </table>
 
-                    <p>当日はお気をつけてお越しください。<br>
-                    スタッフ一同、お会いできることを心よりお待ちしております。</p>
+                    <p>" . t('email_wait_message') . "<br>
+                    " . t('email_wait_message_2') . "</p>
 
                     <div style='text-align: center;'>
-                        <a href='https://maps.google.com/?q=ゲストハウス丸正' class='button' style='color: #ffffff;'>地図を見る</a>
+                        <a href='https://maps.google.com/?q=" . t('site_title') . "' class='button' style='color: #ffffff;'>" . t('email_btn_map') . "</a>
                     </div>
 
                     <div style='border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px;'>
-                         <h3 style='font-size: 16px; margin-bottom: 10px; color: #555;'>ご利用案内</h3>
+                         <h3 style='font-size: 16px; margin-bottom: 10px; color: #555;'>" . t('info_guide_title') . "</h3>
 
-                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【宿泊料金について】</h4>
+                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【" . t('info_pricing_title') . "】</h4>
                          <ul style='font-size: 13px; padding-left: 20px; color: #555;'>
-                            <li>大人料金: 4,500円（お一人）</li>
-                            <li>子供料金（中学生まで）: 2,500円（寝具持込み）</li>
-                            <li>※乳幼児（5歳まで）など布団無しで添い寝の場合は無料</li>
-                            <li>※お支払いは当日現金でお支払いをお願い致します。</li>
+                            <li>" . t('info_pricing_adult') . "</li>
+                            <li>" . t('info_pricing_child') . "</li>
+                            <li>" . t('info_pricing_infant') . "</li>
+                            <li>" . t('info_pricing_payment') . "</li>
                          </ul>
 
-                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【チェックイン・チェックアウトについて】</h4>
+                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【" . t('info_checkin_title') . "】</h4>
                          <ul style='font-size: 13px; padding-left: 20px; color: #555;'>
-                            <li>チェックイン: 15時～（20時以降到着の方は、当日電話にてご連絡ください）</li>
-                            <li>チェックアウト: 10時</li>
-                            <li>※日中・夜間共、宿泊者がいない時は宿を留守にすることもあります。宿に来る前に必ず電話で連絡してください。</li>
+                            <li>" . t('info_checkin_in') . "</li>
+                            <li>" . t('info_checkin_out') . "</li>
+                            <li>" . t('info_checkin_note') . "</li>
                          </ul>
 
-                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【宿泊予約について】</h4>
+                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【" . t('info_booking_title') . "】</h4>
                          <ul style='font-size: 13px; padding-left: 20px; color: #555;'>
-                            <li>当サイトまたはお電話でご予約をお願いします。（電話問合せ: 8時～20時）</li>
-                            <li>予約の際は宿泊日・人数（男女別）をお知らせください。</li>
-                            <li>当日予約・飛込みも可能ですが、極力事前にご予約下さい。</li>
-                            <li>団体・グループ等の貸切はお早めにご連絡ください。</li>
+                            <li>" . t('info_booking_1') . "</li>
+                            <li>" . t('info_booking_2') . "</li>
+                            <li>" . t('info_booking_3') . "</li>
+                            <li>" . t('info_booking_4') . "</li>
                          </ul>
 
-                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【キャンセルについて】</h4>
-                         <p style='font-size: 13px; margin: 5px 0; color: #555;'>他のお客様のご迷惑となりますので、人数変更・キャンセルの場合は早めにご連絡ください。</p>
+                         <h4 style='font-size: 14px; margin: 15px 0 5px; color: #555;'>【" . t('info_cancel_title') . "】</h4>
+                         <p style='font-size: 13px; margin: 5px 0; color: #555;'>" . t('info_cancel_desc') . "</p>
                          <ul style='font-size: 13px; padding-left: 20px; color: #555;'>
-                            <li>5日前: 30％</li>
-                            <li>2日前: 50％</li>
-                            <li>前日、当日、無断キャンセル: 100％</li>
-                            <li>※貸切予約および繁忙期（GW、お盆、年末年始）は、7日前より50％、5日前より70％、3日前より100％となります。</li>
-                            <li>（天災及びアクシデントによる場合は除きます）</li>
+                            <li>" . t('info_cancel_policy_1') . "</li>
+                            <li>" . t('info_cancel_policy_2') . "</li>
+                            <li>" . t('info_cancel_policy_3') . "</li>
+                            <li>" . t('info_cancel_policy_note') . "</li>
+                            <li>" . t('info_cancel_policy_except') . "</li>
                          </ul>
                     </div>
                 </div>
                 <div class='footer'>
-                    <p>ゲストハウス丸正<br>
-                    〒000-0000 〇〇県〇〇市〇〇町1-2-3<br>
-                    TEL: 00-0000-0000</p>
-                    <p>※このメールは自動送信されています。</p>
+                    <p>" . t('site_title') . "<br>
+                    " . t('email_footer_address_1') . "<br>
+                    " . t('email_footer_tel') . "</p>
+                    <p>" . t('email_footer_auto') . "</p>
                 </div>
             </div>
         </body>
@@ -292,7 +292,7 @@ function send_cancellation_email($booking_id, $dbh) {
 
         // メール設定
         $to = $booking['guest_email'];
-        $subject = '【ゲストハウス丸正】ご予約キャンセルのお知らせ';
+        $subject = t('email_subject_cancelled');
 
         $booking_number = isset($booking['booking_number']) ? $booking['booking_number'] : $booking['id'];
 
@@ -315,37 +315,37 @@ function send_cancellation_email($booking_id, $dbh) {
         <body>
             <div class='container'>
                 <div class='header'>
-                    <h1>ゲストハウス丸正</h1>
-                    <p>ご予約キャンセル</p>
+                    <h1>" . t('site_title') . "</h1>
+                    <p>" . t('email_header_cancelled') . "</p>
                 </div>
                 <div class='content'>
-                    <p>{$booking['guest_name']} 様</p>
-                    <p>以下のご予約のキャンセルを承りました。</p>
+                    <p>" . t('email_greeting', h($booking['guest_name'])) . "</p>
+                    <p>" . t('email_body_cancelled') . "</p>
 
                     <table class='booking-details'>
                         <tr>
-                            <th>予約番号</th>
+                            <th>" . t('booking_number') . "</th>
                             <td><strong>{$booking_number}</strong></td>
                         </tr>
                         <tr>
-                            <th>お部屋</th>
+                            <th>" . t('booking_info_room') . "</th>
                             <td>{$booking['room_name']}</td>
                         </tr>
                         <tr>
-                            <th>チェックイン</th>
+                            <th>" . t('booking_info_check_in') . "</th>
                             <td>{$booking['check_in_date']}</td>
                         </tr>
                         <tr>
-                            <th>チェックアウト</th>
+                            <th>" . t('booking_info_check_out') . "</th>
                             <td>{$booking['check_out_date']}</td>
                         </tr>
                     </table>
 
-                    <p>またのご利用を心よりお待ちしております。</p>
+                    <p>" . t('email_farewell') . "</p>
                 </div>
                 <div class='footer'>
-                    <p>ゲストハウス丸正<br>
-                    TEL: 00-0000-0000</p>
+                    <p>" . t('site_title') . "<br>
+                    " . t('email_footer_tel') . "</p>
                 </div>
             </div>
         </body>
@@ -355,7 +355,7 @@ function send_cancellation_email($booking_id, $dbh) {
         // 管理者にも通知を送る
         if (defined('ADMIN_EMAIL')) {
              // 簡易的に管理者へも同じ内容（あるいは通知専用）を送る
-             send_email_smtp(ADMIN_EMAIL, "【管理者通知】予約キャンセル: {$booking_number}", "予約 {$booking_number} がキャンセルされました。", $dbh, false);
+             send_email_smtp(ADMIN_EMAIL, t('email_admin_subject_cancel', $booking_number), "予約 {$booking_number} がキャンセルされました。", $dbh, false);
         }
 
         // ゲストへの送信
@@ -400,7 +400,7 @@ function send_booking_modification_email($booking_id, $dbh) {
 
         // --- ゲスト向けメール ---
         $to_guest = $booking['guest_email'];
-        $subject_guest = '【ゲストハウス丸正】ご予約内容変更のお知らせ';
+        $subject_guest = t('email_subject_modified');
 
         $body_guest = "
         <html>
@@ -420,48 +420,48 @@ function send_booking_modification_email($booking_id, $dbh) {
         <body>
             <div class='container'>
                 <div class='header'>
-                    <h1>ゲストハウス丸正</h1>
-                    <p>予約内容変更のお知らせ</p>
+                    <h1>" . t('site_title') . "</h1>
+                    <p>" . t('email_header_modified') . "</p>
                 </div>
                 <div class='content'>
-                    <p>{$booking['guest_name']} 様</p>
-                    <p>いつもご利用ありがとうございます。<br>
-                    ご予約内容の変更を承りました。以下の内容をご確認ください。</p>
+                    <p>" . t('email_greeting', h($booking['guest_name'])) . "</p>
+                    <p>" . t('email_body_modified') . "<br>
+                    " . t('email_body_modified_2') . "</p>
 
                     <table class='booking-details'>
                         <tr>
-                            <th>予約番号</th>
+                            <th>" . t('booking_number') . "</th>
                             <td><strong>{$booking_number}</strong></td>
                         </tr>
                         <tr>
-                            <th>お部屋</th>
+                            <th>" . t('booking_info_room') . "</th>
                             <td>{$booking['room_name']} ({$booking['type_name']})</td>
                         </tr>
                         <tr>
-                            <th>チェックイン</th>
+                            <th>" . t('booking_info_check_in') . "</th>
                             <td>{$booking['check_in_date']} " . ($booking['check_in_time'] ? "({$booking['check_in_time']})" : "") . "</td>
                         </tr>
                         <tr>
-                            <th>チェックアウト</th>
+                            <th>" . t('booking_info_check_out') . "</th>
                             <td>{$booking['check_out_date']} " . ($booking['check_out_time'] ? "({$booking['check_out_time']})" : "") . "</td>
                         </tr>
                         <tr>
-                            <th>ご利用人数</th>
-                            <td>大人: {$booking['num_guests']}名, 子供: {$booking['num_children']}名</td>
+                            <th>" . t('booking_info_guests') . "</th>
+                            <td>{$booking['num_guests']}名 (子供: {$booking['num_children']}名)</td>
                         </tr>
-                        " . ($booking['notes'] ? "<tr><th>備考</th><td>" . nl2br(h($booking['notes'])) . "</td></tr>" : "") . "
+                        " . ($booking['notes'] ? "<tr><th>" . t('book_notes_label') . "</th><td>" . nl2br(h($booking['notes'])) . "</td></tr>" : "") . "
                         <tr>
-                            <th>合計金額</th>
+                            <th>" . t('booking_info_total_price') . "</th>
                             <td><span style='color: #c0392b; font-weight: bold;'>¥{$formatted_price}</span></td>
                         </tr>
                     </table>
 
-                    <p>ご不明な点がございましたら、お気軽にお問い合わせください。</p>
+                    <p>" . t('email_inquiry') . "</p>
                 </div>
                 <div class='footer'>
-                    <p>ゲストハウス丸正<br>
-                    TEL: 00-0000-0000</p>
-                    <p>※このメールは自動送信されています。</p>
+                    <p>" . t('site_title') . "<br>
+                    " . t('email_footer_tel') . "</p>
+                    <p>" . t('email_footer_auto') . "</p>
                 </div>
             </div>
         </body>
@@ -475,19 +475,18 @@ function send_booking_modification_email($booking_id, $dbh) {
         // 定数が未定義の場合は仮のアドレスまたはスキップ
         $admin_email = defined('ADMIN_EMAIL') ? ADMIN_EMAIL : 'admin@example.com';
 
-        $subject_admin = "【管理者通知】予約変更: {$booking_number} ({$booking['guest_name']}様)";
-        $body_admin = "
-        以下の予約が変更されました。
+        $subject_admin = t('email_admin_subject_modify', $booking_number, $booking['guest_name']);
+        $body_admin = t('email_admin_body_modify') . "
 
-        予約番号: {$booking_number}
-        氏名: {$booking['guest_name']}
-        電話番号: {$booking['guest_phone']}
-        日程: {$booking['check_in_date']} ～ {$booking['check_out_date']}
-        人数: 大人 {$booking['num_guests']}名, 子供 {$booking['num_children']}名
-        合計金額: ¥{$formatted_price}
-        備考: {$booking['notes']}
+        " . t('booking_number') . ": {$booking_number}
+        " . t('form_name') . ": {$booking['guest_name']}
+        " . t('form_tel') . ": {$booking['guest_phone']}
+        " . t('booking_info_check_in') . ": {$booking['check_in_date']} ～ {$booking['check_out_date']}
+        " . t('booking_info_guests') . ": {$booking['num_guests']}, " . t('pricing_child') . " {$booking['num_children']}
+        " . t('booking_info_total_price') . ": ¥{$formatted_price}
+        " . t('book_notes_label') . " {$booking['notes']}
 
-        管理画面で詳細をご確認ください。
+        " . t('email_admin_check_panel') . "
         ";
 
         send_email_smtp($admin_email, $subject_admin, $body_admin, $dbh, false);

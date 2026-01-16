@@ -1,4 +1,4 @@
--- ゲストハウス丸正 データベース構築SQL
+-- ゲストハウスマル正 データベース構築SQL
 
 -- データベースが存在しない場合に作成
 CREATE DATABASE IF NOT EXISTS `guesthouse_marusho` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;

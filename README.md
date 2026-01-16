@@ -1,6 +1,6 @@
 # Guesthouse Marusho Reservation System
 
-ゲストハウス丸正の予約管理システムです。
+ゲストハウスマル正の予約管理システムです。
 
 ## 機能一覧
 

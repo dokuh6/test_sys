@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理画面 - ゲストハウス丸正</title>
+    <title>管理画面 - ゲストハウスマル正</title>
     <style>
         body { font-family: sans-serif; margin: 0; background-color: #f4f7f6; }
         .admin-header { background-color: #2c3e50; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
