@@ -47,6 +47,8 @@ CREATE TABLE `rooms` (
   `room_type_id` int(11) NOT NULL COMMENT '部屋タイプID',
   `name` varchar(255) NOT NULL COMMENT '部屋名・番号 (例: 101号室)',
   `price` decimal(10,2) NOT NULL COMMENT '一泊あたりの料金',
+  `price_adult` decimal(10,2) NOT NULL DEFAULT 4500.00 COMMENT '大人料金',
+  `price_child` decimal(10,2) NOT NULL DEFAULT 2500.00 COMMENT '子供料金',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -73,6 +75,8 @@ CREATE TABLE `bookings` (
   `num_children` int(11) DEFAULT 0 COMMENT '宿泊人数 (子供)',
   `total_price` decimal(10,2) NOT NULL COMMENT '合計金額',
   `status` varchar(20) NOT NULL DEFAULT 'confirmed' COMMENT '予約状況 (confirmed, cancelled)',
+  `payment_status` varchar(20) NOT NULL DEFAULT 'unpaid' COMMENT '支払状況 (unpaid, paid)',
+  `checkin_status` varchar(20) NOT NULL DEFAULT 'waiting' COMMENT 'チェックイン状況 (waiting, checked_in)',
   `notes` text DEFAULT NULL COMMENT '備考欄',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -108,13 +112,13 @@ INSERT INTO `room_types` (`id`, `name`, `description`, `capacity`) VALUES
 (4, '和室', '日本の伝統的なお部屋で、落ち着いた時間をお過ごしください。', 4);
 
 -- 部屋
-INSERT INTO `rooms` (`id`, `room_type_id`, `name`, `price`) VALUES
-(1, 1, '101号室', '8000.00'),
-(2, 1, '102号室', '8000.00'),
-(3, 2, '201号室', '12000.00'),
-(4, 2, '202号室', '12000.00'),
-(5, 3, '301号室', '15000.00'),
-(6, 4, '302号室 (和室)', '16000.00');
+INSERT INTO `rooms` (`id`, `room_type_id`, `name`, `price`, `price_adult`, `price_child`) VALUES
+(1, 1, '101号室', '8000.00', '8000.00', '4000.00'),
+(2, 1, '102号室', '8000.00', '8000.00', '4000.00'),
+(3, 2, '201号室', '12000.00', '12000.00', '6000.00'),
+(4, 2, '202号室', '12000.00', '12000.00', '6000.00'),
+(5, 3, '301号室', '15000.00', '15000.00', '7500.00'),
+(6, 4, '302号室 (和室)', '16000.00', '16000.00', '8000.00');
 
 -- 管理者アカウント
 INSERT INTO `users` (`name`, `email`, `password`, `role`, `notes`) VALUES
