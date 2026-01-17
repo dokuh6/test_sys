@@ -24,7 +24,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 0; background-color: white; min-width: 600px; }
         th, td { border: 1px solid #ddd; padding: 0.8rem; text-align: left; }
         th { background-color: #eaf2f5; }
-        .btn-admin { padding: 8px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-admin { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; text-decoration: none; display: inline-block; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
@@ -40,9 +40,87 @@
             .admin-nav.active { display: block; }
 
             /* Toggle buttons */
-            #sidebar-toggle, #nav-toggle { display: block !important; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 5px; }
+            #sidebar-toggle, #nav-toggle { display: block !important; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 5px; min-width: 44px; min-height: 44px; }
 
-            .admin-main { padding: 1rem; }
+            .admin-main { padding: 10px; }
+
+            /* Card Layout for Tables on Mobile */
+            /* Force table to not be like tables anymore */
+            .mobile-card-view table,
+            .mobile-card-view thead,
+            .mobile-card-view tbody,
+            .mobile-card-view th,
+            .mobile-card-view td,
+            .mobile-card-view tr {
+                display: block;
+            }
+
+            /* Hide table headers (but not display: none;, for accessibility) */
+            .mobile-card-view thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .mobile-card-view tr {
+                border: 1px solid #ccc;
+                margin-bottom: 15px;
+                background: white;
+                border-radius: 8px;
+                padding: 10px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+
+            .mobile-card-view td {
+                /* Behave  like a "row" */
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 40%;
+                text-align: right;
+                min-height: 30px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .mobile-card-view td:last-child {
+                border-bottom: 0;
+            }
+
+            .mobile-card-view td:before {
+                /* Now like a table header */
+                position: absolute;
+                /* Top/left values mimic padding */
+                left: 10px;
+                width: 35%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                content: attr(data-label);
+            }
+
+            /* If no data-label, standard stack (apply ONLY to standard tables, avoid FullCalendar) */
+            .table-responsive table,
+            table.admin-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            /* Explicitly reset for FullCalendar tables if they get caught */
+            .fc table {
+                display: table !important;
+                overflow-x: visible !important;
+                white-space: normal !important;
+            }
+
+            input, select, textarea {
+                min-height: 44px;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
         }
 
         #sidebar-toggle, #nav-toggle { display: none; }
