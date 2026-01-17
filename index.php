@@ -222,14 +222,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('search-calendar');
     let calendar = null;
 
-    toggleBtn.addEventListener('click', function() {
-        calendarContainer.classList.toggle('hidden');
-        if (!calendarContainer.classList.contains('hidden') && !calendar) {
-            initCalendar();
-        }
-    });
+    if (toggleBtn && calendarContainer && calendarEl) {
+        toggleBtn.addEventListener('click', function() {
+            calendarContainer.classList.toggle('hidden');
+            if (!calendarContainer.classList.contains('hidden') && !calendar) {
+                initCalendar();
+            }
+        });
+    }
 
     function initCalendar() {
+        if (!calendarEl) return;
         var isMobile = window.innerWidth < 768;
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: isMobile ? 'listWeek' : 'dayGridMonth',
@@ -257,37 +260,45 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             select: function(info) {
                 // 選択された日付をセット
-                document.getElementById('check_in_date').value = info.startStr;
+                var checkInInput = document.getElementById('check_in_date');
+                var checkOutInput = document.getElementById('check_out_date');
 
-                if (info.endStr) {
-                    document.getElementById('check_out_date').value = info.endStr;
-                } else {
+                if (checkInInput) checkInInput.value = info.startStr;
+
+                if (info.endStr && checkOutInput) {
+                    checkOutInput.value = info.endStr;
+                } else if (checkOutInput) {
                     // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
                     let date = new Date(info.start);
                     date.setDate(date.getDate() + 1);
                     let year = date.getFullYear();
                     let month = (date.getMonth() + 1).toString().padStart(2, '0');
                     let day = date.getDate().toString().padStart(2, '0');
-                    document.getElementById('check_out_date').value = `${year}-${month}-${day}`;
+                    checkOutInput.value = `${year}-${month}-${day}`;
                 }
 
                 // フォームへスクロール
-                document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (checkInInput) checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
             },
             dateClick: function(info) {
                 // スマホでタップしただけの時も同様の処理を行う
-                document.getElementById('check_in_date').value = info.dateStr;
+                var checkInInput = document.getElementById('check_in_date');
+                var checkOutInput = document.getElementById('check_out_date');
 
-                // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
-                let date = new Date(info.date);
-                date.setDate(date.getDate() + 1);
-                let year = date.getFullYear();
-                let month = (date.getMonth() + 1).toString().padStart(2, '0');
-                let day = date.getDate().toString().padStart(2, '0');
-                document.getElementById('check_out_date').value = `${year}-${month}-${day}`;
+                if (checkInInput) checkInInput.value = info.dateStr;
+
+                if (checkOutInput) {
+                    // デフォルト1泊 (タイムゾーン問題を避けるため手動計算)
+                    let date = new Date(info.date);
+                    date.setDate(date.getDate() + 1);
+                    let year = date.getFullYear();
+                    let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    let day = date.getDate().toString().padStart(2, '0');
+                    checkOutInput.value = `${year}-${month}-${day}`;
+                }
 
                 // フォームへスクロール
-                document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (checkInInput) checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
             },
             eventClick: function(info) {
                  // 満室イベントをクリックした場合
@@ -295,18 +306,23 @@ document.addEventListener('DOMContentLoaded', function() {
                      alert('<?php echo h(t('calendar_alert_full')); ?>');
                  } else if (info.event.extendedProps.status === 'available') {
                      // 空室イベントをクリックした場合、選択処理を行う (リストビュー用)
-                     document.getElementById('check_in_date').value = info.event.startStr;
+                     var checkInInput = document.getElementById('check_in_date');
+                     var checkOutInput = document.getElementById('check_out_date');
 
-                     // デフォルト1泊
-                     let date = new Date(info.event.start);
-                     date.setDate(date.getDate() + 1);
-                     let year = date.getFullYear();
-                     let month = (date.getMonth() + 1).toString().padStart(2, '0');
-                     let day = date.getDate().toString().padStart(2, '0');
-                     document.getElementById('check_out_date').value = `${year}-${month}-${day}`;
+                     if (checkInInput) checkInInput.value = info.event.startStr;
+
+                     if (checkOutInput) {
+                         // デフォルト1泊
+                         let date = new Date(info.event.start);
+                         date.setDate(date.getDate() + 1);
+                         let year = date.getFullYear();
+                         let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                         let day = date.getDate().toString().padStart(2, '0');
+                         checkOutInput.value = `${year}-${month}-${day}`;
+                     }
 
                      // フォームへスクロール
-                     document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                     if (checkInInput) checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                  }
             }
         });

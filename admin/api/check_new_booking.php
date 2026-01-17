@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../includes/init.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 1) {
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != ROLE_MANAGER) {
     echo json_encode(['error' => 'Unauthorized']);
     exit;
 }

@@ -2,14 +2,11 @@
 // ヘッダーをJSONに設定
 header('Content-Type: application/json');
 
-// セッション開始と認証チェック
-require_once '../../includes/db_connect.php';
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// セッション開始と認証チェック (init.phpでDB接続も含む)
+require_once '../../includes/init.php';
 
 // 管理者権限チェック
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 1) {
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != ROLE_MANAGER) {
     http_response_code(403);
     echo json_encode(['error' => 'Unauthorized']);
     exit();
