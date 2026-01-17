@@ -93,6 +93,12 @@ require_once 'includes/header.php';
             <?php echo h(t('btn_login')); ?>
         </button>
     </form>
+
+    <div class="mt-6 text-center">
+        <a href="forgot_password.php" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:underline">
+            <?php echo h(t('forgot_password_title')); ?>
+        </a>
+    </div>
 </div>
 
 <?php

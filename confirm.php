@@ -108,11 +108,16 @@ if (empty($errors)) {
 
         // 予約が見つかった場合の権限チェック (トークン利用時はトークン合致でOKとする = 鍵を持ってる)
         if ($booking) {
-            if ($search_by_token) {
-                $can_view = true;
-            } elseif (isset($search_by_number_email) && $search_by_number_email) {
-                // メールアドレスと予約番号が一致した場合
-                $can_view = true;
+            if ($search_by_token || (isset($search_by_number_email) && $search_by_number_email)) {
+                // トークンまたは予約番号+メールでの認証成功
+                // セキュリティ: チェックアウト日から一定期間過ぎたら閲覧不可にする
+                $expiry_date = date('Y-m-d', strtotime($booking['check_out_date'] . ' + 30 days'));
+                if (date('Y-m-d') > $expiry_date) {
+                    $errors[] = t('error_token_expired') ?? "リンクの有効期限が切れています。";
+                    $can_view = false;
+                } else {
+                    $can_view = true;
+                }
             } else {
                 // ID指定の場合の所有者チェック
                 if (isset($user_id)) {
