@@ -208,7 +208,7 @@ function send_booking_confirmation_email($booking_id, $dbh) {
                         </tr>
                         <tr>
                             <th>" . t('booking_info_room') . "</th>
-                            <td>{$booking['room_name']} ({$booking['type_name']})</td>
+                            <td>" . h($booking['room_name']) . " (" . h($booking['type_name']) . ")</td>
                         </tr>
                         <tr>
                             <th>" . t('booking_info_check_in') . "</th>
@@ -360,7 +360,7 @@ function send_cancellation_email($booking_id, $dbh) {
                         </tr>
                         <tr>
                             <th>" . t('booking_info_room') . "</th>
-                            <td>{$booking['room_name']}</td>
+                            <td>" . h($booking['room_name']) . "</td>
                         </tr>
                         <tr>
                             <th>" . t('booking_info_check_in') . "</th>
@@ -466,7 +466,7 @@ function send_booking_modification_email($booking_id, $dbh) {
                         </tr>
                         <tr>
                             <th>" . t('booking_info_room') . "</th>
-                            <td>{$booking['room_name']} ({$booking['type_name']})</td>
+                            <td>" . h($booking['room_name']) . " (" . h($booking['type_name']) . ")</td>
                         </tr>
                         <tr>
                             <th>" . t('booking_info_check_in') . "</th>

@@ -409,12 +409,17 @@ $csrf_token = generate_csrf_token();
             </div>
         </div>
         <script>
-            document.getElementById('bookingForm').addEventListener('submit', function() {
-                var btn = document.getElementById('submitBtn');
-                btn.disabled = true;
-                btn.innerHTML = '<?php echo h(t('book_processing')); ?>';
-                btn.classList.add('opacity-50', 'cursor-not-allowed');
-            });
+            var bookingForm = document.getElementById('bookingForm');
+            if (bookingForm) {
+                bookingForm.addEventListener('submit', function() {
+                    var btn = document.getElementById('submitBtn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<?php echo h(t('book_processing')); ?>';
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                });
+            }
         </script>
 
         <!-- Important Information Block -->

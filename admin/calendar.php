@@ -28,6 +28,7 @@ require_once 'admin_header.php';
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
+        if (!calendarEl) return;
         var calendar = new FullCalendar.Calendar(calendarEl, {
             schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source', // オープンソース/開発用ライセンスキー
             initialView: 'resourceTimelineMonth',
@@ -68,7 +69,7 @@ require_once 'admin_header.php';
             },
             resourceAreaWidth: '15%',
             resourceAreaHeaderContent: '部屋',
-            resources: <?php echo json_encode($rooms); ?>,
+            resources: <?php echo json_encode($rooms, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>,
             events: 'api/calendar_events.php',
             selectable: true,
             select: function(info) {
