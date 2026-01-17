@@ -249,11 +249,15 @@ require_once 'admin_header.php';
         const roomSelect = document.getElementById('room_select');
         const checkInInput = document.getElementById('check_in');
         const checkOutInput = document.getElementById('check_out');
+        const submitBtn = document.querySelector('button[type="submit"]');
         const roomId = roomSelect.value;
         const checkIn = checkInInput.value;
         const checkOut = checkOutInput.value;
 
         if (!roomId || !checkIn || !checkOut) return;
+
+        // ボタンを一時的に無効化（チェック中）
+        // submitBtn.disabled = true;
 
         // API呼び出し
         fetch(`api/check_availability.php?room_id=${roomId}&check_in=${checkIn}&check_out=${checkOut}`)
@@ -261,24 +265,45 @@ require_once 'admin_header.php';
             .then(data => {
                 const warningDiv = document.getElementById('availability_warning');
                 if (!data.available) {
+                    // 送信ボタン無効化
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                    submitBtn.style.cursor = 'not-allowed';
+
                     if (!warningDiv) {
                         const div = document.createElement('div');
                         div.id = 'availability_warning';
+                        div.className = 'alert alert-danger';
                         div.style.color = 'red';
                         div.style.fontWeight = 'bold';
                         div.style.marginBottom = '10px';
+                        div.style.padding = '10px';
+                        div.style.backgroundColor = '#fdeea2';
+                        div.style.border = '1px solid #e6db55';
+                        div.style.borderRadius = '4px';
                         div.innerText = '警告: ' + data.message;
                         document.querySelector('form').insertBefore(div, document.querySelector('form').firstChild);
                     } else {
                         warningDiv.innerText = '警告: ' + data.message;
                     }
                 } else {
+                    // 送信ボタン有効化
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+
                     if (warningDiv) {
                         warningDiv.remove();
                     }
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                // エラー時はとりあえず有効化しておく（通信エラーでブロックしないように）
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            });
     }
 
     document.getElementById('room_select').addEventListener('change', () => { calculatePrice(); checkAvailability(); });

@@ -1,13 +1,16 @@
 <?php
 require_once '../../includes/db_connect.php';
+require_once '../../includes/config.php';
 
 header('Content-Type: application/json');
 
-// 管理者認証チェックが必要（ここでは簡易的にセッションチェック、本来はadmin_check.php相当を含めるべきだが、APIなのでJSONで返す）
+// 管理者認証チェックが必要
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 1) {
+
+// Manager (1) and Staff (2) are allowed
+if (!isset($_SESSION['user']) || ($_SESSION['user']['role'] != ROLE_MANAGER && $_SESSION['user']['role'] != ROLE_STAFF)) {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden']);
     exit();
