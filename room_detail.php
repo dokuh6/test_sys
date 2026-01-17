@@ -263,8 +263,9 @@ if (!$room) {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
+        var isMobile = window.innerWidth < 768;
         var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
+            initialView: isMobile ? 'listWeek' : 'dayGridMonth',
             locale: '<?php echo $current_lang ?? "ja"; ?>',
             selectable: true,
             selectOverlap: false,
@@ -289,6 +290,13 @@ if (!$room) {
                 }
             },
             selectLongPressDelay: 0, // スマホでも長押し不要で選択可能にする
+            windowResize: function(view) {
+                if (window.innerWidth < 768) {
+                    calendar.changeView('listWeek');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                }
+            },
             select: function(info) {
                 var checkInInput = document.getElementById('check_in_date');
                 var checkOutInput = document.getElementById('check_out_date');
@@ -333,6 +341,30 @@ if (!$room) {
                 // Trigger change event to update price
                 checkInInput.dispatchEvent(new Event('change'));
                 checkOutInput.dispatchEvent(new Event('change'));
+            },
+            eventClick: function(info) {
+                if (info.event.extendedProps.status === 'reserved') {
+                    alert('<?php echo h(t('calendar_alert_booked')); ?>');
+                } else if (info.event.extendedProps.status === 'available') {
+                    var checkInInput = document.getElementById('check_in_date');
+                    var checkOutInput = document.getElementById('check_out_date');
+
+                    checkInInput.value = info.event.startStr;
+
+                    var date = new Date(info.event.start);
+                    date.setDate(date.getDate() + 1);
+                    var year = date.getFullYear();
+                    var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    var day = date.getDate().toString().padStart(2, '0');
+                    checkOutInput.value = `${year}-${month}-${day}`;
+
+                    checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    checkInInput.focus();
+
+                    // Trigger change event
+                    checkInInput.dispatchEvent(new Event('change'));
+                    checkOutInput.dispatchEvent(new Event('change'));
+                }
             }
         });
         calendar.render();

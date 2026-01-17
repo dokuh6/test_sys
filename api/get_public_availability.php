@@ -3,47 +3,79 @@
 header('Content-Type: application/json');
 
 // DB接続
-require_once '../includes/db_connect.php';
-
-// セッションは不要（公開情報）だが、必要ならsession_start()
-// 公開情報なので、予約者名などの個人情報は含めない。
-// statusがconfirmedの予約のみを「予約済み」として返す。
+require_once '../includes/init.php';
 
 try {
-    // 予約データを取得
+    // パラメータ取得
     $room_id = isset($_GET['room_id']) ? (int)$_GET['room_id'] : null;
+    $start = isset($_GET['start']) ? substr($_GET['start'], 0, 10) : date('Y-m-d');
+    $end = isset($_GET['end']) ? substr($_GET['end'], 0, 10) : date('Y-m-d', strtotime('+3 months'));
 
+    if (!$room_id) {
+        echo json_encode([]);
+        exit;
+    }
+
+    // 予約データを取得
     $sql = "SELECT
-                br.room_id AS resourceId,
-                b.check_in_date AS start,
-                b.check_out_date AS end
+                b.check_in_date,
+                b.check_out_date
             FROM bookings AS b
             JOIN booking_rooms AS br ON b.id = br.booking_id
-            WHERE b.status = 'confirmed'";
-
-    if ($room_id) {
-        $sql .= " AND br.room_id = :room_id";
-    }
+            WHERE b.status = 'confirmed'
+              AND br.room_id = :room_id
+              AND b.check_in_date < :end
+              AND b.check_out_date > :start";
 
     $stmt = $dbh->prepare($sql);
-
-    if ($room_id) {
-        $stmt->bindValue(':room_id', $room_id, PDO::PARAM_INT);
-    }
-
-    $stmt->execute();
+    $stmt->execute([
+        ':room_id' => $room_id,
+        ':start' => $start,
+        ':end' => $end
+    ]);
     $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $events = [];
+    // 予約済みの日付セットを作成
+    $booked_dates = [];
     foreach ($bookings as $booking) {
-        $events[] = [
-            'resourceId' => (string)$booking['resourceId'],
-            'start' => $booking['start'],
-            'end' => $booking['end'],
-            'display' => 'background', // 背景色として表示（「予約済み」を視覚化）
-            'color' => '#ff9f89', // 薄い赤（予約済み）
-            'title' => '予約済' // 背景イベントにはタイトルは表示されにくいが、tooltip等で使えるかも
-        ];
+        $current_date = new DateTime($booking['check_in_date']);
+        $end_date = new DateTime($booking['check_out_date']);
+
+        while ($current_date < $end_date) {
+            $booked_dates[$current_date->format('Y-m-d')] = true;
+            $current_date->modify('+1 day');
+        }
+    }
+
+    // イベント生成ループ
+    $events = [];
+    $current = new DateTime($start);
+    $end_dt = new DateTime($end);
+
+    while ($current < $end_dt) {
+        $date_str = $current->format('Y-m-d');
+
+        if (isset($booked_dates[$date_str])) {
+             $events[] = [
+                'start' => $date_str,
+                'allDay' => true,
+                'color' => '#ef4444', // Red-500
+                'textColor' => '#ffffff',
+                'title' => t('calendar_status_reserved') ?? '予約済',
+                'extendedProps' => ['status' => 'reserved']
+            ];
+        } else {
+             $events[] = [
+                'start' => $date_str,
+                'allDay' => true,
+                'color' => '#22c55e', // Green-500
+                'textColor' => '#ffffff',
+                'title' => t('calendar_status_available') ?? '空室',
+                'extendedProps' => ['status' => 'available']
+            ];
+        }
+
+        $current->modify('+1 day');
     }
 
     echo json_encode($events);
