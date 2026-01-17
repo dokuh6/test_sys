@@ -102,11 +102,19 @@
                 content: attr(data-label);
             }
 
-            /* If no data-label, standard stack */
-            table:not(.mobile-card-view) {
+            /* If no data-label, standard stack (apply ONLY to standard tables, avoid FullCalendar) */
+            .table-responsive table,
+            table.admin-table {
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
+            }
+
+            /* Explicitly reset for FullCalendar tables if they get caught */
+            .fc table {
+                display: table !important;
+                overflow-x: visible !important;
+                white-space: normal !important;
             }
 
             input, select, textarea {
