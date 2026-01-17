@@ -1,6 +1,9 @@
 <?php
 require_once 'admin_check.php';
 
+// Check if Manager (Role 1) or Staff
+require_permission([ROLE_MANAGER, ROLE_STAFF]);
+
 $message = '';
 $error = '';
 
@@ -8,20 +11,31 @@ if (isset($_SESSION['message'])) {
     $message = $_SESSION['message'];
     unset($_SESSION['message']);
 }
+if (isset($_SESSION['error_message'])) {
+    $error = $_SESSION['error_message'];
+    unset($_SESSION['error_message']);
+}
 
 // ユーザー一覧取得
 $search_query = filter_input(INPUT_GET, 'q');
 try {
     $sql = "SELECT `id`, `name`, `email`, `phone`, `role`, `created_at` FROM users";
+    $where = [];
+    $params = [];
+
     if ($search_query) {
-        $sql .= " WHERE name LIKE :q OR email LIKE :q";
+        $where[] = "(name LIKE :q OR email LIKE :q)";
+        $params[':q'] = "%" . $search_query . "%";
+    }
+
+    if (!empty($where)) {
+        $sql .= " WHERE " . implode(" AND ", $where);
     }
     $sql .= " ORDER BY id DESC";
 
     $stmt = $dbh->prepare($sql);
-    if ($search_query) {
-        $like_query = "%" . $search_query . "%";
-        $stmt->bindParam(':q', $like_query, PDO::PARAM_STR);
+    foreach ($params as $key => $val) {
+        $stmt->bindValue($key, $val, PDO::PARAM_STR);
     }
     $stmt->execute();
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -74,10 +88,30 @@ require_once 'admin_header.php';
                     <td><?php echo h($user['name']); ?></td>
                     <td><?php echo h($user['email']); ?></td>
                     <td><?php echo h($user['phone']); ?></td>
-                    <td><?php echo h($user['role'] == 1 ? '管理者' : '一般'); ?></td>
+                    <td>
+                        <?php
+                        switch ($user['role']) {
+                            case ROLE_MANAGER: echo '管理者'; break;
+                            case ROLE_STAFF: echo 'フロント'; break;
+                            case ROLE_CLEANER: echo '清掃'; break;
+                            default: echo '一般'; break;
+                        }
+                        ?>
+                    </td>
                     <td><?php echo h(date('Y-m-d', strtotime($user['created_at']))); ?></td>
                     <td>
-                        <a href="user_detail.php?id=<?php echo h($user['id']); ?>" class="btn-admin" style="background-color:#3498db;">詳細・編集</a>
+                        <?php
+                        // スタッフは一般ユーザーのみ編集可能
+                        $can_edit = true;
+                        if ($_SESSION['user']['role'] != ROLE_MANAGER && $user['role'] != ROLE_USER) {
+                            $can_edit = false;
+                        }
+                        ?>
+                        <?php if ($can_edit): ?>
+                            <a href="user_detail.php?id=<?php echo h($user['id']); ?>" class="btn-admin" style="background-color:#3498db;">詳細・編集</a>
+                        <?php else: ?>
+                            <span style="color:gray;">権限なし</span>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

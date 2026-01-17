@@ -1,8 +1,12 @@
 <?php
 require_once 'admin_check.php';
 
+// Manager Only
+require_permission(ROLE_MANAGER);
+
 $message = '';
 $error = '';
+
 if (isset($_SESSION['message'])) {
     $message = $_SESSION['message'];
     unset($_SESSION['message']);
@@ -24,6 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt = $dbh->prepare($sql);
             $stmt->execute([':name' => $name, ':name_en' => $name_en, ':room_type_id' => $room_type_id, ':price' => $price]);
             $message = "新しい部屋「" . h($name) . "」を追加しました。";
+
+            log_admin_action($dbh, $_SESSION['user']['id'], 'add_room', ['name' => $name]);
         } catch (PDOException $e) {
             $error = "追加に失敗しました: " . h($e->getMessage());
         }
@@ -42,6 +48,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
             $stmt = $dbh->prepare($sql);
             if ($stmt->execute([':id' => $id_to_delete])) {
                 $message = "部屋を削除しました。";
+                log_admin_action($dbh, $_SESSION['user']['id'], 'delete_room', ['room_id' => $id_to_delete]);
             } else {
                 $error = "削除に失敗しました。";
             }

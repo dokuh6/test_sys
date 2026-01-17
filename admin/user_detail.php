@@ -1,6 +1,10 @@
 <?php
 require_once 'admin_check.php';
 
+// Check if Manager or Staff
+// Staff needs to manage customers.
+require_permission([ROLE_MANAGER, ROLE_STAFF]);
+
 $message = '';
 $error = '';
 $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -10,16 +14,49 @@ if (!$user_id) {
     exit();
 }
 
+// ターゲットユーザーの情報を先に取得（権限チェックのため）
+try {
+    $stmt_target = $dbh->prepare("SELECT * FROM users WHERE id = :id");
+    $stmt_target->execute([':id' => $user_id]);
+    $target_user = $stmt_target->fetch(PDO::FETCH_ASSOC);
+
+    if (!$target_user) {
+        // 存在しないユーザー
+        header('Location: users.php');
+        exit();
+    }
+} catch (PDOException $e) {
+    die("DB Error: " . h($e->getMessage()));
+}
+
+// 権限チェック: Staffは一般ユーザー(ROLE_USER)以外を操作できない
+if ($_SESSION['user']['role'] != ROLE_MANAGER) {
+    // ターゲットが管理者やスタッフの場合、アクセス拒否（または閲覧のみにするが、ここでは編集画面なので拒否が安全）
+    if ($target_user['role'] != ROLE_USER) {
+        $_SESSION['error_message'] = "権限がありません。スタッフは一般ユーザーのみ管理できます。";
+        header('Location: users.php');
+        exit();
+    }
+}
+
 // ユーザー更新処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
     validate_csrf_token();
     $name = filter_input(INPUT_POST, 'name');
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
     $phone = filter_input(INPUT_POST, 'phone');
-    $role = filter_input(INPUT_POST, 'role', FILTER_VALIDATE_INT);
     $notes = filter_input(INPUT_POST, 'notes');
 
-    if ($name && $email && ($role === 0 || $role === 1)) {
+    // ロールの処理: マネージャー以外は変更不可（元の値を維持）
+    if ($_SESSION['user']['role'] == ROLE_MANAGER) {
+        $role = filter_input(INPUT_POST, 'role', FILTER_VALIDATE_INT);
+    } else {
+        $role = $target_user['role']; // 強制的に元の値を使用
+    }
+
+    // Role validation
+    if ($name && $email && in_array($role, [ROLE_USER, ROLE_MANAGER, ROLE_STAFF, ROLE_CLEANER], true)) {
+
         try {
             $sql = "UPDATE users SET `name` = :name, `email` = :email, `phone` = :phone, `role` = :role, `notes` = :notes WHERE `id` = :id";
             $stmt = $dbh->prepare($sql);
@@ -32,6 +69,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
 
             if ($stmt->execute()) {
                 $message = "ユーザー情報を更新しました。";
+
+                // Log action
+                log_admin_action($dbh, $_SESSION['user']['id'], 'update_user', [
+                    'target_user_id' => $user_id,
+                    'name' => $name,
+                    'role' => $role
+                ]);
+
+                // 最新の状態に更新
+                $target_user['name'] = $name;
+                $target_user['email'] = $email;
+                $target_user['phone'] = $phone;
+                $target_user['role'] = $role;
+                $target_user['notes'] = $notes;
             } else {
                 $error = "更新に失敗しました。";
             }
@@ -39,13 +90,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
             $error = "データベースエラー: " . h($e->getMessage());
         }
     } else {
-        $error = "必須項目（氏名、メールアドレス）が正しく入力されていません。";
+        $error = "必須項目（氏名、メールアドレス）が正しく入力されていないか、不正な権限が選択されました。";
     }
 }
 
 // パスワード変更処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
     validate_csrf_token();
+    // 権限チェックは冒頭で行われているため、ここに来る時点で StaffはUserのみ操作可能
+
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
 
@@ -65,6 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
 
             if ($stmt->execute()) {
                 $message = "パスワードを変更しました。";
+                log_admin_action($dbh, $_SESSION['user']['id'], 'update_password', ['target_user_id' => $user_id]);
             } else {
                 $error = "パスワード変更に失敗しました。";
             }
@@ -77,6 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
 // ユーザー削除処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     validate_csrf_token();
+    // 権限チェック済み (StaffはUserのみ)
+
     if ($user_id == $_SESSION['user']['id']) {
         $error = "自分自身を削除することはできません。";
     } else {
@@ -86,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
             $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
             if ($stmt->execute()) {
                 $_SESSION['message'] = "ユーザーID " . h($user_id) . " を削除しました。";
+                log_admin_action($dbh, $_SESSION['user']['id'], 'delete_user', ['target_user_id' => $user_id]);
                 header('Location: users.php');
                 exit();
             } else {
@@ -97,21 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     }
 }
 
-
-// ユーザー情報取得
-try {
-    $sql = "SELECT * FROM users WHERE id = :id";
-    $stmt = $dbh->prepare($sql);
-    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$user) {
-        $error = "ユーザーが見つかりません。";
-    }
-} catch (PDOException $e) {
-    $error = "データ取得エラー: " . h($e->getMessage());
-}
+// ユーザー変数をview用にセット
+$user = $target_user;
 
 // 予約履歴取得
 $user_bookings = [];
@@ -178,10 +222,23 @@ require_once 'admin_header.php';
                     <tr>
                         <th>権限</th>
                         <td>
-                            <select name="role">
-                                <option value="0" <?php echo $user['role'] == 0 ? 'selected' : ''; ?>>一般ユーザー</option>
-                                <option value="1" <?php echo $user['role'] == 1 ? 'selected' : ''; ?>>管理者</option>
-                            </select>
+                            <?php if ($_SESSION['user']['role'] == ROLE_MANAGER): ?>
+                                <select name="role">
+                                    <option value="<?php echo ROLE_USER; ?>" <?php echo $user['role'] == ROLE_USER ? 'selected' : ''; ?>>一般ユーザー</option>
+                                    <option value="<?php echo ROLE_MANAGER; ?>" <?php echo $user['role'] == ROLE_MANAGER ? 'selected' : ''; ?>>管理者 (Manager)</option>
+                                    <option value="<?php echo ROLE_STAFF; ?>" <?php echo $user['role'] == ROLE_STAFF ? 'selected' : ''; ?>>フロント (Staff)</option>
+                                    <option value="<?php echo ROLE_CLEANER; ?>" <?php echo $user['role'] == ROLE_CLEANER ? 'selected' : ''; ?>>清掃 (Cleaner)</option>
+                                </select>
+                            <?php else: ?>
+                                <?php
+                                    $role_name = '一般ユーザー';
+                                    if ($user['role'] == ROLE_MANAGER) $role_name = '管理者';
+                                    elseif ($user['role'] == ROLE_STAFF) $role_name = 'フロント';
+                                    elseif ($user['role'] == ROLE_CLEANER) $role_name = '清掃';
+                                    echo h($role_name);
+                                ?>
+                                <!-- スタッフは権限変更不可なのでhiddenでも送らない（サーバーサイドで無視するが、念のため） -->
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <tr>

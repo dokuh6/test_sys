@@ -1,6 +1,9 @@
 <?php
 require_once 'admin_check.php';
 
+// Manager Only
+require_permission(ROLE_MANAGER);
+
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
     header('Location: rooms.php');
@@ -90,6 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':price_child' => $price_child,
             ':id' => $id
         ]);
+
+        log_admin_action($dbh, $_SESSION['user']['id'], 'update_room', ['room_id' => $id]);
 
         // 2. 画像の処理
         $main_image_uploaded = isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK;

@@ -3,6 +3,9 @@ require_once 'admin_check.php';
 require_once '../includes/functions.php';
 require_once '../includes/config.php';
 
+// Manager and Staff Only
+require_permission([ROLE_MANAGER, ROLE_STAFF]);
+
 $message = '';
 $error = '';
 $room_id = filter_input(INPUT_GET, 'room_id', FILTER_VALIDATE_INT);
@@ -97,6 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sql_br = "INSERT INTO booking_rooms (booking_id, room_id) VALUES (:booking_id, :room_id)";
             $stmt_br = $dbh->prepare($sql_br);
             $stmt_br->execute([':booking_id' => $booking_id, ':room_id' => $room_id]);
+
+            log_admin_action($dbh, $_SESSION['user']['id'], 'create_booking', ['booking_id' => $booking_id]);
 
             $dbh->commit();
 

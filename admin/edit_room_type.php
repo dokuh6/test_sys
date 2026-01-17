@@ -1,6 +1,9 @@
 <?php
 require_once 'admin_check.php';
 
+// Manager Only
+require_permission(ROLE_MANAGER);
+
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
     header('Location: room_types.php');
@@ -70,6 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt = $dbh->prepare($sql);
             $stmt->execute($params);
+
+            log_admin_action($dbh, $_SESSION['user']['id'], 'update_room_type', ['room_type_id' => $id]);
+
             $_SESSION['message'] = t('admin_update_success');
             header('Location: room_types.php');
             exit();
