@@ -94,7 +94,14 @@ if (empty($errors)) {
         if ($booking) {
             // Verify ownership if not already verified by token/email
             if ($search_by_token || (isset($search_by_number_email) && $search_by_number_email)) {
-                $can_edit = true;
+                 // セキュリティ: チェックアウト日から一定期間過ぎたら編集不可
+                 $expiry_date = date('Y-m-d', strtotime($booking['check_out_date'] . ' + 30 days'));
+                 if (date('Y-m-d') > $expiry_date) {
+                     $errors[] = t('error_token_expired') ?? "リンクの有効期限が切れています。";
+                     $can_edit = false;
+                 } else {
+                     $can_edit = true;
+                 }
             } elseif (isset($user_id) && $booking['user_id'] == $user_id) {
                 $can_edit = true;
             }
