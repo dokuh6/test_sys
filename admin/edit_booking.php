@@ -2,6 +2,9 @@
 require_once 'admin_check.php';
 require_once '../includes/config.php'; // 料金定数などのため
 
+// Manager and Staff Only
+require_permission([ROLE_MANAGER, ROLE_STAFF]);
+
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
     header('Location: bookings.php');
@@ -86,6 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':status' => $status,
                     ':id' => $id
                 ]);
+
+            log_admin_action($dbh, $_SESSION['user']['id'], 'update_booking', ['booking_id' => $id]);
+
             // メール送信
             require_once '../includes/functions.php';
             send_booking_modification_email($id, $dbh);

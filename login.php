@@ -38,8 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'role' => $user['role']
                 ];
 
-                // 管理者であれば管理者ページへ、一般ユーザーはマイページへ
-                if ($user['role'] == 1) {
+                // ログ記録
+                log_admin_action($dbh, $user['id'], 'login', ['ip' => $_SERVER['REMOTE_ADDR']]);
+
+                // 管理者・スタッフ・清掃員であれば管理者ページへ、一般ユーザーはマイページへ
+                if ($user['role'] == ROLE_MANAGER || $user['role'] == ROLE_STAFF || $user['role'] == ROLE_CLEANER) {
                     header('Location: admin/index.php');
                 } else {
                     header('Location: mypage.php');

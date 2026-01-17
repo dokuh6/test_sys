@@ -30,6 +30,7 @@ try {
 
     // Verify Access
     $allowed = false;
+    $action_user = null;
 
     // 1. Token Check (from URL usually)
     if ($token && isset($booking['booking_token']) && $booking['booking_token'] === $token) {
@@ -46,10 +47,12 @@ try {
     // 3. User ID Check (Logged in user)
     elseif (isset($_SESSION['user']['id']) && $booking['user_id'] == $_SESSION['user']['id']) {
         $allowed = true;
+        $action_user = $_SESSION['user']['id'];
     }
     // 4. Admin Check
     elseif (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 1) {
         $allowed = true;
+        $action_user = $_SESSION['user']['id'];
     }
     // 5. Last Booking Session Check (for immediate cancellation after booking if needed, though safer to rely on token)
     elseif (isset($_SESSION['last_booking_id']) && $_SESSION['last_booking_id'] == $booking_id) {
@@ -77,6 +80,11 @@ try {
     // Use UPDATE with explicit status change
     $updateStmt = $dbh->prepare("UPDATE bookings SET status = 'cancelled' WHERE id = :id");
     $updateStmt->execute([':id' => $booking_id]);
+
+    // Log user action
+    if ($action_user) {
+        log_admin_action($dbh, $action_user, 'cancel_booking_user', ['booking_id' => $booking_id]);
+    }
 
     // Send Email
     send_cancellation_email($booking_id, $dbh);

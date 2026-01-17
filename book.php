@@ -141,6 +141,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_br = $dbh->prepare($sql_br);
             $stmt_br->execute([':booking_id' => $booking_id, ':room_id' => $room_id]);
 
+            // Log for user action (if logged in)
+            if ($user_id) {
+                log_admin_action($dbh, $user_id, 'create_booking_user', ['booking_id' => $booking_id]);
+            }
+
             $dbh->commit();
 
             $_SESSION['last_booking_id'] = $booking_id;

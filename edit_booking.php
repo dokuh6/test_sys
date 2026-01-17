@@ -183,6 +183,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_edit && empty($errors)) {
                         ':id' => $booking['id']
                     ]);
 
+                    if (isset($_SESSION['user']['id'])) {
+                        log_admin_action($dbh, $_SESSION['user']['id'], 'update_booking_user', ['booking_id' => $booking['id']]);
+                    }
+
                     // メール送信
                     send_booking_modification_email($booking['id'], $dbh);
 

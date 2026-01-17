@@ -53,6 +53,37 @@ function log_email_history($to, $subject, $body, $headers, $status, $error_messa
 }
 
 /**
+ * 管理者/ユーザーの操作ログを記録する
+ * @param PDO $dbh
+ * @param int|null $user_id
+ * @param string $action
+ * @param array|string $details
+ * @return bool
+ */
+function log_admin_action($dbh, $user_id, $action, $details = []) {
+    try {
+        $ip_address = $_SERVER['REMOTE_ADDR'] ?? null;
+        if (is_array($details)) {
+            $details = json_encode($details, JSON_UNESCAPED_UNICODE);
+        }
+
+        $sql = "INSERT INTO admin_logs (user_id, action, details, ip_address, created_at) VALUES (:user_id, :action, :details, :ip_address, NOW())";
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([
+            ':user_id' => $user_id,
+            ':action' => $action,
+            ':details' => $details,
+            ':ip_address' => $ip_address
+        ]);
+        return true;
+    } catch (Exception $e) {
+        // エラーログに残すが処理は止めない
+        error_log("Failed to log admin action: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
  * SMTPを使用してメールを送信する
  * @param string $to
  * @param string $subject

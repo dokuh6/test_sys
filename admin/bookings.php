@@ -1,6 +1,15 @@
 <?php
 require_once 'admin_check.php';
 
+// Cleaners can view, but not operate. Operations are POST requests.
+// Or we can just hide buttons.
+// However, the prompt says "Cleaner: View only, no operations".
+// If Cleaner tries to POST, we should block it.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_permission([ROLE_MANAGER, ROLE_STAFF]);
+}
+// View is allowed for everyone (Manager, Staff, Cleaner).
+
 $message = '';
 $error = '';
 
@@ -22,12 +31,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $stmt = $dbh->prepare($sql);
                 $stmt->execute([':status' => $status, ':id' => $booking_id]);
                 $message = "予約ID {$booking_id} の支払ステータスを更新しました。";
+
+                log_admin_action($dbh, $_SESSION['user']['id'], 'update_payment_status', [
+                    'booking_id' => $booking_id,
+                    'status' => $status
+                ]);
             } elseif ($_POST['action'] === 'update_checkin') {
                 $status = $_POST['checkin_status'] === 'checked_in' ? 'checked_in' : 'waiting';
                 $sql = "UPDATE bookings SET checkin_status = :status WHERE id = :id";
                 $stmt = $dbh->prepare($sql);
                 $stmt->execute([':status' => $status, ':id' => $booking_id]);
                 $message = "予約ID {$booking_id} のチェックインステータスを更新しました。";
+
+                log_admin_action($dbh, $_SESSION['user']['id'], 'update_checkin_status', [
+                    'booking_id' => $booking_id,
+                    'status' => $status
+                ]);
             }
         } catch (PDOException $e) {
             $error = "ステータス更新エラー: " . h($e->getMessage());
@@ -36,7 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 // --- キャンセル処理 (GETリクエスト) ---
+// Note: GET actions also change state, so we must protect them.
 if (isset($_GET['action']) && $_GET['action'] === 'cancel' && isset($_GET['id'])) {
+    require_permission([ROLE_MANAGER, ROLE_STAFF]); // Block Cleaner
+
     $booking_id_to_cancel = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
     if ($booking_id_to_cancel) {
         try {
@@ -46,6 +68,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel' && isset($_GET['id'])
             $stmt->bindParam(':id', $booking_id_to_cancel, PDO::PARAM_INT);
             if ($stmt->execute()) {
                 $message = "予約番号 " . h($booking_id_to_cancel) . " は正常にキャンセルされました。";
+                log_admin_action($dbh, $_SESSION['user']['id'], 'cancel_booking', ['booking_id' => $booking_id_to_cancel]);
             } else {
                 $error = "予約のキャンセルに失敗しました。";
             }
@@ -168,9 +191,11 @@ require_once 'admin_header.php';
         </div>
     </form>
 
+    <?php if ($_SESSION['user']['role'] != ROLE_CLEANER): ?>
     <div>
         <a href="add_booking.php" class="btn-admin" style="background-color: #27ae60; padding: 10px 20px; text-decoration: none;"><?php echo h(t('admin_new_booking_btn')); ?></a>
     </div>
+    <?php endif; ?>
 </div>
 
 <?php if ($message): ?>
@@ -251,32 +276,40 @@ require_once 'admin_header.php';
                         </small>
                     </td>
                     <td>
-                        <form method="POST" style="display:inline-block; margin-bottom: 2px;">
-                            <input type="hidden" name="booking_id" value="<?php echo $booking['id']; ?>">
-                            <input type="hidden" name="action" value="update_payment">
-                            <?php if ($booking['payment_status'] !== 'paid'): ?>
-                                <button type="submit" name="payment_status" value="paid" class="btn-tiny btn-paid"><?php echo h(t('admin_btn_received')); ?></button>
-                            <?php else: ?>
-                                <button type="submit" name="payment_status" value="unpaid" class="btn-tiny btn-undo"><?php echo h(t('admin_btn_unpaid')); ?></button>
-                            <?php endif; ?>
-                        </form>
-                        <br>
-                        <form method="POST" style="display:inline-block;">
-                            <input type="hidden" name="booking_id" value="<?php echo $booking['id']; ?>">
-                            <input type="hidden" name="action" value="update_checkin">
-                            <?php if ($booking['checkin_status'] !== 'checked_in'): ?>
-                                <button type="submit" name="checkin_status" value="checked_in" class="btn-tiny btn-checkin"><?php echo h(t('admin_btn_checkin')); ?></button>
-                            <?php else: ?>
-                                <button type="submit" name="checkin_status" value="waiting" class="btn-tiny btn-undo"><?php echo h(t('admin_btn_undo_checkin')); ?></button>
-                            <?php endif; ?>
-                        </form>
+                        <?php if ($_SESSION['user']['role'] != ROLE_CLEANER): ?>
+                            <form method="POST" style="display:inline-block; margin-bottom: 2px;">
+                                <input type="hidden" name="booking_id" value="<?php echo $booking['id']; ?>">
+                                <input type="hidden" name="action" value="update_payment">
+                                <?php if ($booking['payment_status'] !== 'paid'): ?>
+                                    <button type="submit" name="payment_status" value="paid" class="btn-tiny btn-paid"><?php echo h(t('admin_btn_received')); ?></button>
+                                <?php else: ?>
+                                    <button type="submit" name="payment_status" value="unpaid" class="btn-tiny btn-undo"><?php echo h(t('admin_btn_unpaid')); ?></button>
+                                <?php endif; ?>
+                            </form>
+                            <br>
+                            <form method="POST" style="display:inline-block;">
+                                <input type="hidden" name="booking_id" value="<?php echo $booking['id']; ?>">
+                                <input type="hidden" name="action" value="update_checkin">
+                                <?php if ($booking['checkin_status'] !== 'checked_in'): ?>
+                                    <button type="submit" name="checkin_status" value="checked_in" class="btn-tiny btn-checkin"><?php echo h(t('admin_btn_checkin')); ?></button>
+                                <?php else: ?>
+                                    <button type="submit" name="checkin_status" value="waiting" class="btn-tiny btn-undo"><?php echo h(t('admin_btn_undo_checkin')); ?></button>
+                                <?php endif; ?>
+                            </form>
+                        <?php else: ?>
+                             -
+                        <?php endif; ?>
                     </td>
                     <td>
-                        <a href="edit_booking.php?id=<?php echo h($booking['id']); ?>" class="btn-admin" style="background-color:#3498db; font-size: 0.8em; padding: 4px 8px;"><?php echo h(t('admin_edit')); ?></a>
-                        <?php if ($booking['status'] === 'confirmed'): ?>
-                            <a href="bookings.php?action=cancel&id=<?php echo h($booking['id']); ?>" class="btn-admin btn-cancel" onclick="return confirm('<?php echo h(t('admin_delete_confirm')); ?>');" style="font-size: 0.8em; padding: 4px 8px;">
-                                <?php echo h(t('admin_cancel')); ?>
-                            </a>
+                        <?php if ($_SESSION['user']['role'] != ROLE_CLEANER): ?>
+                            <a href="edit_booking.php?id=<?php echo h($booking['id']); ?>" class="btn-admin" style="background-color:#3498db; font-size: 0.8em; padding: 4px 8px;"><?php echo h(t('admin_edit')); ?></a>
+                            <?php if ($booking['status'] === 'confirmed'): ?>
+                                <a href="bookings.php?action=cancel&id=<?php echo h($booking['id']); ?>" class="btn-admin btn-cancel" onclick="return confirm('<?php echo h(t('admin_delete_confirm')); ?>');" style="font-size: 0.8em; padding: 4px 8px;">
+                                    <?php echo h(t('admin_cancel')); ?>
+                                </a>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span style="color:gray;">(閲覧のみ)</span>
                         <?php endif; ?>
                     </td>
                 </tr>
