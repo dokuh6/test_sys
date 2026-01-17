@@ -67,3 +67,45 @@ footer {
 .btn:hover {
     background-color: #0059b3;
 }
+
+/* Mobile Responsiveness Improvements */
+@media (max-width: 768px) {
+    main {
+        padding: 10px;
+        margin: 10px auto;
+        width: 96%; /* Maximize width on small screens */
+        max-width: none;
+        border-radius: 8px; /* Slightly softer corners */
+    }
+
+    /* Adjust header font size if needed (though Tailwind handles most) */
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Ensure forms inputs are easy to tap */
+    input[type="date"],
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* FullCalendar Mobile Adjustments */
+@media (max-width: 640px) {
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .fc .fc-toolbar-title {
+        font-size: 1.2rem;
+    }
+    .fc .fc-button {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}

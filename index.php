@@ -9,6 +9,30 @@ require_once 'includes/header.php';
         <div class="space-y-4 text-gray-600 dark:text-gray-300 leading-relaxed max-w-4xl mx-auto text-left md:text-center">
             <p><?php echo h(t('index_description')); ?></p>
         </div>
+
+        <!-- Booking Flow Buttons -->
+        <?php if (!isset($_SESSION['user'])): ?>
+        <div class="mt-8 flex flex-col md:flex-row justify-center gap-4 max-w-2xl mx-auto">
+            <a href="register.php" class="flex-1 bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg shadow-md transition-all hover:-translate-y-1 text-center group">
+                <div class="font-bold text-lg mb-1 flex items-center justify-center gap-2">
+                    <span class="material-icons">person_add</span>
+                    <?php echo h(t('btn_first_time')); ?>
+                </div>
+                <div class="text-sm opacity-90 group-hover:opacity-100">
+                    <?php echo h(t('text_register_benefit')); ?>
+                </div>
+            </a>
+            <a href="login.php" class="flex-1 bg-primary hover:bg-primary-dark text-white p-4 rounded-lg shadow-md transition-all hover:-translate-y-1 text-center">
+                <div class="font-bold text-lg mb-1 flex items-center justify-center gap-2">
+                    <span class="material-icons">login</span>
+                    <?php echo h(t('btn_repeater')); ?>
+                </div>
+                <div class="text-sm opacity-90">
+                    <?php echo h(t('text_login_benefit')); ?>
+                </div>
+            </a>
+        </div>
+        <?php endif; ?>
     </div>
     <div class="bg-gray-50 dark:bg-gray-800/50 mx-6 mb-12 rounded-lg p-8 border border-gray-100 dark:border-gray-700">
         <h3 class="text-xl font-bold text-center mb-8 text-gray-800 dark:text-white flex items-center justify-center gap-2">
@@ -206,8 +230,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function initCalendar() {
+        var isMobile = window.innerWidth < 768;
         calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
+            initialView: isMobile ? 'listWeek' : 'dayGridMonth',
             locale: '<?php echo $current_lang ?? "ja"; ?>',
             selectable: true,
             selectOverlap: true, // 満室の日はイベントでカバーするが、選択自体はイベントと被ってもOK（ただしロジックで弾く）
@@ -223,6 +248,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 start: '<?php echo date("Y-m-d"); ?>'
             },
             selectLongPressDelay: 0, // スマホでも長押し不要で選択可能にする
+            windowResize: function(view) {
+                if (window.innerWidth < 768) {
+                    calendar.changeView('listWeek');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                }
+            },
             select: function(info) {
                 // 選択された日付をセット
                 document.getElementById('check_in_date').value = info.startStr;

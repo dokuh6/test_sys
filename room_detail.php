@@ -263,8 +263,9 @@ if (!$room) {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
+        var isMobile = window.innerWidth < 768;
         var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
+            initialView: isMobile ? 'listWeek' : 'dayGridMonth',
             locale: '<?php echo $current_lang ?? "ja"; ?>',
             selectable: true,
             selectOverlap: false,
@@ -289,6 +290,13 @@ if (!$room) {
                 }
             },
             selectLongPressDelay: 0, // スマホでも長押し不要で選択可能にする
+            windowResize: function(view) {
+                if (window.innerWidth < 768) {
+                    calendar.changeView('listWeek');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                }
+            },
             select: function(info) {
                 var checkInInput = document.getElementById('check_in_date');
                 var checkOutInput = document.getElementById('check_out_date');

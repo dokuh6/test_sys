@@ -357,7 +357,7 @@ $csrf_token = generate_csrf_token();
                     <input type="hidden" name="num_children" value="<?php echo h($num_children); ?>">
                     <input type="hidden" name="total_price" value="<?php echo h($total_price); ?>">
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="check_in_time" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"><?php echo h(t('book_check_in_time_label')); ?></label>
                             <select id="check_in_time" name="check_in_time" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3 px-3 min-h-[44px]">
