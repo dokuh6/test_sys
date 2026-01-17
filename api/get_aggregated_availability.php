@@ -64,8 +64,9 @@ try {
         if ($booked >= $total_rooms && $total_rooms > 0) {
             $events[] = [
                 'start' => $date_str,
-                'display' => 'background',
-                'color' => '#ff9f89', // Red for full
+                'allDay' => true,
+                'color' => '#ef4444', // Red-500 from Tailwind palette
+                'textColor' => '#ffffff',
                 'title' => '満室',
                 'classNames' => ['status-full']
             ];

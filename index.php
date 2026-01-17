@@ -290,8 +290,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
             },
             eventClick: function(info) {
-                 // 満室イベント(background)をクリックしてもselectは発火しない場合がある
-                 // しかしbackgroundイベントはクリックを透過するはず。
+                 // 満室イベントをクリックした場合
+                 alert('<?php echo h(t('calendar_alert_full')); ?>');
             }
         });
         calendar.render();

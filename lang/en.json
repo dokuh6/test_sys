@@ -283,5 +283,11 @@
     "admin_status_checked_in": "Checked In",
     "admin_status_waiting": "Waiting",
     "admin_note_exists": "(Note)",
-    "admin_hint_recalc": "* If you change guests or dates, click 'Recalculate' to update the total price."
+    "admin_hint_recalc": "* If you change guests or dates, click 'Recalculate' to update the total price.",
+    "btn_first_time": "First Time? (Register)",
+    "text_register_benefit": "Register & Book (Skip details)",
+    "btn_repeater": "Repeater? (Login)",
+    "text_login_benefit": "Login & Book (Quick)",
+    "calendar_alert_full": "This date is fully booked.",
+    "calendar_alert_booked": "This date is already booked."
 }

@@ -341,6 +341,9 @@ if (!$room) {
                 // Trigger change event to update price
                 checkInInput.dispatchEvent(new Event('change'));
                 checkOutInput.dispatchEvent(new Event('change'));
+            },
+            eventClick: function(info) {
+                alert('<?php echo h(t('calendar_alert_booked')); ?>');
             }
         });
         calendar.render();

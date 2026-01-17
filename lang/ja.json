@@ -283,5 +283,11 @@
     "admin_status_checked_in": "入室済",
     "admin_status_waiting": "待ち",
     "admin_note_exists": "(備考あり)",
-    "admin_hint_recalc": "※人数や日程を変更した場合、「再計算する」ボタンを押すと金額が更新されます。"
+    "admin_hint_recalc": "※人数や日程を変更した場合、「再計算する」ボタンを押すと金額が更新されます。",
+    "btn_first_time": "初めての方 (会員登録)",
+    "text_register_benefit": "会員登録して予約 (入力の手間を省略)",
+    "btn_repeater": "リピーターの方 (ログイン)",
+    "text_login_benefit": "ログインして予約 (スピーディーに)",
+    "calendar_alert_full": "この日は満室のため予約できません。",
+    "calendar_alert_booked": "この日は既に予約済みです。"
 }

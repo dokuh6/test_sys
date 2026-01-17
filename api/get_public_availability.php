@@ -40,9 +40,10 @@ try {
             'resourceId' => (string)$booking['resourceId'],
             'start' => $booking['start'],
             'end' => $booking['end'],
-            'display' => 'background', // 背景色として表示（「予約済み」を視覚化）
-            'color' => '#ff9f89', // 薄い赤（予約済み）
-            'title' => '予約済' // 背景イベントにはタイトルは表示されにくいが、tooltip等で使えるかも
+            'allDay' => true,
+            'color' => '#ef4444', // Red-500
+            'textColor' => '#ffffff',
+            'title' => '予約済'
         ];
     }
 
