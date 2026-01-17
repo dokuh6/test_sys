@@ -343,7 +343,28 @@ if (!$room) {
                 checkOutInput.dispatchEvent(new Event('change'));
             },
             eventClick: function(info) {
-                alert('<?php echo h(t('calendar_alert_booked')); ?>');
+                if (info.event.extendedProps.status === 'reserved') {
+                    alert('<?php echo h(t('calendar_alert_booked')); ?>');
+                } else if (info.event.extendedProps.status === 'available') {
+                    var checkInInput = document.getElementById('check_in_date');
+                    var checkOutInput = document.getElementById('check_out_date');
+
+                    checkInInput.value = info.event.startStr;
+
+                    var date = new Date(info.event.start);
+                    date.setDate(date.getDate() + 1);
+                    var year = date.getFullYear();
+                    var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    var day = date.getDate().toString().padStart(2, '0');
+                    checkOutInput.value = `${year}-${month}-${day}`;
+
+                    checkInInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    checkInInput.focus();
+
+                    // Trigger change event
+                    checkInInput.dispatchEvent(new Event('change'));
+                    checkOutInput.dispatchEvent(new Event('change'));
+                }
             }
         });
         calendar.render();

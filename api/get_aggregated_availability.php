@@ -3,11 +3,12 @@
 header('Content-Type: application/json');
 
 // DB接続
-require_once '../includes/db_connect.php';
+require_once '../includes/init.php';
 
 try {
     // 期間の指定があれば取得 (デフォルトは今日から3ヶ月)
-    $start = isset($_GET['start']) ? $_GET['start'] : date('Y-m-d');
+    // FullCalendar sends ISO string for start/end, sometimes including time.
+    $start = isset($_GET['start']) ? substr($_GET['start'], 0, 10) : date('Y-m-d');
     $end = isset($_GET['end']) ? $_GET['end'] : date('Y-m-d', strtotime('+3 months'));
 
     // 全部屋数を取得
@@ -67,13 +68,21 @@ try {
                 'allDay' => true,
                 'color' => '#ef4444', // Red-500 from Tailwind palette
                 'textColor' => '#ffffff',
-                'title' => '満室',
-                'classNames' => ['status-full']
+                'title' => t('calendar_status_full') ?? '満室',
+                'classNames' => ['status-full'],
+                'extendedProps' => ['status' => 'full']
             ];
         } else {
-             // 空室あり (あえてイベントを出さないか、薄い緑などで表示も可)
-             // ユーザーがクリックしやすいように背景イベントを出すか？
-             // いや、FullCalendarの標準動作で日付クリックできるので、満室の日だけブロック(視覚的警告)すればOK
+            // 空室あり (リスト表示用にイベントを追加)
+            $events[] = [
+                'start' => $date_str,
+                'allDay' => true,
+                'color' => '#22c55e', // Green-500
+                'textColor' => '#ffffff',
+                'title' => t('calendar_status_available') ?? '空室',
+                'classNames' => ['status-available'],
+                'extendedProps' => ['status' => 'available']
+            ];
         }
 
         $current->modify('+1 day');

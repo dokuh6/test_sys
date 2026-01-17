@@ -289,5 +289,8 @@
     "btn_repeater": "Repeater? (Login)",
     "text_login_benefit": "Login & Book (Quick)",
     "calendar_alert_full": "This date is fully booked.",
-    "calendar_alert_booked": "This date is already booked."
+    "calendar_alert_booked": "This date is already booked.",
+    "calendar_status_available": "Available",
+    "calendar_status_reserved": "Booked",
+    "calendar_status_full": "Full"
 }

@@ -289,5 +289,8 @@
     "btn_repeater": "リピーターの方 (ログイン)",
     "text_login_benefit": "ログインして予約 (スピーディーに)",
     "calendar_alert_full": "この日は満室のため予約できません。",
-    "calendar_alert_booked": "この日は既に予約済みです。"
+    "calendar_alert_booked": "この日は既に予約済みです。",
+    "calendar_status_available": "空室",
+    "calendar_status_reserved": "予約済",
+    "calendar_status_full": "満室"
 }

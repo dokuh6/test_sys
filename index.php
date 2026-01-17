@@ -291,7 +291,23 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             eventClick: function(info) {
                  // 満室イベントをクリックした場合
-                 alert('<?php echo h(t('calendar_alert_full')); ?>');
+                 if (info.event.extendedProps.status === 'full') {
+                     alert('<?php echo h(t('calendar_alert_full')); ?>');
+                 } else if (info.event.extendedProps.status === 'available') {
+                     // 空室イベントをクリックした場合、選択処理を行う (リストビュー用)
+                     document.getElementById('check_in_date').value = info.event.startStr;
+
+                     // デフォルト1泊
+                     let date = new Date(info.event.start);
+                     date.setDate(date.getDate() + 1);
+                     let year = date.getFullYear();
+                     let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                     let day = date.getDate().toString().padStart(2, '0');
+                     document.getElementById('check_out_date').value = `${year}-${month}-${day}`;
+
+                     // フォームへスクロール
+                     document.getElementById('check_in_date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                 }
             }
         });
         calendar.render();
