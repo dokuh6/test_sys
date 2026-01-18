@@ -26,6 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 画像アップロード処理
     $image_path = null;
+
+    if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] !== UPLOAD_ERR_OK && $_FILES['main_image']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $error = "画像のアップロードに失敗しました。エラーコード: " . $_FILES['main_image']['error'];
+    }
+
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = '../assets/images/room_types/';
         if (!file_exists($upload_dir)) {

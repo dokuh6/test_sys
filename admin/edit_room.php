@@ -97,6 +97,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         log_admin_action($dbh, $_SESSION['user']['id'], 'update_room', ['room_id' => $id]);
 
         // 2. 画像の処理
+        if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] !== UPLOAD_ERR_OK && $_FILES['main_image']['error'] !== UPLOAD_ERR_NO_FILE) {
+            throw new Exception("メイン画像のアップロードに失敗しました。エラーコード: " . $_FILES['main_image']['error']);
+        }
+
+        if (isset($_FILES['sub_images']['error']) && is_array($_FILES['sub_images']['error'])) {
+            foreach ($_FILES['sub_images']['error'] as $key => $err) {
+                if ($err !== UPLOAD_ERR_OK && $err !== UPLOAD_ERR_NO_FILE) {
+                     throw new Exception("サブ画像のアップロードに失敗しました (" . $_FILES['sub_images']['name'][$key] . ")。エラーコード: " . $err);
+                }
+            }
+        }
+
         $main_image_uploaded = isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK;
         $sub_images_uploaded = isset($_FILES['sub_images']) && !empty(array_filter($_FILES['sub_images']['name']));
 
