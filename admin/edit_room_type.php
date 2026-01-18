@@ -41,6 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // 書き込み権限の確認と修正試行
+        if (!$error && !is_writable($upload_dir)) {
+            if (!@chmod($upload_dir, 0777)) {
+                $error = 'ディレクトリへの書き込み権限がありません (chmod失敗)。';
+            }
+        }
+
         if (!$error) {
             $tmp_name = $_FILES['main_image']['tmp_name'];
             $name_file = basename($_FILES['main_image']['name']);
@@ -55,7 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (move_uploaded_file($tmp_name, $destination)) {
                     $image_path = 'images/room_types/' . $new_filename;
                 } else {
-                    $error = "画像の保存に失敗しました。";
+                    $error_details = error_get_last();
+                    $error_msg = isset($error_details['message']) ? $error_details['message'] : '不明なシステムエラー';
+                    $error = "画像の保存に失敗しました: " . $error_msg;
                 }
             } else {
                 $error = "許可されていないファイル形式です。";

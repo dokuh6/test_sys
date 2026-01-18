@@ -50,6 +50,14 @@ function handle_image_upload($file, $room_id) {
             return ['status' => false, 'error' => 'ディレクトリの作成に失敗しました。'];
         }
     }
+
+    // 書き込み権限の確認と修正試行
+    if (!is_writable($upload_dir)) {
+        if (!@chmod($upload_dir, 0777)) {
+            return ['status' => false, 'error' => 'ディレクトリへの書き込み権限がありません (chmod失敗)。'];
+        }
+    }
+
     $upload_path = $upload_dir . $filename;
 
     // ファイルを移動
@@ -58,7 +66,10 @@ function handle_image_upload($file, $room_id) {
         return ['status' => true, 'path' => 'images/rooms/' . $filename];
     }
 
-    return ['status' => false, 'error' => 'ファイルの保存に失敗しました。'];
+    // 詳細なエラー情報を取得
+    $error_details = error_get_last();
+    $error_msg = isset($error_details['message']) ? $error_details['message'] : '不明なシステムエラー';
+    return ['status' => false, 'error' => 'ファイルの保存に失敗しました: ' . $error_msg];
 }
 
 
