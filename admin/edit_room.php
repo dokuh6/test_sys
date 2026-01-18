@@ -47,7 +47,9 @@ function handle_image_upload($file, $room_id) {
     $filename = 'room_' . $room_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
     $upload_dir = '../assets/images/rooms/';
     if (!file_exists($upload_dir)) {
-        mkdir($upload_dir, 0755, true);
+        if (!mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
+            return null;
+        }
     }
     $upload_path = $upload_dir . $filename;
 

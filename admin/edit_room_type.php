@@ -34,25 +34,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = '../assets/images/room_types/';
         if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
+            if (!mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
+                $error = "ディレクトリの作成に失敗しました。";
+            }
         }
 
-        $tmp_name = $_FILES['main_image']['tmp_name'];
-        $name_file = basename($_FILES['main_image']['name']);
-        $ext = strtolower(pathinfo($name_file, PATHINFO_EXTENSION));
-        $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (!$error) {
+            $tmp_name = $_FILES['main_image']['tmp_name'];
+            $name_file = basename($_FILES['main_image']['name']);
+            $ext = strtolower(pathinfo($name_file, PATHINFO_EXTENSION));
+            $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
-        if (in_array($ext, $allowed_exts)) {
-            $new_filename = 'room_type_' . $id . '_' . time() . '.' . $ext;
-            $destination = $upload_dir . $new_filename;
+            if (in_array($ext, $allowed_exts)) {
+                $new_filename = 'room_type_' . $id . '_' . time() . '.' . $ext;
+                $destination = $upload_dir . $new_filename;
 
-            if (move_uploaded_file($tmp_name, $destination)) {
-                $image_path = 'images/room_types/' . $new_filename;
+                if (move_uploaded_file($tmp_name, $destination)) {
+                    $image_path = 'images/room_types/' . $new_filename;
+                } else {
+                    $error = "画像の保存に失敗しました。";
+                }
             } else {
-                $error = "画像の保存に失敗しました。";
+                $error = "許可されていないファイル形式です。";
             }
-        } else {
-            $error = "許可されていないファイル形式です。";
         }
     }
 
