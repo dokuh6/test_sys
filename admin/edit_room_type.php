@@ -27,32 +27,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 画像アップロード処理
     $image_path = null;
 
+    // エラーチェック: アップロードエラーがある場合 (NO_FILE以外) は即座にエラーとする
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] !== UPLOAD_ERR_OK && $_FILES['main_image']['error'] !== UPLOAD_ERR_NO_FILE) {
-        $error = "画像のアップロードに失敗しました。エラーコード: " . $_FILES['main_image']['error'];
+        $error = "画像のアップロードに失敗しました。" . get_file_upload_error_message($_FILES['main_image']['error']);
     }
 
-    if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = '../assets/images/room_types/';
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
+    // アップロード成功時の処理
+    if (!$error && isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK) {
+        // 絶対パスの取得と構築
+        $base_dir = realpath(__DIR__ . '/../assets/images');
+        if ($base_dir === false) {
+             $base_dir = __DIR__ . '/../assets/images';
+             if (!file_exists($base_dir)) {
+                 $old_mask = umask(0);
+                 mkdir($base_dir, 0777, true);
+                 umask($old_mask);
+             }
+             $base_dir = realpath($base_dir);
         }
 
-        $tmp_name = $_FILES['main_image']['tmp_name'];
-        $name_file = basename($_FILES['main_image']['name']);
-        $ext = strtolower(pathinfo($name_file, PATHINFO_EXTENSION));
-        $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $upload_dir = $base_dir . '/room_types/';
 
-        if (in_array($ext, $allowed_exts)) {
-            $new_filename = 'room_type_' . $id . '_' . time() . '.' . $ext;
-            $destination = $upload_dir . $new_filename;
+        // ディレクトリが存在しない場合、作成する (umask考慮)
+        if (!file_exists($upload_dir)) {
+            $old_mask = umask(0);
+            $result = mkdir($upload_dir, 0777, true);
+            umask($old_mask);
 
-            if (move_uploaded_file($tmp_name, $destination)) {
-                $image_path = 'images/room_types/' . $new_filename;
-            } else {
-                $error = "画像の保存に失敗しました。";
+            if (!$result && !is_dir($upload_dir)) {
+                $error = "ディレクトリの作成に失敗しました。";
             }
-        } else {
-            $error = "許可されていないファイル形式です。";
+        }
+
+        // 書き込み権限の確認と修正試行
+        if (!$error && !is_writable($upload_dir)) {
+            // 権限変更を試みる
+            if (!@chmod($upload_dir, 0777)) {
+                // 失敗した場合、詳細なデバッグ情報を返す
+                $stat = stat($upload_dir);
+                $owner_uid = $stat['uid'];
+                $current_uid = posix_geteuid();
+
+                // ディレクトリが空（.gitkeepのみなど）なら再作成を試みる
+                $files = array_diff(scandir($upload_dir), ['.', '..']);
+                if (count($files) <= 1) { // .gitkeepのみ、あるいは空
+                     if (@rmdir($upload_dir)) {
+                         $old_mask = umask(0);
+                         mkdir($upload_dir, 0777, true);
+                         umask($old_mask);
+                         if (is_writable($upload_dir)) {
+                             // 成功
+                             goto type_success_check;
+                         }
+                     }
+                }
+                $error = "ディレクトリ({$upload_dir})への書き込み権限がありません。サーバー上の権限を確認してください。(Current UID: {$current_uid}, Dir Owner UID: {$owner_uid})";
+            }
+        }
+
+        type_success_check:
+
+        if (!$error) {
+            $tmp_name = $_FILES['main_image']['tmp_name'];
+            $name_file = basename($_FILES['main_image']['name']);
+            $ext = strtolower(pathinfo($name_file, PATHINFO_EXTENSION));
+            $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+            // 拡張子チェック (MIMEタイプチェックも本来推奨だが、ここでは拡張子を優先)
+            if (in_array($ext, $allowed_exts)) {
+                $new_filename = 'room_type_' . $id . '_' . time() . '.' . $ext;
+                $destination = $upload_dir . $new_filename;
+
+                if (move_uploaded_file($tmp_name, $destination)) {
+                    $image_path = 'images/room_types/' . $new_filename;
+                } else {
+                    $error_details = error_get_last();
+                    $error_msg = isset($error_details['message']) ? $error_details['message'] : '不明なシステムエラー';
+                    $error = "画像の保存に失敗しました: " . $error_msg;
+                }
+            } else {
+                $error = "許可されていないファイル形式です。";
+            }
         }
     }
 
