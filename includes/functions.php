@@ -556,3 +556,30 @@ function validate_csrf_token() {
     // トークンを一度使ったら削除
     unset($_SESSION['csrf_token']);
 }
+
+/**
+ * ファイルアップロードのエラーコードを日本語メッセージに変換する
+ * @param int $code $_FILES['...']['error'] の値
+ * @return string 日本語エラーメッセージ
+ */
+function get_file_upload_error_message($code) {
+    switch ($code) {
+        case UPLOAD_ERR_OK:
+            return 'エラーはありません。';
+        case UPLOAD_ERR_INI_SIZE:
+        case UPLOAD_ERR_FORM_SIZE:
+            return 'ファイルサイズが大きすぎます (サーバー設定の上限を超えています)。';
+        case UPLOAD_ERR_PARTIAL:
+            return 'ファイルの一部しかアップロードされていません。';
+        case UPLOAD_ERR_NO_FILE:
+            return 'ファイルがアップロードされていません。';
+        case UPLOAD_ERR_NO_TMP_DIR:
+            return '一時保存フォルダが見つかりません。';
+        case UPLOAD_ERR_CANT_WRITE:
+            return 'ディスクへの書き込みに失敗しました。';
+        case UPLOAD_ERR_EXTENSION:
+            return 'PHPの拡張機能によってアップロードが停止されました。';
+        default:
+            return '不明なエラーが発生しました (コード: ' . $code . ')。';
+    }
+}

@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // エラーチェック: アップロードエラーがある場合 (NO_FILE以外) は即座にエラーとする
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] !== UPLOAD_ERR_OK && $_FILES['main_image']['error'] !== UPLOAD_ERR_NO_FILE) {
-        $error = "画像のアップロードに失敗しました。エラーコード: " . $_FILES['main_image']['error'];
+        $error = "画像のアップロードに失敗しました。" . get_file_upload_error_message($_FILES['main_image']['error']);
     }
 
     // アップロード成功時の処理

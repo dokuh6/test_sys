@@ -26,7 +26,7 @@ function handle_image_upload($file, $room_id) {
         if ($file['error'] === UPLOAD_ERR_NO_FILE) {
             return ['status' => true, 'path' => null];
         }
-        return ['status' => false, 'error' => 'Upload error code: ' . $file['error']];
+        return ['status' => false, 'error' => get_file_upload_error_message($file['error'])];
     }
 
     // ファイルタイプの検証 (拡張子チェックを優先)
