@@ -27,11 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 画像アップロード処理
     $image_path = null;
 
+    // エラーチェック: アップロードエラーがある場合 (NO_FILE以外) は即座にエラーとする
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] !== UPLOAD_ERR_OK && $_FILES['main_image']['error'] !== UPLOAD_ERR_NO_FILE) {
         $error = "画像のアップロードに失敗しました。エラーコード: " . $_FILES['main_image']['error'];
     }
 
-    if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK) {
+    // アップロード成功時の処理
+    if (!$error && isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = '../assets/images/room_types/';
         if (!file_exists($upload_dir)) {
             if (!mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
@@ -45,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ext = strtolower(pathinfo($name_file, PATHINFO_EXTENSION));
             $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
+            // 拡張子チェック (MIMEタイプチェックも本来推奨だが、ここでは拡張子を優先)
             if (in_array($ext, $allowed_exts)) {
                 $new_filename = 'room_type_' . $id . '_' . time() . '.' . $ext;
                 $destination = $upload_dir . $new_filename;

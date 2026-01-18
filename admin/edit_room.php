@@ -17,38 +17,37 @@ $error = '';
  * 画像アップロードを処理し、保存先のパスを返す
  * @param array $file $_FILESの要素
  * @param int $room_id 部屋ID
- * @return string|null 成功した場合は画像のパス、失敗した場合はnull
+ * @return array 結果配列 ['status' => bool, 'path' => ?string, 'error' => ?string]
  */
 function handle_image_upload($file, $room_id) {
     // エラーチェック
     if ($file['error'] !== UPLOAD_ERR_OK) {
         // ファイルがアップロードされていない場合は無視
         if ($file['error'] === UPLOAD_ERR_NO_FILE) {
-            return null;
+            return ['status' => true, 'path' => null];
         }
-        // その他のエラー
-        return null;
+        return ['status' => false, 'error' => 'Upload error code: ' . $file['error']];
     }
 
-    // ファイルタイプの検証
-    $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!in_array($file['type'], $allowed_types)) {
-        return null;
+    // ファイルタイプの検証 (拡張子チェックを優先)
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+    if (!in_array($ext, $allowed_exts)) {
+        return ['status' => false, 'error' => '許可されていないファイル形式です。'];
     }
 
     // ファイルサイズの検証 (例: 5MBまで)
     if ($file['size'] > 5 * 1024 * 1024) {
-        return null;
+        return ['status' => false, 'error' => 'ファイルサイズが大きすぎます (上限5MB)。'];
     }
 
     // ユニークなファイル名を生成
-    $path_info = pathinfo($file['name']);
-    $extension = $path_info['extension'];
-    $filename = 'room_' . $room_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
+    $filename = 'room_' . $room_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
     $upload_dir = '../assets/images/rooms/';
     if (!file_exists($upload_dir)) {
         if (!mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
-            return null;
+            return ['status' => false, 'error' => 'ディレクトリの作成に失敗しました。'];
         }
     }
     $upload_path = $upload_dir . $filename;
@@ -56,10 +55,10 @@ function handle_image_upload($file, $room_id) {
     // ファイルを移動
     if (move_uploaded_file($file['tmp_name'], $upload_path)) {
         // `../` を除いたパスを返す
-        return 'images/rooms/' . $filename;
+        return ['status' => true, 'path' => 'images/rooms/' . $filename];
     }
 
-    return null;
+    return ['status' => false, 'error' => 'ファイルの保存に失敗しました。'];
 }
 
 
@@ -125,11 +124,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([':id' => $id]);
 
             // 新しいメイン画像をアップロードしてDBに保存
-            $new_path = handle_image_upload($_FILES['main_image'], $id);
-            if ($new_path) {
+            $result = handle_image_upload($_FILES['main_image'], $id);
+            if (!$result['status']) {
+                throw new Exception($result['error']);
+            }
+            if ($result['path']) {
                 $sql = "INSERT INTO room_images (room_id, image_path, is_main) VALUES (:id, :path, 1)";
                 $stmt = $dbh->prepare($sql);
-                $stmt->execute([':id' => $id, ':path' => $new_path]);
+                $stmt->execute([':id' => $id, ':path' => $result['path']]);
             }
         }
 
@@ -164,11 +166,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'error' => $sub_image_files['error'][$key],
                         'size' => $sub_image_files['size'][$key]
                     ];
-                    $new_path = handle_image_upload($file_info, $id);
-                    if ($new_path) {
+                    $result = handle_image_upload($file_info, $id);
+                    if (!$result['status']) {
+                        throw new Exception("サブ画像のアップロード失敗: " . $result['error']);
+                    }
+                    if ($result['path']) {
                         $sql = "INSERT INTO room_images (room_id, image_path, is_main) VALUES (:id, :path, 0)";
                         $stmt = $dbh->prepare($sql);
-                        $stmt->execute([':id' => $id, ':path' => $new_path]);
+                        $stmt->execute([':id' => $id, ':path' => $result['path']]);
                         $image_count++;
                     }
                 }
