@@ -1,0 +1,5 @@
+# Ignore all images in assets
+assets/images/*
+
+# Keep directories via .gitkeep
+!assets/images/**/.gitkeep
